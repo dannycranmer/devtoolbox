@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UUID Generator Online Free &mdash; DevToolbox</title>
+  <meta name="description" content="Generate UUID v4 identifiers instantly. Bulk generate 1-100, with or without hyphens, copy to clipboard. Free, private, no tracking.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .uuid-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .uuid-control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .uuid-control-group label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
+    .uuid-control-group input[type="number"] {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      width: 5rem;
+    }
+    .uuid-control-group input[type="number"]:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+    .uuid-check {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+    .uuid-check input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 1rem;
+      height: 1rem;
+    }
+    .uuid-check label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+    .uuid-case-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .uuid-case-group label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
+    .uuid-case-group select {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+    }
+    .uuid-case-group select:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+    .uuid-output {
+      width: 100%;
+      min-height: 300px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.9375rem;
+      padding: 1rem;
+      line-height: 1.7;
+      resize: vertical;
+      tab-size: 2;
+    }
+    .uuid-output:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+    .uuid-stats {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" class="active" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>UUID Generator</h1>
+      <p>Generate random UUID v4 identifiers. Bulk generate, choose format, copy to clipboard. <span class="shortcut-hint"><kbd class="kbd">Ctrl+Enter</kbd> to generate</span></p>
+    </div>
+
+    <div class="uuid-controls">
+      <div class="uuid-control-group">
+        <label for="uuid-count">Count</label>
+        <input type="number" id="uuid-count" min="1" max="100" value="1">
+      </div>
+      <div class="uuid-check">
+        <input type="checkbox" id="uuid-hyphens" checked>
+        <label for="uuid-hyphens">Include hyphens</label>
+      </div>
+      <div class="uuid-case-group">
+        <label for="uuid-case">Case</label>
+        <select id="uuid-case">
+          <option value="lower">lowercase</option>
+          <option value="upper">UPPERCASE</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-bottom: 0.75rem;">
+      <button class="btn btn-primary" id="btn-generate" type="button">Generate</button>
+      <button class="btn" id="btn-copy" type="button">Copy</button>
+      <button class="btn" id="btn-clear" type="button">Clear</button>
+    </div>
+
+    <textarea id="uuid-output" class="uuid-output" readonly aria-label="Generated UUIDs" placeholder="Click Generate to create UUIDs..."></textarea>
+    <div id="uuid-stats" class="uuid-stats"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    function generateUUIDv4() {
+      // Use crypto.getRandomValues for cryptographically strong random UUIDs
+      var bytes = new Uint8Array(16);
+      crypto.getRandomValues(bytes);
+      // Set version 4 (0100 in bits 12-15)
+      bytes[6] = (bytes[6] & 0x0f) | 0x40;
+      // Set variant 1 (10xx in bits 6-7 of byte 8)
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+      var hex = [];
+      for (var i = 0; i < 16; i++) {
+        hex.push(('0' + bytes[i].toString(16)).slice(-2));
+      }
+
+      return hex[0] + hex[1] + hex[2] + hex[3] + '-' +
+             hex[4] + hex[5] + '-' +
+             hex[6] + hex[7] + '-' +
+             hex[8] + hex[9] + '-' +
+             hex[10] + hex[11] + hex[12] + hex[13] + hex[14] + hex[15];
+    }
+
+    function generate() {
+      var count = parseInt(countEl.value, 10);
+      if (isNaN(count) || count < 1) count = 1;
+      if (count > 100) count = 100;
+      countEl.value = count;
+
+      var withHyphens = hyphensEl.checked;
+      var upperCase = caseEl.value === 'upper';
+
+      var uuids = [];
+      for (var i = 0; i < count; i++) {
+        var uuid = generateUUIDv4();
+        if (!withHyphens) {
+          uuid = uuid.replace(/-/g, '');
+        }
+        if (upperCase) {
+          uuid = uuid.toUpperCase();
+        }
+        uuids.push(uuid);
+      }
+
+      outputEl.value = uuids.join('\n');
+      statsEl.textContent = count + ' UUID' + (count !== 1 ? 's' : '') + ' generated \u00b7 v4 (random)';
+    }
+
+    // DOM
+    var countEl = document.getElementById('uuid-count');
+    var hyphensEl = document.getElementById('uuid-hyphens');
+    var caseEl = document.getElementById('uuid-case');
+    var outputEl = document.getElementById('uuid-output');
+    var statsEl = document.getElementById('uuid-stats');
+
+    // Generate button
+    document.getElementById('btn-generate').addEventListener('click', generate);
+
+    // Copy
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (!outputEl.value.trim()) return;
+      copyToClipboard(outputEl.value, this);
+    });
+
+    // Clear
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      outputEl.value = '';
+      statsEl.textContent = '';
+    });
+
+    // Ctrl+Enter
+    bindCtrlEnter(generate);
+
+    // Generate one on load
+    generate();
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

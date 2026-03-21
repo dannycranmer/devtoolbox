@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regex Tester — DevToolbox</title>
+  <meta name="description" content="Test regular expressions with live highlighting, match groups, and a library of common patterns. 100% client-side.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" class="active" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Regex Tester</h1>
+      <p>Test regular expressions with live match highlighting. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to test</span></p>
+    </div>
+
+    <div style="max-width:900px;">
+      <span class="panel-label">Pattern</span>
+      <div class="regex-input-row" style="margin-bottom:0.75rem;">
+        <input type="text" id="regex-pattern" placeholder="Enter regex pattern (e.g. \d+)" aria-label="Regular expression pattern" spellcheck="false">
+        <div class="regex-flags" role="group" aria-label="Regex flags">
+          <button class="flag-btn active" data-flag="g" type="button" title="Global" aria-pressed="true">g</button>
+          <button class="flag-btn" data-flag="i" type="button" title="Case insensitive" aria-pressed="false">i</button>
+          <button class="flag-btn" data-flag="m" type="button" title="Multiline" aria-pressed="false">m</button>
+          <button class="flag-btn" data-flag="s" type="button" title="Dotall" aria-pressed="false">s</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <span class="panel-label">Common Patterns</span>
+        <div class="pattern-lib" id="pattern-lib" role="group" aria-label="Common regex patterns">
+          <button class="pattern-btn" data-pattern="[\\w.+-]+@[\\w-]+\\.[\\w.]+" type="button">Email</button>
+          <button class="pattern-btn" data-pattern="https?://[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=%]+" type="button">URL</button>
+          <button class="pattern-btn" data-pattern="\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b" type="button">IPv4</button>
+          <button class="pattern-btn" data-pattern="[\\+]?[(]?\\d{1,4}[)]?[\\s.\\-]?\\d{1,4}[\\s.\\-]?\\d{1,9}" type="button">Phone</button>
+          <button class="pattern-btn" data-pattern="#([0-9a-fA-F]{3}){1,2}\\b" type="button">Hex Color</button>
+          <button class="pattern-btn" data-pattern="\\b\\d{4}[-/]\\d{2}[-/]\\d{2}\\b" type="button">Date (YYYY-MM-DD)</button>
+          <button class="pattern-btn" data-pattern="\\b\\d{1,2}:\\d{2}(:\\d{2})?\\b" type="button">Time</button>
+          <button class="pattern-btn" data-pattern="<[^>]+>" type="button">HTML Tag</button>
+          <button class="pattern-btn" data-pattern="\\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\b" type="button">UUID</button>
+        </div>
+      </div>
+
+      <span class="panel-label">Test String</span>
+      <textarea id="regex-test" class="tall" placeholder="Enter text to test against the pattern..." aria-label="Test string" spellcheck="false"></textarea>
+      <div class="btn-row" style="margin-top:0.5rem;">
+        <button class="btn btn-primary" id="btn-test" type="button">Test</button>
+        <button class="btn" id="btn-example" type="button">Load Example</button>
+        <button class="btn" id="btn-clear" type="button">Clear</button>
+      </div>
+      <div id="regex-msg" class="msg" role="status" aria-live="polite" style="margin-top:0.5rem;"></div>
+
+      <div style="margin-top:1.5rem;">
+        <span class="panel-label">Highlighted Matches</span>
+        <div id="regex-highlight" class="output-area regex-highlight" aria-label="Highlighted matches" style="min-height:150px;"></div>
+      </div>
+
+      <div style="margin-top:1rem;">
+        <span class="panel-label" id="match-count-label">Matches (0)</span>
+        <div id="match-results" class="match-results" aria-labelledby="match-count-label" style="min-height:80px;">
+          <span style="color:var(--text-muted);">No matches yet</span>
+        </div>
+        <div class="btn-row" style="margin-top:0.5rem;">
+          <button class="btn" id="btn-copy-matches" type="button">Copy Matches</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var patternInput = document.getElementById('regex-pattern');
+    var testInput = document.getElementById('regex-test');
+    var highlightEl = document.getElementById('regex-highlight');
+    var matchResults = document.getElementById('match-results');
+    var matchCountLabel = document.getElementById('match-count-label');
+    var msg = document.getElementById('regex-msg');
+    var flagBtns = document.querySelectorAll('.flag-btn');
+    var lastMatches = [];
+
+    function getFlags() {
+      var flags = '';
+      flagBtns.forEach(function (b) {
+        if (b.classList.contains('active')) flags += b.dataset.flag;
+      });
+      return flags;
+    }
+
+    function doTest() {
+      var pattern = patternInput.value;
+      var test = testInput.value;
+      lastMatches = [];
+
+      if (!pattern || !test) {
+        highlightEl.innerHTML = test ? escapeHtml(test) : '';
+        matchResults.innerHTML = '<span style="color:var(--text-muted);">No matches yet</span>';
+        matchCountLabel.textContent = 'Matches (0)';
+        hideMsg(msg);
+        return;
+      }
+
+      var flags = getFlags();
+      var regex;
+      try {
+        regex = new RegExp(pattern, flags);
+      } catch (e) {
+        showMsg(msg, 'error', 'Invalid regex: ' + e.message);
+        highlightEl.innerHTML = escapeHtml(test);
+        matchResults.innerHTML = '';
+        matchCountLabel.textContent = 'Matches (0)';
+        return;
+      }
+
+      hideMsg(msg);
+
+      // Find all matches
+      var allMatches = [];
+      if (flags.indexOf('g') !== -1) {
+        var m;
+        var safety = 0;
+        while ((m = regex.exec(test)) !== null && safety < 10000) {
+          allMatches.push({ match: m[0], index: m.index, groups: Array.from(m).slice(1) });
+          if (m[0].length === 0) { regex.lastIndex++; }
+          safety++;
+        }
+      } else {
+        var m = regex.exec(test);
+        if (m) {
+          allMatches.push({ match: m[0], index: m.index, groups: Array.from(m).slice(1) });
+        }
+      }
+
+      lastMatches = allMatches;
+      matchCountLabel.textContent = 'Matches (' + allMatches.length + ')';
+
+      // Build highlighted text
+      if (allMatches.length === 0) {
+        highlightEl.innerHTML = escapeHtml(test);
+        matchResults.innerHTML = '<span style="color:var(--text-muted);">No matches found</span>';
+        showMsg(msg, 'warning', 'No matches found');
+        return;
+      }
+
+      showMsg(msg, 'success', allMatches.length + ' match' + (allMatches.length !== 1 ? 'es' : '') + ' found');
+
+      // Build highlighted output
+      var html = '';
+      var lastIndex = 0;
+      allMatches.forEach(function (m) {
+        html += escapeHtml(test.substring(lastIndex, m.index));
+        html += '<mark>' + escapeHtml(m.match) + '</mark>';
+        lastIndex = m.index + m.match.length;
+      });
+      html += escapeHtml(test.substring(lastIndex));
+      highlightEl.innerHTML = html;
+
+      // Build match results
+      var resHtml = '';
+      allMatches.forEach(function (m, i) {
+        resHtml += '<div class="match-item">';
+        resHtml += '<span class="match-index">Match ' + (i + 1) + ' [' + m.index + '-' + (m.index + m.match.length) + ']:</span> ';
+        resHtml += '<span class="match-value">' + escapeHtml(m.match) + '</span>';
+        if (m.groups.length > 0) {
+          m.groups.forEach(function (g, gi) {
+            if (g !== undefined) {
+              resHtml += '<div class="match-group">Group ' + (gi + 1) + ': ' + escapeHtml(g) + '</div>';
+            }
+          });
+        }
+        resHtml += '</div>';
+      });
+      matchResults.innerHTML = resHtml;
+    }
+
+    // Flag toggle buttons
+    flagBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        this.classList.toggle('active');
+        this.setAttribute('aria-pressed', this.classList.contains('active'));
+        doTest();
+      });
+    });
+
+    // Common patterns
+    document.getElementById('pattern-lib').addEventListener('click', function (e) {
+      var btn = e.target.closest('.pattern-btn');
+      if (btn) {
+        patternInput.value = btn.dataset.pattern;
+        doTest();
+        patternInput.focus();
+      }
+    });
+
+    // Live update on typing
+    var debounce;
+    function liveUpdate() {
+      clearTimeout(debounce);
+      debounce = setTimeout(doTest, 200);
+    }
+    patternInput.addEventListener('input', liveUpdate);
+    testInput.addEventListener('input', liveUpdate);
+
+    document.getElementById('btn-test').addEventListener('click', doTest);
+
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      patternInput.value = '';
+      testInput.value = '';
+      highlightEl.innerHTML = '';
+      matchResults.innerHTML = '<span style="color:var(--text-muted);">No matches yet</span>';
+      matchCountLabel.textContent = 'Matches (0)';
+      hideMsg(msg);
+      lastMatches = [];
+      patternInput.focus();
+    });
+
+    document.getElementById('btn-example').addEventListener('click', function () {
+      patternInput.value = '(\\w+)@([\\w.]+)';
+      testInput.value = 'Contact us at support@devtoolbox.com or sales@example.org.\nInvalid emails: @missing.com, noat.sign\nMore: admin@test.io, hello@world.co.uk';
+      // Make sure 'g' flag is on
+      flagBtns.forEach(function (b) {
+        if (b.dataset.flag === 'g') {
+          b.classList.add('active');
+          b.setAttribute('aria-pressed', 'true');
+        }
+      });
+      doTest();
+    });
+
+    document.getElementById('btn-copy-matches').addEventListener('click', function () {
+      if (lastMatches.length) {
+        var text = lastMatches.map(function (m) { return m.match; }).join('\n');
+        copyToClipboard(text, this);
+      }
+    });
+
+    bindCtrlEnter(doTest);
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

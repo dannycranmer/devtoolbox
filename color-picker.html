@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Picker &amp; Converter — DevToolbox</title>
+  <meta name="description" content="Pick colors and convert between HEX, RGB, and HSL formats. Visual color picker with live preview swatch. Free, private, runs in your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .color-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .color-picker-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .picker-row {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .native-picker {
+      -webkit-appearance: none;
+      appearance: none;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      width: 80px;
+      height: 80px;
+      padding: 0;
+      cursor: pointer;
+      background: none;
+      flex-shrink: 0;
+    }
+    .native-picker::-webkit-color-swatch-wrapper {
+      padding: 4px;
+    }
+    .native-picker::-webkit-color-swatch {
+      border: none;
+      border-radius: var(--radius-sm);
+    }
+    .native-picker::-moz-color-swatch {
+      border: none;
+      border-radius: var(--radius-sm);
+    }
+    .swatch-large {
+      width: 100%;
+      height: 120px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+    .color-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      flex: 1;
+    }
+    .color-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .color-field label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+    .color-field-row {
+      display: flex;
+      gap: 0.375rem;
+      align-items: center;
+    }
+    .color-field input[type="text"] {
+      flex: 1;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      padding: 0.625rem 0.75rem;
+    }
+    .color-field .btn {
+      flex-shrink: 0;
+      height: 38px;
+    }
+    .color-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .color-css-output {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      line-height: 1.8;
+      color: var(--text-primary);
+    }
+    .color-css-output .css-prop {
+      color: var(--text-muted);
+    }
+    .color-css-output .css-val {
+      color: var(--accent);
+    }
+    .palette-section {
+      margin-top: 1.5rem;
+    }
+    .palette-section h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .palette-grid {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .palette-chip {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition);
+      position: relative;
+    }
+    .palette-chip:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-lg);
+    }
+    .palette-chip.current {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    .contrast-info {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .contrast-box {
+      flex: 1;
+      min-width: 120px;
+      padding: 0.75rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.8125rem;
+    }
+    .contrast-box .ratio {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .contrast-box .grade {
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+    .grade-pass { color: var(--success); }
+    .grade-fail { color: var(--error); }
+    @media (max-width: 768px) {
+      .color-layout {
+        grid-template-columns: 1fr;
+      }
+      .picker-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .native-picker {
+        width: 100%;
+        height: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" class="active" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Color Picker &amp; Converter</h1>
+      <p>Pick a color and convert between HEX, RGB, and HSL formats. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to apply input</span></p>
+    </div>
+
+    <div class="color-layout">
+      <div class="color-picker-wrap">
+        <div class="picker-row">
+          <input type="color" id="color-native" class="native-picker" value="#0ea5e9" aria-label="Visual color picker">
+          <div class="color-inputs">
+            <div class="color-field">
+              <label for="hex-input">HEX</label>
+              <div class="color-field-row">
+                <input type="text" id="hex-input" value="#0ea5e9" placeholder="#000000" spellcheck="false" aria-label="HEX color value">
+                <button class="btn btn-sm" id="btn-copy-hex" type="button">Copy</button>
+              </div>
+            </div>
+            <div class="color-field">
+              <label for="rgb-input">RGB</label>
+              <div class="color-field-row">
+                <input type="text" id="rgb-input" value="rgb(14, 165, 233)" placeholder="rgb(0, 0, 0)" spellcheck="false" aria-label="RGB color value">
+                <button class="btn btn-sm" id="btn-copy-rgb" type="button">Copy</button>
+              </div>
+            </div>
+            <div class="color-field">
+              <label for="hsl-input">HSL</label>
+              <div class="color-field-row">
+                <input type="text" id="hsl-input" value="hsl(199, 89%, 48%)" placeholder="hsl(0, 0%, 0%)" spellcheck="false" aria-label="HSL color value">
+                <button class="btn btn-sm" id="btn-copy-hsl" type="button">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="btn-random" type="button">Random Color</button>
+          <button class="btn" id="btn-example" type="button">Load Example</button>
+        </div>
+        <div id="color-msg" class="msg" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="color-info">
+        <span class="panel-label">Preview</span>
+        <div id="swatch" class="swatch-large" style="background: #0ea5e9;"></div>
+        <div id="css-output" class="color-css-output"></div>
+        <div>
+          <span class="panel-label">Contrast with White / Black</span>
+          <div class="contrast-info" id="contrast-info"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="palette-section">
+      <h3>Shades &amp; Tints</h3>
+      <div class="palette-grid" id="palette-shades"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var native = document.getElementById('color-native');
+    var hexInput = document.getElementById('hex-input');
+    var rgbInput = document.getElementById('rgb-input');
+    var hslInput = document.getElementById('hsl-input');
+    var swatch = document.getElementById('swatch');
+    var cssOutput = document.getElementById('css-output');
+    var contrastInfo = document.getElementById('contrast-info');
+    var paletteShades = document.getElementById('palette-shades');
+    var msg = document.getElementById('color-msg');
+
+    // Current color stored as {r, g, b} 0-255
+    var currentColor = { r: 14, g: 165, b: 233 };
+
+    // --- Conversion functions ---
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(function (c) {
+        var h = c.toString(16);
+        return h.length === 1 ? '0' + h : h;
+      }).join('');
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.replace(/^#/, '');
+      if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+      if (hex.length !== 6 || !/^[0-9a-fA-F]{6}$/.test(hex)) return null;
+      return {
+        r: parseInt(hex.substring(0, 2), 16),
+        g: parseInt(hex.substring(2, 4), 16),
+        b: parseInt(hex.substring(4, 6), 16)
+      };
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      var h, s, l = (max + min) / 2;
+
+      if (max === min) {
+        h = s = 0;
+      } else {
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      return {
+        h: Math.round(h * 360),
+        s: Math.round(s * 100),
+        l: Math.round(l * 100)
+      };
+    }
+
+    function hslToRgb(h, s, l) {
+      h /= 360; s /= 100; l /= 100;
+      var r, g, b;
+
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        function hue2rgb(p, q, t) {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        }
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+      return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+      };
+    }
+
+    // --- Luminance & contrast ---
+    function luminance(r, g, b) {
+      var a = [r, g, b].map(function (v) {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+    }
+
+    function contrastRatio(l1, l2) {
+      var lighter = Math.max(l1, l2);
+      var darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    function wcagGrade(ratio) {
+      if (ratio >= 7) return { text: 'AAA', pass: true };
+      if (ratio >= 4.5) return { text: 'AA', pass: true };
+      if (ratio >= 3) return { text: 'AA Large', pass: true };
+      return { text: 'Fail', pass: false };
+    }
+
+    // --- Update all UI ---
+    function updateAll(source) {
+      var r = currentColor.r, g = currentColor.g, b = currentColor.b;
+      var hex = rgbToHex(r, g, b);
+      var hsl = rgbToHsl(r, g, b);
+
+      if (source !== 'hex') hexInput.value = hex;
+      if (source !== 'rgb') rgbInput.value = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+      if (source !== 'hsl') hslInput.value = 'hsl(' + hsl.h + ', ' + hsl.s + '%, ' + hsl.l + '%)';
+      if (source !== 'native') native.value = hex;
+
+      swatch.style.background = hex;
+
+      // CSS output
+      cssOutput.innerHTML =
+        '<span class="css-prop">color:</span> <span class="css-val">' + escapeHtml(hex) + '</span>;\n' +
+        '<span class="css-prop">color:</span> <span class="css-val">rgb(' + r + ', ' + g + ', ' + b + ')</span>;\n' +
+        '<span class="css-prop">color:</span> <span class="css-val">hsl(' + hsl.h + ', ' + hsl.s + '%, ' + hsl.l + '%)</span>;';
+
+      // Contrast info
+      var lum = luminance(r, g, b);
+      var whiteRatio = contrastRatio(1, lum);
+      var blackRatio = contrastRatio(lum, 0);
+      var whiteGrade = wcagGrade(whiteRatio);
+      var blackGrade = wcagGrade(blackRatio);
+
+      contrastInfo.innerHTML =
+        '<div class="contrast-box" style="background:' + hex + ';color:#fff;">' +
+          '<div class="ratio">' + whiteRatio.toFixed(2) + ':1</div>' +
+          '<div>vs White</div>' +
+          '<div class="grade ' + (whiteGrade.pass ? 'grade-pass' : 'grade-fail') + '">' + whiteGrade.text + '</div>' +
+        '</div>' +
+        '<div class="contrast-box" style="background:' + hex + ';color:#000;">' +
+          '<div class="ratio">' + blackRatio.toFixed(2) + ':1</div>' +
+          '<div>vs Black</div>' +
+          '<div class="grade ' + (blackGrade.pass ? 'grade-pass' : 'grade-fail') + '">' + blackGrade.text + '</div>' +
+        '</div>';
+
+      // Shades & tints
+      var shades = '';
+      for (var i = 0; i <= 10; i++) {
+        var factor = i / 10;
+        var sr = Math.round(r * (1 - factor));
+        var sg = Math.round(g * (1 - factor));
+        var sb = Math.round(b * (1 - factor));
+        var shex = rgbToHex(sr, sg, sb);
+        shades += '<div class="palette-chip" style="background:' + shex + ';" title="' + shex + '" data-hex="' + shex + '"></div>';
+      }
+      var tints = '';
+      for (var i = 0; i <= 10; i++) {
+        var factor = i / 10;
+        var tr = Math.round(r + (255 - r) * factor);
+        var tg = Math.round(g + (255 - g) * factor);
+        var tb = Math.round(b + (255 - b) * factor);
+        var thex = rgbToHex(tr, tg, tb);
+        tints += '<div class="palette-chip" style="background:' + thex + ';" title="' + thex + '" data-hex="' + thex + '"></div>';
+      }
+      paletteShades.innerHTML = tints + shades;
+
+      hideMsg(msg);
+    }
+
+    // --- Input handlers ---
+    native.addEventListener('input', function () {
+      var rgb = hexToRgb(this.value);
+      if (rgb) {
+        currentColor = rgb;
+        updateAll('native');
+      }
+    });
+
+    function parseHexInput() {
+      var val = hexInput.value.trim();
+      if (!val.startsWith('#')) val = '#' + val;
+      var rgb = hexToRgb(val);
+      if (rgb) {
+        currentColor = rgb;
+        updateAll('hex');
+      } else {
+        showMsg(msg, 'error', 'Invalid HEX color. Use format: #RRGGBB or #RGB');
+      }
+    }
+
+    function parseRgbInput() {
+      var val = rgbInput.value.trim();
+      var match = val.match(/^rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i);
+      if (!match) {
+        // Try plain numbers: "14, 165, 233" or "14 165 233"
+        match = val.match(/^(\d{1,3})\s*[,\s]\s*(\d{1,3})\s*[,\s]\s*(\d{1,3})$/);
+      }
+      if (match) {
+        var r = parseInt(match[1], 10);
+        var g = parseInt(match[2], 10);
+        var b = parseInt(match[3], 10);
+        if (r <= 255 && g <= 255 && b <= 255) {
+          currentColor = { r: r, g: g, b: b };
+          updateAll('rgb');
+          return;
+        }
+      }
+      showMsg(msg, 'error', 'Invalid RGB. Use format: rgb(R, G, B) with values 0-255');
+    }
+
+    function parseHslInput() {
+      var val = hslInput.value.trim();
+      var match = val.match(/^hsl\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})%?\s*,\s*(\d{1,3})%?\s*\)$/i);
+      if (!match) {
+        match = val.match(/^(\d{1,3})\s*[,\s]\s*(\d{1,3})%?\s*[,\s]\s*(\d{1,3})%?$/);
+      }
+      if (match) {
+        var h = parseInt(match[1], 10);
+        var s = parseInt(match[2], 10);
+        var l = parseInt(match[3], 10);
+        if (h <= 360 && s <= 100 && l <= 100) {
+          currentColor = hslToRgb(h, s, l);
+          updateAll('hsl');
+          return;
+        }
+      }
+      showMsg(msg, 'error', 'Invalid HSL. Use format: hsl(H, S%, L%) with H 0-360, S/L 0-100');
+    }
+
+    hexInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); parseHexInput(); }
+    });
+    rgbInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); parseRgbInput(); }
+    });
+    hslInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); parseHslInput(); }
+    });
+
+    // Also parse on blur
+    hexInput.addEventListener('blur', parseHexInput);
+    rgbInput.addEventListener('blur', parseRgbInput);
+    hslInput.addEventListener('blur', parseHslInput);
+
+    // Copy buttons
+    document.getElementById('btn-copy-hex').addEventListener('click', function () {
+      copyToClipboard(hexInput.value, this);
+    });
+    document.getElementById('btn-copy-rgb').addEventListener('click', function () {
+      copyToClipboard(rgbInput.value, this);
+    });
+    document.getElementById('btn-copy-hsl').addEventListener('click', function () {
+      copyToClipboard(hslInput.value, this);
+    });
+
+    // Random color
+    document.getElementById('btn-random').addEventListener('click', function () {
+      currentColor = {
+        r: Math.floor(Math.random() * 256),
+        g: Math.floor(Math.random() * 256),
+        b: Math.floor(Math.random() * 256)
+      };
+      updateAll('random');
+    });
+
+    // Example
+    document.getElementById('btn-example').addEventListener('click', function () {
+      var examples = [
+        { r: 14, g: 165, b: 233 },   // Sky blue
+        { r: 239, g: 68, b: 68 },     // Red
+        { r: 34, g: 197, b: 94 },     // Green
+        { r: 168, g: 85, b: 247 },    // Purple
+        { r: 251, g: 191, b: 36 },    // Amber
+        { r: 236, g: 72, b: 153 },    // Pink
+        { r: 20, g: 184, b: 166 },    // Teal
+      ];
+      currentColor = examples[Math.floor(Math.random() * examples.length)];
+      updateAll('example');
+    });
+
+    // Click palette chip to select that color
+    paletteShades.addEventListener('click', function (e) {
+      var chip = e.target.closest('.palette-chip');
+      if (chip) {
+        var hex = chip.getAttribute('data-hex');
+        var rgb = hexToRgb(hex);
+        if (rgb) {
+          currentColor = rgb;
+          updateAll('palette');
+        }
+      }
+    });
+
+    // Ctrl+Enter
+    bindCtrlEnter(function () {
+      // Apply whichever field has focus
+      if (document.activeElement === hexInput) parseHexInput();
+      else if (document.activeElement === rgbInput) parseRgbInput();
+      else if (document.activeElement === hslInput) parseHslInput();
+    });
+
+    // Initial render
+    updateAll('init');
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

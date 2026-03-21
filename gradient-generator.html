@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Gradient Generator Online Free &mdash; DevToolbox</title>
+  <meta name="description" content="Create beautiful CSS gradients visually. Linear and radial gradients, color stops, direction picker, live preview, copy CSS code with vendor prefixes. Free, private, no tracking.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .gradient-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .gradient-preview {
+      width: 100%;
+      height: 280px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    .gradient-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .control-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 0.375rem;
+    }
+    .type-btns {
+      display: flex;
+      gap: 0;
+    }
+    .type-btn {
+      padding: 0.5rem 1rem;
+      font-family: var(--font-sans);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .type-btn:first-child {
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    }
+    .type-btn:last-child {
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      border-left: none;
+    }
+    .type-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .direction-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.375rem;
+      max-width: 280px;
+    }
+    .dir-btn {
+      padding: 0.375rem 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      text-align: center;
+    }
+    .dir-btn:hover {
+      border-color: var(--text-muted);
+    }
+    .dir-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .angle-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.375rem;
+    }
+    .angle-row input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+    }
+    .angle-row input[type="number"] {
+      width: 5rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      padding: 0.375rem 0.5rem;
+      text-align: center;
+    }
+    .angle-row input[type="number"]:focus {
+      outline: none;
+      border-color: var(--border-focus);
+    }
+    .radial-options {
+      display: none;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .radial-options.show {
+      display: flex;
+    }
+    .color-stops {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .color-stop {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .color-stop input[type="color"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 40px;
+      height: 34px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: none;
+      cursor: pointer;
+      padding: 2px;
+    }
+    .color-stop input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    .color-stop input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 2px;
+    }
+    .color-stop input[type="color"]::-moz-color-swatch {
+      border: none;
+      border-radius: 2px;
+    }
+    .color-stop input[type="text"] {
+      width: 90px;
+      font-size: 0.8125rem;
+      padding: 0.375rem 0.5rem;
+    }
+    .color-stop input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+      min-width: 80px;
+    }
+    .color-stop .stop-pct {
+      width: 3.5rem;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .color-stop .btn-remove-stop {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+    .color-stop .btn-remove-stop:hover {
+      border-color: var(--error);
+      color: var(--error);
+    }
+    .css-output {
+      width: 100%;
+      min-height: 120px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      padding: 1rem;
+      line-height: 1.7;
+      resize: vertical;
+    }
+    .css-output:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 0.5rem;
+    }
+    .preset-swatch {
+      height: 40px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform var(--transition), border-color var(--transition);
+    }
+    .preset-swatch:hover {
+      transform: scale(1.05);
+      border-color: var(--accent);
+    }
+    @media (max-width: 768px) {
+      .gradient-layout {
+        grid-template-columns: 1fr;
+      }
+      .direction-grid {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" class="active" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>CSS Gradient Generator</h1>
+      <p>Create beautiful CSS gradients visually. Pick colors, adjust stops, choose direction, copy the CSS. <span class="shortcut-hint"><kbd class="kbd">Ctrl+Enter</kbd> to copy</span></p>
+    </div>
+
+    <div class="gradient-layout">
+      <div>
+        <div class="gradient-preview" id="gradient-preview"></div>
+
+        <div class="control-label">CSS Output</div>
+        <textarea id="css-output" class="css-output" readonly aria-label="Generated CSS"></textarea>
+        <div class="btn-row" style="margin-top: 0.75rem;">
+          <button class="btn btn-primary" id="btn-copy" type="button">Copy CSS</button>
+          <button class="btn" id="btn-example" type="button">Example</button>
+          <button class="btn" id="btn-reset" type="button">Reset</button>
+        </div>
+      </div>
+
+      <div class="gradient-controls">
+        <div>
+          <div class="control-label">Type</div>
+          <div class="type-btns">
+            <button class="type-btn active" data-type="linear" type="button">Linear</button>
+            <button class="type-btn" data-type="radial" type="button">Radial</button>
+          </div>
+        </div>
+
+        <div id="linear-options">
+          <div class="control-label">Direction</div>
+          <div class="direction-grid" id="direction-grid">
+            <button class="dir-btn" data-dir="to top" type="button">&uarr;</button>
+            <button class="dir-btn" data-dir="to top right" type="button">&nearr;</button>
+            <button class="dir-btn" data-dir="to right" type="button">&rarr;</button>
+            <button class="dir-btn" data-dir="to bottom right" type="button">&searr;</button>
+            <button class="dir-btn" data-dir="to bottom" type="button">&darr;</button>
+            <button class="dir-btn" data-dir="to bottom left" type="button">&swarr;</button>
+            <button class="dir-btn" data-dir="to left" type="button">&larr;</button>
+            <button class="dir-btn active" data-dir="to top left" type="button">&nwarr;</button>
+          </div>
+          <div class="angle-row">
+            <label style="font-size:0.8125rem;color:var(--text-secondary);">Angle</label>
+            <input type="range" id="angle-slider" min="0" max="360" value="315">
+            <input type="number" id="angle-input" min="0" max="360" value="315">
+            <span style="font-size:0.8125rem;color:var(--text-muted);">deg</span>
+          </div>
+        </div>
+
+        <div id="radial-options" class="radial-options">
+          <div class="control-label" style="width:100%;">Shape</div>
+          <div class="type-btns">
+            <button class="type-btn active" data-shape="circle" type="button">Circle</button>
+            <button class="type-btn" data-shape="ellipse" type="button">Ellipse</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="control-label">Color Stops</div>
+          <div class="color-stops" id="color-stops"></div>
+          <button class="btn" id="btn-add-stop" type="button" style="margin-top: 0.5rem;">+ Add Color Stop</button>
+        </div>
+
+        <div>
+          <div class="control-label">Presets</div>
+          <div class="presets-grid" id="presets-grid"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    // State
+    var state = {
+      type: 'linear',
+      angle: 315,
+      shape: 'circle',
+      stops: [
+        { color: '#0ea5e9', position: 0 },
+        { color: '#a855f7', position: 100 }
+      ]
+    };
+
+    var presets = [
+      { stops: [{ color: '#0ea5e9', position: 0 }, { color: '#a855f7', position: 100 }], angle: 135 },
+      { stops: [{ color: '#f97316', position: 0 }, { color: '#ef4444', position: 100 }], angle: 135 },
+      { stops: [{ color: '#22c55e', position: 0 }, { color: '#0ea5e9', position: 100 }], angle: 135 },
+      { stops: [{ color: '#f59e0b', position: 0 }, { color: '#ef4444', position: 50 }, { color: '#8b5cf6', position: 100 }], angle: 135 },
+      { stops: [{ color: '#ec4899', position: 0 }, { color: '#8b5cf6', position: 100 }], angle: 135 },
+      { stops: [{ color: '#06b6d4', position: 0 }, { color: '#3b82f6', position: 50 }, { color: '#8b5cf6', position: 100 }], angle: 135 },
+      { stops: [{ color: '#000000', position: 0 }, { color: '#333333', position: 100 }], angle: 180 },
+      { stops: [{ color: '#fbbf24', position: 0 }, { color: '#22c55e', position: 100 }], angle: 135 },
+      { stops: [{ color: '#f43f5e', position: 0 }, { color: '#fb923c', position: 50 }, { color: '#fbbf24', position: 100 }], angle: 90 },
+      { stops: [{ color: '#1e3a5f', position: 0 }, { color: '#0ea5e9', position: 100 }], angle: 180 }
+    ];
+
+    // DOM
+    var previewEl = document.getElementById('gradient-preview');
+    var outputEl = document.getElementById('css-output');
+    var angleSlider = document.getElementById('angle-slider');
+    var angleInput = document.getElementById('angle-input');
+    var stopsContainer = document.getElementById('color-stops');
+    var presetsGrid = document.getElementById('presets-grid');
+    var linearOpts = document.getElementById('linear-options');
+    var radialOpts = document.getElementById('radial-options');
+
+    // Angle map for direction buttons
+    var dirAngles = {
+      'to top': 0, 'to top right': 45, 'to right': 90,
+      'to bottom right': 135, 'to bottom': 180, 'to bottom left': 225,
+      'to left': 270, 'to top left': 315
+    };
+
+    function buildGradientCSS() {
+      var stops = state.stops.map(function (s) {
+        return s.color + ' ' + s.position + '%';
+      }).join(', ');
+
+      if (state.type === 'linear') {
+        return 'linear-gradient(' + state.angle + 'deg, ' + stops + ')';
+      } else {
+        return 'radial-gradient(' + state.shape + ', ' + stops + ')';
+      }
+    }
+
+    function buildFullCSS() {
+      var gradient = buildGradientCSS();
+      var lines = [];
+      lines.push('background: ' + state.stops[0].color + ';');
+      // Vendor prefixes
+      lines.push('background: -webkit-' + gradient + ';');
+      lines.push('background: -moz-' + gradient + ';');
+      lines.push('background: ' + gradient + ';');
+      return lines.join('\n');
+    }
+
+    function update() {
+      var gradient = buildGradientCSS();
+      previewEl.style.background = gradient;
+      outputEl.value = buildFullCSS();
+    }
+
+    function renderStops() {
+      stopsContainer.innerHTML = '';
+      state.stops.forEach(function (stop, i) {
+        var row = document.createElement('div');
+        row.className = 'color-stop';
+
+        var colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.value = stop.color;
+        colorInput.addEventListener('input', function () {
+          state.stops[i].color = this.value;
+          hexInput.value = this.value;
+          update();
+        });
+
+        var hexInput = document.createElement('input');
+        hexInput.type = 'text';
+        hexInput.value = stop.color;
+        hexInput.maxLength = 7;
+        hexInput.addEventListener('input', function () {
+          var v = this.value.trim();
+          if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+            state.stops[i].color = v;
+            colorInput.value = v;
+            update();
+          }
+        });
+
+        var slider = document.createElement('input');
+        slider.type = 'range';
+        slider.min = 0;
+        slider.max = 100;
+        slider.value = stop.position;
+        slider.addEventListener('input', function () {
+          state.stops[i].position = parseInt(this.value, 10);
+          pctLabel.textContent = this.value + '%';
+          update();
+        });
+
+        var pctLabel = document.createElement('span');
+        pctLabel.className = 'stop-pct';
+        pctLabel.textContent = stop.position + '%';
+
+        var removeBtn = document.createElement('button');
+        removeBtn.className = 'btn-remove-stop';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.type = 'button';
+        removeBtn.title = 'Remove stop';
+        removeBtn.addEventListener('click', function () {
+          if (state.stops.length <= 2) return;
+          state.stops.splice(i, 1);
+          renderStops();
+          update();
+        });
+
+        row.appendChild(colorInput);
+        row.appendChild(hexInput);
+        row.appendChild(slider);
+        row.appendChild(pctLabel);
+        row.appendChild(removeBtn);
+        stopsContainer.appendChild(row);
+      });
+    }
+
+    function renderPresets() {
+      presetsGrid.innerHTML = '';
+      presets.forEach(function (preset, i) {
+        var swatch = document.createElement('div');
+        swatch.className = 'preset-swatch';
+        var stops = preset.stops.map(function (s) {
+          return s.color + ' ' + s.position + '%';
+        }).join(', ');
+        swatch.style.background = 'linear-gradient(' + preset.angle + 'deg, ' + stops + ')';
+        swatch.title = 'Apply preset ' + (i + 1);
+        swatch.addEventListener('click', function () {
+          state.type = 'linear';
+          state.angle = preset.angle;
+          state.stops = preset.stops.map(function (s) { return { color: s.color, position: s.position }; });
+          angleSlider.value = state.angle;
+          angleInput.value = state.angle;
+          updateTypeButtons();
+          updateDirectionButtons();
+          renderStops();
+          update();
+        });
+        presetsGrid.appendChild(swatch);
+      });
+    }
+
+    function updateTypeButtons() {
+      var btns = document.querySelectorAll('.type-btns [data-type]');
+      btns.forEach(function (b) {
+        b.classList.toggle('active', b.dataset.type === state.type);
+      });
+      linearOpts.style.display = state.type === 'linear' ? '' : 'none';
+      radialOpts.className = 'radial-options' + (state.type === 'radial' ? ' show' : '');
+    }
+
+    function updateDirectionButtons() {
+      var btns = document.querySelectorAll('#direction-grid .dir-btn');
+      btns.forEach(function (b) {
+        var a = dirAngles[b.dataset.dir];
+        b.classList.toggle('active', a === state.angle);
+      });
+    }
+
+    // Type buttons
+    document.querySelectorAll('.type-btns [data-type]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.type = this.dataset.type;
+        updateTypeButtons();
+        update();
+      });
+    });
+
+    // Shape buttons
+    document.querySelectorAll('[data-shape]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.shape = this.dataset.shape;
+        document.querySelectorAll('[data-shape]').forEach(function (b) {
+          b.classList.toggle('active', b.dataset.shape === state.shape);
+        });
+        update();
+      });
+    });
+
+    // Direction buttons
+    document.querySelectorAll('#direction-grid .dir-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.angle = dirAngles[this.dataset.dir];
+        angleSlider.value = state.angle;
+        angleInput.value = state.angle;
+        updateDirectionButtons();
+        update();
+      });
+    });
+
+    // Angle slider
+    angleSlider.addEventListener('input', function () {
+      state.angle = parseInt(this.value, 10);
+      angleInput.value = state.angle;
+      updateDirectionButtons();
+      update();
+    });
+
+    // Angle number input
+    angleInput.addEventListener('input', function () {
+      var v = parseInt(this.value, 10);
+      if (!isNaN(v) && v >= 0 && v <= 360) {
+        state.angle = v;
+        angleSlider.value = v;
+        updateDirectionButtons();
+        update();
+      }
+    });
+
+    // Add color stop
+    document.getElementById('btn-add-stop').addEventListener('click', function () {
+      if (state.stops.length >= 10) return;
+      var lastColor = state.stops[state.stops.length - 1].color;
+      // Pick a random-ish position between last and 100
+      var lastPos = state.stops[state.stops.length - 1].position;
+      var newPos = Math.min(100, lastPos + Math.round((100 - lastPos) / 2));
+      state.stops.push({ color: lastColor, position: newPos });
+      renderStops();
+      update();
+    });
+
+    // Copy
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      copyToClipboard(outputEl.value, this);
+    });
+
+    // Example
+    document.getElementById('btn-example').addEventListener('click', function () {
+      state.type = 'linear';
+      state.angle = 135;
+      state.stops = [
+        { color: '#667eea', position: 0 },
+        { color: '#764ba2', position: 100 }
+      ];
+      angleSlider.value = 135;
+      angleInput.value = 135;
+      updateTypeButtons();
+      updateDirectionButtons();
+      renderStops();
+      update();
+    });
+
+    // Reset
+    document.getElementById('btn-reset').addEventListener('click', function () {
+      state.type = 'linear';
+      state.angle = 315;
+      state.shape = 'circle';
+      state.stops = [
+        { color: '#0ea5e9', position: 0 },
+        { color: '#a855f7', position: 100 }
+      ];
+      angleSlider.value = 315;
+      angleInput.value = 315;
+      updateTypeButtons();
+      updateDirectionButtons();
+      renderStops();
+      update();
+    });
+
+    // Ctrl+Enter to copy
+    bindCtrlEnter(function () {
+      copyToClipboard(outputEl.value, document.getElementById('btn-copy'));
+    });
+
+    // Init
+    renderPresets();
+    renderStops();
+    update();
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

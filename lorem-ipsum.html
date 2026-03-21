@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lorem Ipsum Generator &mdash; DevToolbox</title>
+  <meta name="description" content="Generate lorem ipsum placeholder text by paragraphs, sentences, or words. Copy to clipboard instantly. Free, private, no tracking.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .li-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .li-control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .li-control-group label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
+    .li-control-group select,
+    .li-control-group input[type="number"] {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+    }
+    .li-control-group input[type="number"] {
+      width: 5rem;
+    }
+    .li-control-group select:focus,
+    .li-control-group input[type="number"]:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+    .li-check {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+    .li-check input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 1rem;
+      height: 1rem;
+    }
+    .li-check label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+    .li-output {
+      width: 100%;
+      min-height: 300px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-body, system-ui, sans-serif);
+      font-size: 0.9375rem;
+      padding: 1rem;
+      line-height: 1.7;
+      resize: vertical;
+      tab-size: 2;
+    }
+    .li-output:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+    .li-stats {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" class="active" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Lorem Ipsum Generator</h1>
+      <p>Generate placeholder text for your designs, mockups, and prototypes. <span class="shortcut-hint"><kbd class="kbd">Ctrl+Enter</kbd> to generate</span></p>
+    </div>
+
+    <div class="li-controls">
+      <div class="li-control-group">
+        <label for="li-count">Generate</label>
+        <input type="number" id="li-count" min="1" max="100" value="5">
+      </div>
+      <div class="li-control-group">
+        <label for="li-unit">of</label>
+        <select id="li-unit">
+          <option value="paragraphs">Paragraphs</option>
+          <option value="sentences">Sentences</option>
+          <option value="words">Words</option>
+        </select>
+      </div>
+      <div class="li-check">
+        <input type="checkbox" id="li-start-lorem" checked>
+        <label for="li-start-lorem">Start with "Lorem ipsum..."</label>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-bottom: 0.75rem;">
+      <button class="btn btn-primary" id="btn-generate" type="button">Generate</button>
+      <button class="btn" id="btn-copy" type="button">Copy</button>
+      <button class="btn" id="btn-clear" type="button">Clear</button>
+    </div>
+
+    <textarea id="li-output" class="li-output" readonly aria-label="Generated lorem ipsum text" placeholder="Click Generate to create placeholder text..."></textarea>
+    <div id="li-stats" class="li-stats"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    // Classic lorem ipsum corpus — split into sentences
+    var SENTENCES = [
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+      'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      'Curabitur pretium tincidunt lacus, nec gravida arcu fermentum vel.',
+      'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.',
+      'Maecenas sed diam eget risus varius blandit sit amet non magna.',
+      'Donec id elit non mi porta gravida at eget metus.',
+      'Nullam quis risus eget urna mollis ornare vel eu leo.',
+      'Praesent commodo cursus magna, vel scelerisque nisl consectetur et.',
+      'Aenean lacinia bibendum nulla sed consectetur.',
+      'Integer posuere erat a ante venenatis dapibus posuere velit aliquet.',
+      'Vestibulum id ligula porta felis euismod semper.',
+      'Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.',
+      'Morbi leo risus, porta ac consectetur ac, vestibulum at eros.',
+      'Cras mattis consectetur purus sit amet fermentum.',
+      'Etiam porta sem malesuada magna mollis euismod.',
+      'Donec sed odio dui.',
+      'Nulla vitae elit libero, a pharetra augue.',
+      'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.',
+      'Aenean eu leo quam pellentesque ornare.',
+      'Sed posuere consectetur est at lobortis.',
+      'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.',
+      'Quisque eget odio ac lectus vestibulum faucibus eget in metus.',
+      'In hac habitasse platea dictumst.',
+      'Suspendisse potenti.',
+      'Nunc lobortis mattis aliquam faucibus purus in massa tempor nec.',
+      'Proin gravida hendrerit lectus a molestie.',
+      'Aliquam erat volutpat.',
+      'Phasellus viverra nulla ut metus varius laoreet.',
+      'Quisque rutrum aenean imperdiet.',
+      'Etiam ultricies nisi vel augue.',
+      'Curabitur ullamcorper ultricies nisi.',
+      'Nam eget dui.',
+      'Etiam rhoncus maecenas tempus.',
+      'Donec vitae sapien ut libero venenatis faucibus.',
+      'Nullam dictum felis eu pede mollis pretium.',
+      'Fusce ac felis sit amet ligula pharetra condimentum.',
+      'Maecenas egestas arcu quis ligula mattis placerat.',
+      'Duis lobortis massa imperdiet quam.',
+      'Phasellus blandit leo ut odio.',
+      'Maecenas nec odio et ante tincidunt tempus.',
+      'Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu.',
+      'In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.',
+      'Nullam dictum felis eu pede mollis pretium integer tincidunt.',
+      'Cras dapibus vivamus elementum semper nisi.',
+      'Aenean vulputate eleifend tellus.',
+      'Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim.',
+      'Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus.'
+    ];
+
+    var WORDS = [];
+    SENTENCES.forEach(function (s) {
+      s.replace(/[.,]/g, '').split(/\s+/).forEach(function (w) {
+        if (w) WORDS.push(w.toLowerCase());
+      });
+    });
+
+    // Deduplicate words for variety
+    var UNIQUE_WORDS = Array.from(new Set(WORDS));
+
+    var LOREM_START = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function generateSentences(count, startWithLorem) {
+      var result = [];
+      for (var i = 0; i < count; i++) {
+        if (i === 0 && startWithLorem) {
+          result.push(LOREM_START);
+        } else {
+          result.push(pickRandom(SENTENCES));
+        }
+      }
+      return result;
+    }
+
+    function generateParagraphs(count, startWithLorem) {
+      var paragraphs = [];
+      for (var p = 0; p < count; p++) {
+        var sentCount = 4 + Math.floor(Math.random() * 4); // 4-7 sentences
+        var sentences = generateSentences(sentCount, p === 0 && startWithLorem);
+        paragraphs.push(sentences.join(' '));
+      }
+      return paragraphs.join('\n\n');
+    }
+
+    function generateWords(count, startWithLorem) {
+      var result = [];
+      if (startWithLorem && count >= 5) {
+        result.push('Lorem', 'ipsum', 'dolor', 'sit', 'amet');
+      }
+      while (result.length < count) {
+        result.push(pickRandom(UNIQUE_WORDS));
+      }
+      // Capitalize first word and add period at end
+      result = result.slice(0, count);
+      result[0] = result[0].charAt(0).toUpperCase() + result[0].slice(1);
+      return result.join(' ') + '.';
+    }
+
+    function generate() {
+      var count = parseInt(countEl.value, 10);
+      if (isNaN(count) || count < 1) count = 1;
+      if (count > 100) count = 100;
+      countEl.value = count;
+
+      var unit = unitEl.value;
+      var startWithLorem = startLoremEl.checked;
+      var text = '';
+
+      if (unit === 'paragraphs') {
+        text = generateParagraphs(count, startWithLorem);
+      } else if (unit === 'sentences') {
+        text = generateSentences(count, startWithLorem).join(' ');
+      } else {
+        text = generateWords(count, startWithLorem);
+      }
+
+      outputEl.value = text;
+      updateStats(text);
+    }
+
+    function updateStats(text) {
+      if (!text) {
+        statsEl.textContent = '';
+        return;
+      }
+      var words = text.trim().split(/\s+/).length;
+      var chars = text.length;
+      var paragraphs = text.split(/\n\n+/).filter(function (p) { return p.trim(); }).length;
+      statsEl.textContent = paragraphs + ' paragraph' + (paragraphs !== 1 ? 's' : '') +
+        ' \u00b7 ' + words + ' word' + (words !== 1 ? 's' : '') +
+        ' \u00b7 ' + chars + ' character' + (chars !== 1 ? 's' : '');
+    }
+
+    // DOM
+    var countEl = document.getElementById('li-count');
+    var unitEl = document.getElementById('li-unit');
+    var startLoremEl = document.getElementById('li-start-lorem');
+    var outputEl = document.getElementById('li-output');
+    var statsEl = document.getElementById('li-stats');
+
+    // Generate button
+    document.getElementById('btn-generate').addEventListener('click', generate);
+
+    // Copy
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (!outputEl.value.trim()) return;
+      copyToClipboard(outputEl.value, this);
+    });
+
+    // Clear
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      outputEl.value = '';
+      statsEl.textContent = '';
+    });
+
+    // Ctrl+Enter
+    bindCtrlEnter(generate);
+
+    // Generate on load with defaults
+    generate();
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

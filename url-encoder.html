@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Encoder/Decoder — DevToolbox</title>
+  <meta name="description" content="Encode and decode URLs online. Supports encodeURIComponent, encodeURI, and full URL parsing. 100% client-side, no data leaves your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" class="active" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>URL Encoder / Decoder</h1>
+      <p>Encode or decode URL components and full URLs. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to encode</span></p>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="mode-select">Mode:</label>
+        <select id="mode-select" aria-label="Encoding mode">
+          <option value="component" selected>encodeURIComponent</option>
+          <option value="uri">encodeURI</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <span class="panel-label">Input</span>
+        <textarea id="url-input" placeholder="Paste your URL or text here..." aria-label="URL input" spellcheck="false"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-encode" type="button">Encode</button>
+          <button class="btn" id="btn-decode" type="button">Decode</button>
+          <button class="btn" id="btn-example" type="button">Load Example</button>
+          <button class="btn" id="btn-clear" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="tool-panel">
+        <span class="panel-label">Output</span>
+        <textarea id="url-output" readonly aria-label="URL output" spellcheck="false"></textarea>
+        <div class="btn-row">
+          <button class="btn" id="btn-copy" type="button">Copy</button>
+          <button class="btn" id="btn-swap" type="button">&#8593;&#8595; Swap</button>
+        </div>
+        <div id="url-msg" class="msg" role="status" aria-live="polite"></div>
+        <div class="status-bar" id="url-status"></div>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <span class="panel-label">URL Parser</span>
+      <div id="url-parts" class="match-results" style="margin-top: 0.5rem; display: none;"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var input = document.getElementById('url-input');
+    var output = document.getElementById('url-output');
+    var msg = document.getElementById('url-msg');
+    var status = document.getElementById('url-status');
+    var modeSel = document.getElementById('mode-select');
+    var partsEl = document.getElementById('url-parts');
+
+    function doEncode() {
+      var raw = input.value;
+      if (!raw) { hideMsg(msg); output.value = ''; status.textContent = ''; return; }
+      try {
+        var encoded = modeSel.value === 'component'
+          ? encodeURIComponent(raw)
+          : encodeURI(raw);
+        output.value = encoded;
+        showMsg(msg, 'success', 'Encoded (' + modeSel.value + ')');
+        status.textContent = encoded.length + ' chars';
+        parseURL(raw);
+      } catch (e) {
+        showMsg(msg, 'error', 'Encode error: ' + e.message);
+      }
+    }
+
+    function doDecode() {
+      var raw = input.value;
+      if (!raw) { hideMsg(msg); output.value = ''; status.textContent = ''; return; }
+      try {
+        var decoded = modeSel.value === 'component'
+          ? decodeURIComponent(raw)
+          : decodeURI(raw);
+        output.value = decoded;
+        showMsg(msg, 'success', 'Decoded');
+        status.textContent = decoded.length + ' chars';
+        parseURL(decoded);
+      } catch (e) {
+        showMsg(msg, 'error', 'Decode error: ' + e.message);
+      }
+    }
+
+    function parseURL(str) {
+      try {
+        var url = new URL(str);
+        var parts = [
+          { label: 'Protocol', value: url.protocol },
+          { label: 'Host', value: url.host },
+          { label: 'Hostname', value: url.hostname },
+          { label: 'Port', value: url.port || '(default)' },
+          { label: 'Pathname', value: url.pathname },
+          { label: 'Search', value: url.search || '(none)' },
+          { label: 'Hash', value: url.hash || '(none)' }
+        ];
+        var html = '';
+        for (var i = 0; i < parts.length; i++) {
+          html += '<div class="match-item"><span class="match-index">' + parts[i].label + '</span> <span class="match-value">' + escapeHtml(parts[i].value) + '</span></div>';
+        }
+        // Parse query params
+        if (url.search) {
+          html += '<div class="match-item" style="margin-top:0.5rem;"><span class="match-index" style="font-weight:600;">Query Parameters</span></div>';
+          url.searchParams.forEach(function (val, key) {
+            html += '<div class="match-item"><span class="match-index" style="padding-left:1rem;">' + escapeHtml(key) + '</span> = <span class="match-value">' + escapeHtml(val) + '</span></div>';
+          });
+        }
+        partsEl.innerHTML = html;
+        partsEl.style.display = 'block';
+      } catch (e) {
+        partsEl.style.display = 'none';
+      }
+    }
+
+    document.getElementById('btn-encode').addEventListener('click', doEncode);
+    document.getElementById('btn-decode').addEventListener('click', doDecode);
+
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      input.value = '';
+      output.value = '';
+      hideMsg(msg);
+      status.textContent = '';
+      partsEl.style.display = 'none';
+      input.focus();
+    });
+
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (output.value) copyToClipboard(output.value, this);
+    });
+
+    document.getElementById('btn-swap').addEventListener('click', function () {
+      var tmp = input.value;
+      input.value = output.value;
+      output.value = tmp;
+    });
+
+    document.getElementById('btn-example').addEventListener('click', function () {
+      input.value = 'https://example.com/search?q=hello world&lang=en&tags=javascript,web dev&redirect=https://other.com/page?id=42#section';
+      doEncode();
+    });
+
+    bindCtrlEnter(doEncode);
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

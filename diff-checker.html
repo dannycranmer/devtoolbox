@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diff Checker &amp; Text Compare — DevToolbox</title>
+  <meta name="description" content="Compare two texts and see differences highlighted line by line. Added, removed, and unchanged lines with stats. Free, private, runs in your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .diff-output {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      min-height: 300px;
+      overflow: auto;
+      line-height: 1.6;
+    }
+    .diff-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .diff-table td {
+      padding: 1px 8px;
+      vertical-align: top;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .diff-line-num {
+      width: 40px;
+      min-width: 40px;
+      text-align: right;
+      color: var(--text-muted);
+      user-select: none;
+      font-size: 0.75rem;
+      border-right: 1px solid var(--border);
+      padding-right: 6px;
+    }
+    .diff-marker {
+      width: 20px;
+      min-width: 20px;
+      text-align: center;
+      font-weight: 700;
+      user-select: none;
+    }
+    .diff-content {
+      width: 100%;
+    }
+    .diff-row-added {
+      background: rgba(34, 197, 94, 0.1);
+    }
+    .diff-row-added .diff-marker {
+      color: var(--success);
+    }
+    .diff-row-added .diff-content {
+      color: #86efac;
+    }
+    .diff-row-removed {
+      background: rgba(239, 68, 68, 0.1);
+    }
+    .diff-row-removed .diff-marker {
+      color: var(--error);
+    }
+    .diff-row-removed .diff-content {
+      color: #f87171;
+    }
+    .diff-row-unchanged .diff-content {
+      color: var(--text-secondary);
+    }
+    .diff-row-unchanged .diff-marker {
+      color: var(--text-muted);
+    }
+    .diff-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.8125rem;
+      font-family: var(--font-mono);
+      padding: 0.5rem 0;
+    }
+    .diff-stat-added { color: var(--success); }
+    .diff-stat-removed { color: var(--error); }
+    .diff-stat-unchanged { color: var(--text-muted); }
+    .diff-empty {
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" class="active" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Diff Checker &amp; Text Compare</h1>
+      <p>Compare two texts and see differences highlighted line by line. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to compare</span></p>
+    </div>
+
+    <div class="controls">
+      <label class="toggle-wrap">
+        <input type="checkbox" id="ignore-whitespace" aria-label="Ignore whitespace">
+        Ignore Whitespace
+      </label>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="ignore-case" aria-label="Ignore case">
+        Ignore Case
+      </label>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <span class="panel-label">Original</span>
+        <textarea id="diff-original" placeholder="Paste original text here..." aria-label="Original text" spellcheck="false"></textarea>
+      </div>
+      <div class="tool-panel">
+        <span class="panel-label">Modified</span>
+        <textarea id="diff-modified" placeholder="Paste modified text here..." aria-label="Modified text" spellcheck="false"></textarea>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-top: 0.75rem;">
+      <button class="btn btn-primary" id="btn-compare" type="button">Compare</button>
+      <button class="btn" id="btn-swap" type="button">Swap</button>
+      <button class="btn" id="btn-clear" type="button">Clear</button>
+    </div>
+
+    <div id="diff-stats" class="diff-stats"></div>
+
+    <div id="diff-output" class="diff-output" style="margin-top: 0.75rem;">
+      <div class="diff-empty">Paste text in both panels and click Compare to see differences.</div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var originalEl = document.getElementById('diff-original');
+    var modifiedEl = document.getElementById('diff-modified');
+    var outputEl = document.getElementById('diff-output');
+    var statsEl = document.getElementById('diff-stats');
+    var ignoreWsEl = document.getElementById('ignore-whitespace');
+    var ignoreCaseEl = document.getElementById('ignore-case');
+
+    // LCS-based diff algorithm
+    function computeLCS(a, b) {
+      var m = a.length;
+      var n = b.length;
+      // Use space-optimized approach for very large inputs
+      // But we need the full table for backtracking
+      var dp = new Array(m + 1);
+      for (var i = 0; i <= m; i++) {
+        dp[i] = new Uint16Array(n + 1);
+      }
+      for (var i = 1; i <= m; i++) {
+        for (var j = 1; j <= n; j++) {
+          if (a[i - 1] === b[j - 1]) {
+            dp[i][j] = dp[i - 1][j - 1] + 1;
+          } else {
+            dp[i][j] = dp[i - 1][j] > dp[i][j - 1] ? dp[i - 1][j] : dp[i][j - 1];
+          }
+        }
+      }
+      return dp;
+    }
+
+    function backtrack(dp, a, b) {
+      var result = [];
+      var i = a.length;
+      var j = b.length;
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) {
+          result.push({ type: 'unchanged', oldLine: i, newLine: j, text: a[i - 1] });
+          i--;
+          j--;
+        } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+          result.push({ type: 'added', oldLine: null, newLine: j, text: b[j - 1] });
+          j--;
+        } else {
+          result.push({ type: 'removed', oldLine: i, newLine: null, text: a[i - 1] });
+          i--;
+        }
+      }
+      result.reverse();
+      return result;
+    }
+
+    function normalizeLine(line) {
+      var result = line;
+      if (ignoreCaseEl.checked) {
+        result = result.toLowerCase();
+      }
+      if (ignoreWsEl.checked) {
+        result = result.replace(/\s+/g, ' ').trim();
+      }
+      return result;
+    }
+
+    function computeDiff(originalText, modifiedText) {
+      var originalLines = originalText.split('\n');
+      var modifiedLines = modifiedText.split('\n');
+
+      // Normalize for comparison
+      var normOriginal = originalLines.map(normalizeLine);
+      var normModified = modifiedLines.map(normalizeLine);
+
+      var dp = computeLCS(normOriginal, normModified);
+      var ops = backtrack(dp, normOriginal, normModified);
+
+      // Map back to original (non-normalized) text
+      var oIdx = 0;
+      var mIdx = 0;
+      var result = [];
+      for (var k = 0; k < ops.length; k++) {
+        var op = ops[k];
+        if (op.type === 'unchanged') {
+          result.push({ type: 'unchanged', oldLine: op.oldLine, newLine: op.newLine, text: originalLines[op.oldLine - 1] });
+        } else if (op.type === 'removed') {
+          result.push({ type: 'removed', oldLine: op.oldLine, newLine: null, text: originalLines[op.oldLine - 1] });
+        } else {
+          result.push({ type: 'added', oldLine: null, newLine: op.newLine, text: modifiedLines[op.newLine - 1] });
+        }
+      }
+      return result;
+    }
+
+    function renderDiff(ops) {
+      if (ops.length === 0) {
+        outputEl.innerHTML = '<div class="diff-empty">No content to compare.</div>';
+        statsEl.innerHTML = '';
+        return;
+      }
+
+      var added = 0, removed = 0, unchanged = 0;
+      var html = '<table class="diff-table">';
+
+      for (var i = 0; i < ops.length; i++) {
+        var op = ops[i];
+        var rowClass = 'diff-row-' + op.type;
+        var marker = '';
+        var oldNum = '';
+        var newNum = '';
+
+        if (op.type === 'added') {
+          marker = '+';
+          newNum = op.newLine;
+          added++;
+        } else if (op.type === 'removed') {
+          marker = '-';
+          oldNum = op.oldLine;
+          removed++;
+        } else {
+          marker = ' ';
+          oldNum = op.oldLine;
+          newNum = op.newLine;
+          unchanged++;
+        }
+
+        html += '<tr class="' + rowClass + '">';
+        html += '<td class="diff-line-num">' + oldNum + '</td>';
+        html += '<td class="diff-line-num">' + newNum + '</td>';
+        html += '<td class="diff-marker">' + marker + '</td>';
+        html += '<td class="diff-content">' + escapeHtml(op.text || '') + '</td>';
+        html += '</tr>';
+      }
+
+      html += '</table>';
+      outputEl.innerHTML = html;
+
+      statsEl.innerHTML =
+        '<span class="diff-stat-added">+ ' + added + ' added</span>' +
+        '<span class="diff-stat-removed">- ' + removed + ' removed</span>' +
+        '<span class="diff-stat-unchanged">' + unchanged + ' unchanged</span>';
+    }
+
+    function doCompare() {
+      var original = originalEl.value;
+      var modified = modifiedEl.value;
+
+      if (!original && !modified) {
+        outputEl.innerHTML = '<div class="diff-empty">Paste text in both panels and click Compare to see differences.</div>';
+        statsEl.innerHTML = '';
+        return;
+      }
+
+      var ops = computeDiff(original, modified);
+
+      // Check if texts are identical (all unchanged)
+      var allUnchanged = ops.every(function (op) { return op.type === 'unchanged'; });
+      if (allUnchanged && original === modified) {
+        outputEl.innerHTML = '<div class="diff-empty" style="color: var(--success);">Texts are identical.</div>';
+        statsEl.innerHTML = '<span class="diff-stat-unchanged">' + ops.length + ' unchanged</span>';
+        return;
+      }
+
+      renderDiff(ops);
+    }
+
+    document.getElementById('btn-compare').addEventListener('click', doCompare);
+
+    document.getElementById('btn-swap').addEventListener('click', function () {
+      var tmp = originalEl.value;
+      originalEl.value = modifiedEl.value;
+      modifiedEl.value = tmp;
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      originalEl.value = '';
+      modifiedEl.value = '';
+      outputEl.innerHTML = '<div class="diff-empty">Paste text in both panels and click Compare to see differences.</div>';
+      statsEl.innerHTML = '';
+      originalEl.focus();
+    });
+
+    bindCtrlEnter(doCompare);
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

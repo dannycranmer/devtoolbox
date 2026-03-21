@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Formatter &amp; Validator — DevToolbox</title>
+  <meta name="description" content="Format, validate, and minify JSON online. Syntax highlighting, tree view, and error reporting with line numbers.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" class="active" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>JSON Formatter &amp; Validator</h1>
+      <p>Paste JSON to format, validate, or minify. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to format</span></p>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="indent-select">Indent:</label>
+        <select id="indent-select" aria-label="Indentation style">
+          <option value="2" selected>2 spaces</option>
+          <option value="4">4 spaces</option>
+          <option value="tab">Tabs</option>
+        </select>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="tree-toggle" aria-label="Toggle tree view">
+        Tree View
+      </label>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <span class="panel-label">Input</span>
+        <textarea id="json-input" placeholder="Paste your JSON here..." aria-label="JSON input" spellcheck="false"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-format" type="button">Format</button>
+          <button class="btn" id="btn-minify" type="button">Minify</button>
+          <button class="btn" id="btn-example" type="button">Load Example</button>
+          <button class="btn" id="btn-clear" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="tool-panel">
+        <span class="panel-label">Output</span>
+        <div id="json-output" class="output-area" aria-label="Formatted JSON output" tabindex="0" role="region"></div>
+        <div class="btn-row">
+          <button class="btn" id="btn-copy" type="button">Copy</button>
+        </div>
+        <div id="json-msg" class="msg" role="status" aria-live="polite"></div>
+        <div class="status-bar" id="json-status"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var input = document.getElementById('json-input');
+    var output = document.getElementById('json-output');
+    var msg = document.getElementById('json-msg');
+    var status = document.getElementById('json-status');
+    var indentSel = document.getElementById('indent-select');
+    var treeToggle = document.getElementById('tree-toggle');
+    var lastParsed = null;
+    var lastFormatted = '';
+
+    function getIndent() {
+      var v = indentSel.value;
+      return v === 'tab' ? '\t' : parseInt(v, 10);
+    }
+
+    function syntaxHighlight(json) {
+      var escaped = escapeHtml(json);
+      return escaped.replace(
+        /("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+        function (match) {
+          var cls = 'syn-num';
+          if (/^"/.test(match)) {
+            cls = /:$/.test(match) ? 'syn-key' : 'syn-str';
+          } else if (/true|false/.test(match)) {
+            cls = 'syn-bool';
+          } else if (/null/.test(match)) {
+            cls = 'syn-null';
+          }
+          return '<span class="' + cls + '">' + match + '</span>';
+        }
+      );
+    }
+
+    function buildTree(data, key) {
+      if (data === null) {
+        return '<span class="tree-null">null</span>';
+      }
+      if (typeof data !== 'object') {
+        if (typeof data === 'string') return '<span class="tree-str">"' + escapeHtml(data) + '"</span>';
+        if (typeof data === 'boolean') return '<span class="tree-bool">' + data + '</span>';
+        return '<span class="tree-num">' + data + '</span>';
+      }
+      var isArr = Array.isArray(data);
+      var entries = isArr ? data : Object.keys(data);
+      var bracket = isArr ? ['[', ']'] : ['{', '}'];
+      if (entries.length === 0) return bracket[0] + bracket[1];
+
+      var html = '<span class="tree-toggle" role="button" tabindex="0" aria-label="Toggle section">' + bracket[0] + '</span>';
+      html += '<div class="tree-node">';
+      var items = isArr ? data : Object.keys(data);
+      for (var i = 0; i < items.length; i++) {
+        var k = isArr ? i : items[i];
+        var v = isArr ? items[i] : data[items[i]];
+        html += '<div>';
+        if (!isArr) html += '<span class="tree-key">"' + escapeHtml(k) + '"</span>: ';
+        html += buildTree(v, k);
+        if (i < items.length - 1) html += ',';
+        html += '</div>';
+      }
+      html += '</div>' + bracket[1];
+      return html;
+    }
+
+    function doFormat() {
+      var raw = input.value.trim();
+      if (!raw) {
+        hideMsg(msg);
+        output.innerHTML = '';
+        status.textContent = '';
+        return;
+      }
+      try {
+        lastParsed = JSON.parse(raw);
+        var indent = getIndent();
+        lastFormatted = JSON.stringify(lastParsed, null, indent);
+
+        if (treeToggle.checked) {
+          output.innerHTML = buildTree(lastParsed);
+          bindTreeToggles();
+        } else {
+          output.innerHTML = syntaxHighlight(lastFormatted);
+        }
+        showMsg(msg, 'success', 'Valid JSON');
+        var bytes = new Blob([lastFormatted]).size;
+        status.textContent = lastFormatted.length + ' chars \u00B7 ' + formatBytes(bytes);
+      } catch (e) {
+        lastFormatted = '';
+        output.textContent = '';
+        var errMsg = e.message;
+        // Try to extract position info
+        var posMatch = errMsg.match(/position\s+(\d+)/i);
+        if (posMatch) {
+          var pos = parseInt(posMatch[1], 10);
+          var upToPos = raw.substring(0, pos);
+          var line = (upToPos.match(/\n/g) || []).length + 1;
+          errMsg += ' (line ' + line + ')';
+        }
+        showMsg(msg, 'error', 'Invalid JSON: ' + errMsg);
+        status.textContent = '';
+      }
+    }
+
+    function doMinify() {
+      var raw = input.value.trim();
+      if (!raw) return;
+      try {
+        var parsed = JSON.parse(raw);
+        lastFormatted = JSON.stringify(parsed);
+        output.textContent = lastFormatted;
+        showMsg(msg, 'success', 'Minified');
+        var bytes = new Blob([lastFormatted]).size;
+        status.textContent = lastFormatted.length + ' chars \u00B7 ' + formatBytes(bytes);
+      } catch (e) {
+        showMsg(msg, 'error', 'Invalid JSON: ' + e.message);
+      }
+    }
+
+    function bindTreeToggles() {
+      output.querySelectorAll('.tree-toggle').forEach(function (el) {
+        el.addEventListener('click', function () {
+          this.classList.toggle('collapsed');
+          var node = this.nextElementSibling;
+          if (node) node.style.display = node.style.display === 'none' ? '' : 'none';
+        });
+        el.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); }
+        });
+      });
+    }
+
+    document.getElementById('btn-format').addEventListener('click', doFormat);
+    document.getElementById('btn-minify').addEventListener('click', doMinify);
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      input.value = '';
+      output.innerHTML = '';
+      hideMsg(msg);
+      status.textContent = '';
+      lastFormatted = '';
+      input.focus();
+    });
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      var text = lastFormatted || output.textContent;
+      if (text) copyToClipboard(text, this);
+    });
+    document.getElementById('btn-example').addEventListener('click', function () {
+      input.value = JSON.stringify({
+        "name": "DevToolbox",
+        "version": "1.0.0",
+        "description": "Free developer tools",
+        "features": ["JSON Formatter", "Base64", "JWT Decoder", "Regex Tester"],
+        "config": { "darkMode": true, "offline": true },
+        "stats": { "tools": 4, "price": 0, "tracking": null },
+        "open_source": false
+      }, null, 2);
+      doFormat();
+    });
+
+    treeToggle.addEventListener('change', function () {
+      if (lastParsed !== null) doFormat();
+    });
+    indentSel.addEventListener('change', function () {
+      if (lastParsed !== null && !treeToggle.checked) doFormat();
+    });
+
+    bindCtrlEnter(doFormat);
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

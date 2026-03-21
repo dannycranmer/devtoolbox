@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64 Encoder/Decoder — DevToolbox</title>
+  <meta name="description" content="Encode and decode Base64 strings online. URL-safe variant, file upload support. 100% client-side.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" class="active" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Base64 Encoder / Decoder</h1>
+      <p>Encode text or files to Base64, or decode Base64 strings. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to process</span></p>
+    </div>
+
+    <div class="controls">
+      <div class="tab-row">
+        <button class="tab-btn active" data-mode="encode" type="button">Encode</button>
+        <button class="tab-btn" data-mode="decode" type="button">Decode</button>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="url-safe" aria-label="URL-safe Base64">
+        URL-safe
+      </label>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <span class="panel-label" id="input-label">Text Input</span>
+        <textarea id="b64-input" placeholder="Enter text to encode..." aria-labelledby="input-label" spellcheck="false"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-process" type="button">Encode</button>
+          <button class="btn" id="btn-example" type="button">Load Example</button>
+          <button class="btn" id="btn-clear" type="button">Clear</button>
+        </div>
+
+        <div class="drop-zone" id="drop-zone" role="button" tabindex="0" aria-label="Drag and drop a file to convert to Base64">
+          <p>Drag &amp; drop a file here, or click to select</p>
+          <p style="font-size:0.75rem;margin-top:0.375rem;color:var(--text-muted)">File will be converted to Base64</p>
+          <input type="file" id="file-input" aria-label="File upload">
+        </div>
+      </div>
+
+      <div class="tool-panel">
+        <span class="panel-label">Output</span>
+        <textarea id="b64-output" readonly placeholder="Result will appear here..." aria-label="Base64 output" spellcheck="false"></textarea>
+        <div class="btn-row">
+          <button class="btn" id="btn-copy" type="button">Copy</button>
+        </div>
+        <div id="b64-msg" class="msg" role="status" aria-live="polite"></div>
+        <div class="status-bar" id="b64-status"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var input = document.getElementById('b64-input');
+    var output = document.getElementById('b64-output');
+    var msg = document.getElementById('b64-msg');
+    var statusEl = document.getElementById('b64-status');
+    var inputLabel = document.getElementById('input-label');
+    var urlSafe = document.getElementById('url-safe');
+    var dropZone = document.getElementById('drop-zone');
+    var fileInput = document.getElementById('file-input');
+    var btnProcess = document.getElementById('btn-process');
+    var tabs = document.querySelectorAll('.tab-btn');
+    var mode = 'encode';
+
+    function isBase64(str) {
+      if (str.length < 4) return false;
+      return /^[A-Za-z0-9+/\-_=\s]+$/.test(str) && str.length % 4 <= 1;
+    }
+
+    function toUrlSafe(b64) {
+      return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function fromUrlSafe(b64) {
+      var s = b64.replace(/-/g, '+').replace(/_/g, '/');
+      while (s.length % 4) s += '=';
+      return s;
+    }
+
+    function setMode(m) {
+      mode = m;
+      tabs.forEach(function (t) {
+        t.classList.toggle('active', t.dataset.mode === m);
+      });
+      if (m === 'encode') {
+        inputLabel.textContent = 'Text Input';
+        input.placeholder = 'Enter text to encode...';
+        btnProcess.textContent = 'Encode';
+      } else {
+        inputLabel.textContent = 'Base64 Input';
+        input.placeholder = 'Paste Base64 to decode...';
+        btnProcess.textContent = 'Decode';
+      }
+    }
+
+    function doProcess() {
+      var raw = input.value;
+      if (!raw.trim()) {
+        hideMsg(msg);
+        output.value = '';
+        statusEl.textContent = '';
+        return;
+      }
+      try {
+        var result;
+        if (mode === 'encode') {
+          // Text to Base64
+          var encoded = btoa(unescape(encodeURIComponent(raw)));
+          result = urlSafe.checked ? toUrlSafe(encoded) : encoded;
+          showMsg(msg, 'success', 'Encoded successfully');
+        } else {
+          // Base64 to text
+          var b64 = urlSafe.checked ? fromUrlSafe(raw.trim()) : raw.trim();
+          result = decodeURIComponent(escape(atob(b64)));
+          showMsg(msg, 'success', 'Decoded successfully');
+        }
+        output.value = result;
+        statusEl.textContent = 'Input: ' + raw.length + ' chars \u00B7 Output: ' + result.length + ' chars';
+      } catch (e) {
+        output.value = '';
+        showMsg(msg, 'error', 'Error: ' + (mode === 'decode' ? 'Invalid Base64 string' : e.message));
+        statusEl.textContent = '';
+      }
+    }
+
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        setMode(this.dataset.mode);
+      });
+    });
+
+    // Auto-detect on paste
+    input.addEventListener('paste', function () {
+      setTimeout(function () {
+        var val = input.value.trim();
+        if (val && isBase64(val) && val.length > 10) {
+          setMode('decode');
+        }
+      }, 50);
+    });
+
+    btnProcess.addEventListener('click', doProcess);
+
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      input.value = '';
+      output.value = '';
+      hideMsg(msg);
+      statusEl.textContent = '';
+      input.focus();
+    });
+
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (output.value) copyToClipboard(output.value, this);
+    });
+
+    document.getElementById('btn-example').addEventListener('click', function () {
+      if (mode === 'encode') {
+        input.value = '{"user":"developer","tool":"DevToolbox","message":"Hello, World!"}';
+      } else {
+        input.value = 'eyJ1c2VyIjoiZGV2ZWxvcGVyIiwidG9vbCI6IkRldlRvb2xib3giLCJtZXNzYWdlIjoiSGVsbG8sIFdvcmxkISJ9';
+      }
+      doProcess();
+    });
+
+    // File drag & drop
+    dropZone.addEventListener('click', function () { fileInput.click(); });
+    dropZone.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+    });
+
+    dropZone.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      this.classList.add('drag-over');
+    });
+    dropZone.addEventListener('dragleave', function () {
+      this.classList.remove('drag-over');
+    });
+    dropZone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', function () {
+      if (this.files.length) handleFile(this.files[0]);
+    });
+
+    function handleFile(file) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var b64 = reader.result.split(',')[1] || '';
+        output.value = urlSafe.checked ? toUrlSafe(b64) : b64;
+        setMode('encode');
+        input.value = '[File: ' + file.name + ' (' + formatBytes(file.size) + ')]';
+        showMsg(msg, 'success', 'File encoded: ' + file.name);
+        statusEl.textContent = 'File: ' + formatBytes(file.size) + ' \u00B7 Base64: ' + output.value.length + ' chars';
+      };
+      reader.onerror = function () {
+        showMsg(msg, 'error', 'Failed to read file');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    bindCtrlEnter(doProcess);
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

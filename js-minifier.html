@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript Minifier &amp; Beautifier Online Free &mdash; DevToolbox</title>
+  <meta name="description" content="Minify or beautify JavaScript instantly. See size reduction percentage, copy to clipboard. Free, private, no tracking — runs entirely in your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .js-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 0.5rem;
+    }
+    .js-stats .reduction {
+      color: var(--success);
+      font-weight: 600;
+    }
+    .js-stats .increase {
+      color: var(--warning);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" class="active" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>JavaScript Minifier &amp; Beautifier</h1>
+      <p>Paste JavaScript to minify or beautify with one click. See size reduction stats. <span class="shortcut-hint"><kbd class="kbd">Ctrl+Enter</kbd> to minify</span></p>
+    </div>
+
+    <div class="btn-row" style="margin-bottom: 0.75rem;">
+      <button class="btn btn-primary" id="btn-minify" type="button">Minify</button>
+      <button class="btn" id="btn-beautify" type="button">Beautify</button>
+      <button class="btn" id="btn-copy" type="button">Copy</button>
+      <button class="btn" id="btn-example" type="button">Example</button>
+      <button class="btn" id="btn-clear" type="button">Clear</button>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <span class="panel-label">Input</span>
+        <textarea id="js-input" placeholder="Paste your JavaScript here..." aria-label="JavaScript input"></textarea>
+      </div>
+      <div class="tool-panel">
+        <span class="panel-label">Output</span>
+        <textarea id="js-output" readonly placeholder="Minified or beautified JavaScript will appear here..." aria-label="JavaScript output"></textarea>
+      </div>
+    </div>
+
+    <div id="js-stats" class="js-stats"></div>
+    <div id="js-msg" class="msg" style="margin-top: 0.5rem;"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var inputEl = document.getElementById('js-input');
+    var outputEl = document.getElementById('js-output');
+    var statsEl = document.getElementById('js-stats');
+    var msgEl = document.getElementById('js-msg');
+
+    var EXAMPLE_JS = '// User authentication module\nfunction authenticateUser(username, password) {\n  const users = getUsers();\n\n  // Find matching user\n  const user = users.find(function (u) {\n    return u.username === username;\n  });\n\n  if (!user) {\n    console.error("User not found:", username);\n    return { success: false, error: "Invalid credentials" };\n  }\n\n  // Verify password hash\n  const isValid = bcrypt.compareSync(password, user.passwordHash);\n\n  if (isValid) {\n    const token = generateToken({\n      id: user.id,\n      role: user.role,\n      exp: Date.now() + 86400000\n    });\n\n    return {\n      success: true,\n      token: token,\n      user: {\n        id: user.id,\n        username: user.username,\n        role: user.role\n      }\n    };\n  } else {\n    return { success: false, error: "Invalid credentials" };\n  }\n}\n\n// Rate limiter middleware\nconst rateLimiter = (function () {\n  const requests = {};\n  const MAX_REQUESTS = 100;\n  const WINDOW_MS = 60000;\n\n  return function (req, res, next) {\n    const ip = req.ip || req.connection.remoteAddress;\n    const now = Date.now();\n\n    if (!requests[ip]) {\n      requests[ip] = [];\n    }\n\n    // Clean old entries\n    requests[ip] = requests[ip].filter(function (time) {\n      return now - time < WINDOW_MS;\n    });\n\n    if (requests[ip].length >= MAX_REQUESTS) {\n      res.status(429).json({\n        error: "Too many requests",\n        retryAfter: Math.ceil(WINDOW_MS / 1000)\n      });\n      return;\n    }\n\n    requests[ip].push(now);\n    next();\n  };\n})();\n\nmodule.exports = { authenticateUser, rateLimiter };';
+
+    // ---- Minifier ----
+    function minifyJS(code) {
+      var result = '';
+      var i = 0;
+      var len = code.length;
+      var inSingleQuote = false;
+      var inDoubleQuote = false;
+      var inTemplate = false;
+      var inLineComment = false;
+      var inBlockComment = false;
+      var inRegex = false;
+      var lastNonSpace = '';
+      var prevChar = '';
+
+      while (i < len) {
+        var ch = code[i];
+        var next = i + 1 < len ? code[i + 1] : '';
+
+        // Line comment
+        if (!inSingleQuote && !inDoubleQuote && !inTemplate && !inBlockComment && !inRegex && ch === '/' && next === '/') {
+          inLineComment = true;
+          i += 2;
+          continue;
+        }
+        if (inLineComment) {
+          if (ch === '\n') {
+            inLineComment = false;
+            // Emit newline only if needed for ASI
+            if (needsNewline(lastNonSpace)) {
+              result += '\n';
+            }
+          }
+          i++;
+          continue;
+        }
+
+        // Block comment
+        if (!inSingleQuote && !inDoubleQuote && !inTemplate && !inRegex && ch === '/' && next === '*') {
+          inBlockComment = true;
+          i += 2;
+          continue;
+        }
+        if (inBlockComment) {
+          if (ch === '*' && next === '/') {
+            inBlockComment = false;
+            i += 2;
+          } else {
+            i++;
+          }
+          continue;
+        }
+
+        // Single-quoted string
+        if (!inDoubleQuote && !inTemplate && !inRegex && ch === "'") {
+          if (!inSingleQuote) {
+            inSingleQuote = true;
+            result += ch;
+            prevChar = ch;
+            i++;
+            continue;
+          } else {
+            result += ch;
+            prevChar = ch;
+            inSingleQuote = false;
+            lastNonSpace = ch;
+            i++;
+            continue;
+          }
+        }
+        if (inSingleQuote) {
+          result += ch;
+          if (ch === '\\') {
+            i++;
+            if (i < len) { result += code[i]; prevChar = code[i]; }
+            i++;
+            continue;
+          }
+          prevChar = ch;
+          i++;
+          continue;
+        }
+
+        // Double-quoted string
+        if (!inSingleQuote && !inTemplate && !inRegex && ch === '"') {
+          if (!inDoubleQuote) {
+            inDoubleQuote = true;
+            result += ch;
+            prevChar = ch;
+            i++;
+            continue;
+          } else {
+            result += ch;
+            prevChar = ch;
+            inDoubleQuote = false;
+            lastNonSpace = ch;
+            i++;
+            continue;
+          }
+        }
+        if (inDoubleQuote) {
+          result += ch;
+          if (ch === '\\') {
+            i++;
+            if (i < len) { result += code[i]; prevChar = code[i]; }
+            i++;
+            continue;
+          }
+          prevChar = ch;
+          i++;
+          continue;
+        }
+
+        // Template literal
+        if (!inSingleQuote && !inDoubleQuote && !inRegex && ch === '`') {
+          inTemplate = !inTemplate;
+          result += ch;
+          prevChar = ch;
+          if (!inTemplate) lastNonSpace = ch;
+          i++;
+          continue;
+        }
+        if (inTemplate) {
+          result += ch;
+          if (ch === '\\') {
+            i++;
+            if (i < len) { result += code[i]; prevChar = code[i]; }
+            i++;
+            continue;
+          }
+          prevChar = ch;
+          i++;
+          continue;
+        }
+
+        // Regex literal (basic detection)
+        if (!inSingleQuote && !inDoubleQuote && !inTemplate && ch === '/' && canStartRegex(lastNonSpace)) {
+          inRegex = true;
+          result += ch;
+          prevChar = ch;
+          i++;
+          continue;
+        }
+        if (inRegex) {
+          result += ch;
+          if (ch === '\\') {
+            i++;
+            if (i < len) { result += code[i]; prevChar = code[i]; }
+            i++;
+            continue;
+          }
+          if (ch === '/') {
+            inRegex = false;
+            lastNonSpace = ch;
+            // consume regex flags
+            i++;
+            while (i < len && /[gimsuy]/.test(code[i])) {
+              result += code[i];
+              prevChar = code[i];
+              lastNonSpace = code[i];
+              i++;
+            }
+            continue;
+          }
+          prevChar = ch;
+          i++;
+          continue;
+        }
+
+        // Whitespace
+        if (ch === ' ' || ch === '\t') {
+          // Keep a single space only when needed between identifiers/keywords
+          if (result.length > 0 && needsSpaceBetween(lastNonSpace, peekNextNonSpace(code, i + 1))) {
+            result += ' ';
+          }
+          i++;
+          continue;
+        }
+
+        // Newlines
+        if (ch === '\n' || ch === '\r') {
+          if (ch === '\r' && next === '\n') i++;
+          // Only emit newline for ASI safety
+          if (needsNewline(lastNonSpace)) {
+            // Check if next non-space char could cause ASI issues
+            var nextNS = peekNextNonSpace(code, i + 1);
+            if (nextNS && !isOperatorStart(nextNS) && nextNS !== '}' && nextNS !== ')' && nextNS !== ']' && nextNS !== ',' && nextNS !== ';' && nextNS !== ':' && nextNS !== '.' && nextNS !== '?') {
+              result += '\n';
+            }
+          }
+          i++;
+          continue;
+        }
+
+        // Normal characters
+        result += ch;
+        prevChar = ch;
+        lastNonSpace = ch;
+        i++;
+      }
+
+      // Collapse multiple newlines
+      result = result.replace(/\n{2,}/g, '\n');
+      return result.trim();
+    }
+
+    function needsNewline(lastChar) {
+      // Characters that could be the end of a statement
+      return /[a-zA-Z0-9_$\)\]\+\-'">`]/.test(lastChar);
+    }
+
+    function needsSpaceBetween(left, right) {
+      if (!left || !right) return false;
+      var identChar = /[a-zA-Z0-9_$]/;
+      // Space needed between two identifier characters
+      if (identChar.test(left) && identChar.test(right)) return true;
+      // Keywords that need space before certain tokens
+      return false;
+    }
+
+    function peekNextNonSpace(code, start) {
+      for (var j = start; j < code.length; j++) {
+        var c = code[j];
+        if (c !== ' ' && c !== '\t' && c !== '\n' && c !== '\r') return c;
+      }
+      return '';
+    }
+
+    function isOperatorStart(ch) {
+      return /[+\-*/%=<>&|^!~?:,;.({[]/.test(ch);
+    }
+
+    function canStartRegex(lastNonSpace) {
+      if (!lastNonSpace) return true;
+      // After these characters, / starts a regex, not division
+      return /[=(:,;[!&|?{}>~^%*/+\-]/.test(lastNonSpace) || lastNonSpace === '\n';
+    }
+
+    // ---- Beautifier ----
+    function beautifyJS(code) {
+      // Tokenize and reformat
+      var tokens = tokenize(code);
+      if (tokens.length === 0) return '';
+
+      var output = '';
+      var indent = 0;
+      var newlinePending = false;
+      var spacePending = false;
+
+      for (var i = 0; i < tokens.length; i++) {
+        var tok = tokens[i];
+        var prev = i > 0 ? tokens[i - 1] : null;
+        var nextTok = i + 1 < tokens.length ? tokens[i + 1] : null;
+
+        // Skip whitespace tokens (we control our own spacing)
+        if (tok.type === 'whitespace') continue;
+        if (tok.type === 'newline') {
+          newlinePending = true;
+          continue;
+        }
+
+        // Opening brace
+        if (tok.value === '{') {
+          output += ' {\n';
+          indent++;
+          output += makeIndent(indent);
+          newlinePending = false;
+          spacePending = false;
+          continue;
+        }
+
+        // Closing brace
+        if (tok.value === '}') {
+          output = output.replace(/[ \t]+$/, '');
+          if (output.charAt(output.length - 1) !== '\n') output += '\n';
+          indent = Math.max(0, indent - 1);
+          output += makeIndent(indent) + '}';
+          // Add newline after } unless followed by else/catch/finally/while or punctuation
+          if (nextTok && (nextTok.value === 'else' || nextTok.value === 'catch' || nextTok.value === 'finally' || nextTok.value === 'while')) {
+            spacePending = true;
+          } else {
+            output += '\n';
+            if (indent === 0 && nextTok && nextTok.value !== '}' && nextTok.value !== ')' && nextTok.value !== ';') {
+              output += '\n';
+            }
+            newlinePending = false;
+            if (nextTok && nextTok.value !== '}') output += makeIndent(indent);
+          }
+          spacePending = false;
+          continue;
+        }
+
+        // Semicolon
+        if (tok.value === ';') {
+          output += ';';
+          if (nextTok && nextTok.value !== '}') {
+            output += '\n' + makeIndent(indent);
+          }
+          newlinePending = false;
+          spacePending = false;
+          continue;
+        }
+
+        // Handle pending newlines/spaces
+        if (newlinePending) {
+          var lastLine = output.substring(output.lastIndexOf('\n') + 1);
+          if (lastLine.trim().length > 0) {
+            output += '\n' + makeIndent(indent);
+          }
+          newlinePending = false;
+          spacePending = false;
+        } else if (spacePending) {
+          output += ' ';
+          spacePending = false;
+        }
+
+        // Comma
+        if (tok.value === ',') {
+          output += ', ';
+          continue;
+        }
+
+        // Colon
+        if (tok.value === ':') {
+          output += ': ';
+          continue;
+        }
+
+        // Operators that need spaces
+        if (tok.type === 'operator' && /^(===|!==|==|!=|<=|>=|=>|&&|\|\||[+\-*/%]=?|=|<|>|\?|\|\|=|&&=|\?\?=|\?\?)$/.test(tok.value)) {
+          if (prev && prev.type !== 'whitespace' && prev.value !== '(' && prev.value !== '[') {
+            var lastChar = output.charAt(output.length - 1);
+            if (lastChar !== ' ' && lastChar !== '\n') output += ' ';
+          }
+          output += tok.value;
+          spacePending = true;
+          continue;
+        }
+
+        // Parens/brackets
+        if (tok.value === '(' || tok.value === '[') {
+          output += tok.value;
+          continue;
+        }
+        if (tok.value === ')' || tok.value === ']') {
+          output += tok.value;
+          continue;
+        }
+
+        // Keywords that need trailing space
+        if (tok.type === 'word' && /^(var|let|const|function|return|if|else|for|while|do|switch|case|break|continue|throw|new|typeof|instanceof|in|of|class|extends|import|export|from|default|try|catch|finally|yield|await|async|delete|void)$/.test(tok.value)) {
+          output += tok.value;
+          if (nextTok && nextTok.value !== '(' && nextTok.value !== ';' && nextTok.value !== '{') {
+            spacePending = true;
+          }
+          continue;
+        }
+
+        // Default: just output the token
+        output += tok.value;
+        // Check if we need a space after
+        if (tok.type === 'word' && nextTok && (nextTok.type === 'word' || nextTok.type === 'string' || nextTok.type === 'number')) {
+          spacePending = true;
+        }
+      }
+
+      // Clean up
+      output = output.replace(/\n{3,}/g, '\n\n');
+      output = output.replace(/[ \t]+\n/g, '\n');
+      return output.trim();
+    }
+
+    function tokenize(code) {
+      var tokens = [];
+      var i = 0;
+      var len = code.length;
+
+      while (i < len) {
+        var ch = code[i];
+        var next = i + 1 < len ? code[i + 1] : '';
+
+        // Newlines
+        if (ch === '\n') {
+          tokens.push({ type: 'newline', value: '\n' });
+          i++;
+          continue;
+        }
+        if (ch === '\r') {
+          if (next === '\n') i++;
+          tokens.push({ type: 'newline', value: '\n' });
+          i++;
+          continue;
+        }
+
+        // Whitespace
+        if (ch === ' ' || ch === '\t') {
+          var ws = '';
+          while (i < len && (code[i] === ' ' || code[i] === '\t')) { ws += code[i]; i++; }
+          tokens.push({ type: 'whitespace', value: ws });
+          continue;
+        }
+
+        // Line comment
+        if (ch === '/' && next === '/') {
+          var comment = '//';
+          i += 2;
+          while (i < len && code[i] !== '\n') { comment += code[i]; i++; }
+          tokens.push({ type: 'comment', value: comment });
+          continue;
+        }
+
+        // Block comment
+        if (ch === '/' && next === '*') {
+          var bc = '/*';
+          i += 2;
+          while (i < len) {
+            if (code[i] === '*' && i + 1 < len && code[i + 1] === '/') {
+              bc += '*/';
+              i += 2;
+              break;
+            }
+            bc += code[i];
+            i++;
+          }
+          tokens.push({ type: 'comment', value: bc });
+          continue;
+        }
+
+        // Strings
+        if (ch === "'" || ch === '"' || ch === '`') {
+          var quote = ch;
+          var str = ch;
+          i++;
+          while (i < len) {
+            if (code[i] === '\\') {
+              str += code[i] + (i + 1 < len ? code[i + 1] : '');
+              i += 2;
+              continue;
+            }
+            str += code[i];
+            if (code[i] === quote) { i++; break; }
+            i++;
+          }
+          tokens.push({ type: 'string', value: str });
+          continue;
+        }
+
+        // Numbers
+        if (/[0-9]/.test(ch) || (ch === '.' && /[0-9]/.test(next))) {
+          var num = '';
+          if (ch === '0' && (next === 'x' || next === 'X' || next === 'b' || next === 'B' || next === 'o' || next === 'O')) {
+            num += code[i] + code[i + 1];
+            i += 2;
+            while (i < len && /[0-9a-fA-F_]/.test(code[i])) { num += code[i]; i++; }
+          } else {
+            while (i < len && /[0-9._eE]/.test(code[i])) {
+              if ((code[i] === 'e' || code[i] === 'E') && i + 1 < len && (code[i + 1] === '+' || code[i + 1] === '-')) {
+                num += code[i] + code[i + 1];
+                i += 2;
+                continue;
+              }
+              num += code[i];
+              i++;
+            }
+          }
+          if (i < len && /[n]/.test(code[i])) { num += code[i]; i++; } // BigInt
+          tokens.push({ type: 'number', value: num });
+          continue;
+        }
+
+        // Word (identifier/keyword)
+        if (/[a-zA-Z_$]/.test(ch)) {
+          var word = '';
+          while (i < len && /[a-zA-Z0-9_$]/.test(code[i])) { word += code[i]; i++; }
+          tokens.push({ type: 'word', value: word });
+          continue;
+        }
+
+        // Multi-char operators
+        var op3 = code.substring(i, i + 3);
+        var op2 = code.substring(i, i + 2);
+        if (op3 === '===' || op3 === '!==' || op3 === '>>>' || op3 === '**=' || op3 === '>>=' || op3 === '<<=' || op3 === '||=' || op3 === '&&=' || op3 === '??=') {
+          tokens.push({ type: 'operator', value: op3 });
+          i += 3;
+          continue;
+        }
+        if (op2 === '=>' || op2 === '==' || op2 === '!=' || op2 === '<=' || op2 === '>=' || op2 === '&&' || op2 === '||' || op2 === '??' || op2 === '**' || op2 === '+=' || op2 === '-=' || op2 === '*=' || op2 === '/=' || op2 === '%=' || op2 === '>>' || op2 === '<<' || op2 === '++' || op2 === '--' || op2 === '|=' || op2 === '&=' || op2 === '^=') {
+          tokens.push({ type: 'operator', value: op2 });
+          i += 2;
+          continue;
+        }
+
+        // Regex (basic: / after operator context)
+        if (ch === '/') {
+          var lastTok = null;
+          for (var k = tokens.length - 1; k >= 0; k--) {
+            if (tokens[k].type !== 'whitespace' && tokens[k].type !== 'newline') { lastTok = tokens[k]; break; }
+          }
+          if (!lastTok || lastTok.type === 'operator' || lastTok.value === '(' || lastTok.value === '[' || lastTok.value === '{' || lastTok.value === ',' || lastTok.value === ';' || lastTok.value === ':' || lastTok.value === 'return' || lastTok.value === 'case' || lastTok.value === 'typeof' || lastTok.value === 'in' || lastTok.value === 'instanceof' || lastTok.value === 'void' || lastTok.value === 'delete' || lastTok.value === 'throw' || lastTok.value === 'new' || lastTok.value === 'yield' || lastTok.value === 'await') {
+            var rx = '/';
+            i++;
+            while (i < len && code[i] !== '/') {
+              if (code[i] === '\\') { rx += code[i] + (i + 1 < len ? code[i + 1] : ''); i += 2; continue; }
+              if (code[i] === '\n') break;
+              rx += code[i];
+              i++;
+            }
+            if (i < len && code[i] === '/') { rx += '/'; i++; }
+            while (i < len && /[gimsuy]/.test(code[i])) { rx += code[i]; i++; }
+            tokens.push({ type: 'regex', value: rx });
+            continue;
+          }
+          // Otherwise it's a division operator
+          tokens.push({ type: 'operator', value: '/' });
+          i++;
+          continue;
+        }
+
+        // Single-char punctuation/operator
+        tokens.push({ type: /[+\-*%=<>&|^!~?]/.test(ch) ? 'operator' : 'punct', value: ch });
+        i++;
+      }
+
+      return tokens;
+    }
+
+    function makeIndent(level) {
+      var s = '';
+      for (var j = 0; j < level; j++) s += '  ';
+      return s;
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      return (bytes / 1024).toFixed(1) + ' KB';
+    }
+
+    function updateStats(original, result, action) {
+      var origSize = new Blob([original]).size;
+      var resultSize = new Blob([result]).size;
+
+      if (origSize === 0) {
+        statsEl.innerHTML = '';
+        return;
+      }
+
+      var diff = origSize - resultSize;
+      var pct = ((Math.abs(diff) / origSize) * 100).toFixed(1);
+
+      var parts = [];
+      parts.push('Input: ' + formatBytes(origSize));
+      parts.push('Output: ' + formatBytes(resultSize));
+
+      if (action === 'minify' && diff > 0) {
+        parts.push('<span class="reduction">' + pct + '% smaller</span>');
+      } else if (action === 'beautify' && diff < 0) {
+        parts.push('<span class="increase">' + pct + '% larger (formatted)</span>');
+      } else if (diff === 0) {
+        parts.push('No size change');
+      } else if (diff > 0) {
+        parts.push('<span class="reduction">' + pct + '% smaller</span>');
+      } else {
+        parts.push('<span class="increase">' + pct + '% larger</span>');
+      }
+
+      statsEl.innerHTML = parts.join(' &middot; ');
+    }
+
+    function doMinify() {
+      hideMsg(msgEl);
+      var input = inputEl.value;
+      if (!input.trim()) {
+        showMsg(msgEl, 'error', 'Please paste some JavaScript first.');
+        return;
+      }
+      try {
+        var result = minifyJS(input);
+        outputEl.value = result;
+        updateStats(input, result, 'minify');
+      } catch (e) {
+        showMsg(msgEl, 'error', 'Minification error: ' + e.message);
+      }
+    }
+
+    function doBeautify() {
+      hideMsg(msgEl);
+      var input = inputEl.value;
+      if (!input.trim()) {
+        showMsg(msgEl, 'error', 'Please paste some JavaScript first.');
+        return;
+      }
+      try {
+        var result = beautifyJS(input);
+        outputEl.value = result;
+        updateStats(input, result, 'beautify');
+      } catch (e) {
+        showMsg(msgEl, 'error', 'Beautification error: ' + e.message);
+      }
+    }
+
+    // Buttons
+    document.getElementById('btn-minify').addEventListener('click', doMinify);
+    document.getElementById('btn-beautify').addEventListener('click', doBeautify);
+
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (!outputEl.value.trim()) return;
+      copyToClipboard(outputEl.value, this);
+    });
+
+    document.getElementById('btn-example').addEventListener('click', function () {
+      inputEl.value = EXAMPLE_JS;
+      outputEl.value = '';
+      statsEl.innerHTML = '';
+      hideMsg(msgEl);
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      inputEl.value = '';
+      outputEl.value = '';
+      statsEl.innerHTML = '';
+      hideMsg(msgEl);
+    });
+
+    // Ctrl+Enter to minify
+    bindCtrlEnter(doMinify);
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

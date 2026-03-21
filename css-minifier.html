@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Minifier &amp; Beautifier Online Free &mdash; DevToolbox</title>
+  <meta name="description" content="Minify or beautify CSS instantly. See size reduction percentage, copy to clipboard. Free, private, no tracking — runs entirely in your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .css-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 0.5rem;
+    }
+    .css-stats .reduction {
+      color: var(--success);
+      font-weight: 600;
+    }
+    .css-stats .increase {
+      color: var(--warning);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" class="active" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>CSS Minifier &amp; Beautifier</h1>
+      <p>Paste CSS to minify or beautify with one click. See size reduction stats. <span class="shortcut-hint"><kbd class="kbd">Ctrl+Enter</kbd> to minify</span></p>
+    </div>
+
+    <div class="btn-row" style="margin-bottom: 0.75rem;">
+      <button class="btn btn-primary" id="btn-minify" type="button">Minify</button>
+      <button class="btn" id="btn-beautify" type="button">Beautify</button>
+      <button class="btn" id="btn-copy" type="button">Copy</button>
+      <button class="btn" id="btn-example" type="button">Example</button>
+      <button class="btn" id="btn-clear" type="button">Clear</button>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <span class="panel-label">Input</span>
+        <textarea id="css-input" placeholder="Paste your CSS here..." aria-label="CSS input"></textarea>
+      </div>
+      <div class="tool-panel">
+        <span class="panel-label">Output</span>
+        <textarea id="css-output" readonly placeholder="Minified or beautified CSS will appear here..." aria-label="CSS output"></textarea>
+      </div>
+    </div>
+
+    <div id="css-stats" class="css-stats"></div>
+    <div id="css-msg" class="msg" style="margin-top: 0.5rem;"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var inputEl = document.getElementById('css-input');
+    var outputEl = document.getElementById('css-output');
+    var statsEl = document.getElementById('css-stats');
+    var msgEl = document.getElementById('css-msg');
+
+    var EXAMPLE_CSS = '/* Main layout styles */\n.container {\n  display: flex;\n  flex-direction: column;\n  max-width: 1200px;\n  margin: 0 auto;\n  padding: 2rem 1.5rem;\n}\n\n.header {\n  background-color: #1a1a2e;\n  color: #ffffff;\n  padding: 1rem 2rem;\n  border-bottom: 2px solid #16213e;\n}\n\n.header h1 {\n  font-size: 1.75rem;\n  font-weight: 700;\n  letter-spacing: -0.02em;\n}\n\n.nav-links {\n  display: flex;\n  gap: 1rem;\n  list-style: none;\n}\n\n.nav-links a {\n  color: #a3a3a3;\n  text-decoration: none;\n  padding: 0.5rem 0.75rem;\n  border-radius: 4px;\n  transition: color 150ms ease, background 150ms ease;\n}\n\n.nav-links a:hover {\n  color: #ffffff;\n  background: rgba(255, 255, 255, 0.1);\n}\n\n/* Card component */\n.card {\n  background: #111111;\n  border: 1px solid #222222;\n  border-radius: 8px;\n  padding: 1.5rem;\n  margin-bottom: 1rem;\n}\n\n.card:hover {\n  border-color: #0ea5e9;\n  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n}\n\n@media (max-width: 768px) {\n  .container {\n    padding: 1rem;\n  }\n  .nav-links {\n    flex-direction: column;\n    gap: 0.5rem;\n  }\n}';
+
+    function minifyCSS(css) {
+      var result = css;
+      // Remove comments
+      result = result.replace(/\/\*[\s\S]*?\*\//g, '');
+      // Remove newlines and carriage returns
+      result = result.replace(/[\r\n]+/g, '');
+      // Collapse whitespace
+      result = result.replace(/\s+/g, ' ');
+      // Remove space around selectors and braces
+      result = result.replace(/\s*{\s*/g, '{');
+      result = result.replace(/\s*}\s*/g, '}');
+      result = result.replace(/\s*;\s*/g, ';');
+      result = result.replace(/\s*:\s*/g, ':');
+      result = result.replace(/\s*,\s*/g, ',');
+      // Remove trailing semicolons before closing braces
+      result = result.replace(/;}/g, '}');
+      // Remove leading/trailing whitespace
+      result = result.trim();
+      return result;
+    }
+
+    function beautifyCSS(css) {
+      // First minify to normalize
+      var result = minifyCSS(css);
+      if (!result) return '';
+
+      var output = '';
+      var indent = 0;
+      var inString = false;
+      var stringChar = '';
+      var i = 0;
+
+      while (i < result.length) {
+        var ch = result[i];
+
+        // Track strings
+        if (!inString && (ch === '"' || ch === "'")) {
+          inString = true;
+          stringChar = ch;
+          output += ch;
+          i++;
+          continue;
+        }
+        if (inString) {
+          output += ch;
+          if (ch === stringChar && result[i - 1] !== '\\') {
+            inString = false;
+          }
+          i++;
+          continue;
+        }
+
+        if (ch === '{') {
+          // Check for @media or other at-rules
+          output += ' {\n';
+          indent++;
+          output += makeIndent(indent);
+          i++;
+        } else if (ch === '}') {
+          indent--;
+          // Remove trailing whitespace from last line
+          output = output.replace(/[ \t]+$/, '');
+          output += '\n' + makeIndent(indent) + '}\n';
+          if (indent === 0) {
+            output += '\n';
+          } else {
+            output += makeIndent(indent);
+          }
+          i++;
+        } else if (ch === ';') {
+          output += ';\n' + makeIndent(indent);
+          i++;
+        } else if (ch === ':') {
+          output += ': ';
+          i++;
+        } else if (ch === ',') {
+          // Check if we're in a selector (before {) or in a value
+          var beforeBrace = result.indexOf('{', i);
+          var beforeSemicolon = result.indexOf(';', i);
+          var beforeCloseBrace = result.indexOf('}', i);
+          var nextEnd = Math.min(
+            beforeSemicolon === -1 ? Infinity : beforeSemicolon,
+            beforeCloseBrace === -1 ? Infinity : beforeCloseBrace
+          );
+          if (beforeBrace !== -1 && beforeBrace < nextEnd) {
+            // Selector list - new line
+            output += ',\n' + makeIndent(indent);
+          } else {
+            // Value list (e.g., font-family, shorthand)
+            output += ', ';
+          }
+          i++;
+        } else {
+          output += ch;
+          i++;
+        }
+      }
+
+      // Clean up extra blank lines
+      output = output.replace(/\n{3,}/g, '\n\n');
+      output = output.replace(/[ \t]+\n/g, '\n');
+      return output.trim();
+    }
+
+    function makeIndent(level) {
+      var s = '';
+      for (var i = 0; i < level; i++) s += '  ';
+      return s;
+    }
+
+    function updateStats(original, result, action) {
+      var origSize = new Blob([original]).size;
+      var resultSize = new Blob([result]).size;
+
+      if (origSize === 0) {
+        statsEl.innerHTML = '';
+        return;
+      }
+
+      var diff = origSize - resultSize;
+      var pct = ((Math.abs(diff) / origSize) * 100).toFixed(1);
+
+      var parts = [];
+      parts.push('Input: ' + formatBytes(origSize));
+      parts.push('Output: ' + formatBytes(resultSize));
+
+      if (action === 'minify' && diff > 0) {
+        parts.push('<span class="reduction">' + pct + '% smaller</span>');
+      } else if (action === 'beautify' && diff < 0) {
+        parts.push('<span class="increase">' + pct + '% larger (formatted)</span>');
+      } else if (diff === 0) {
+        parts.push('No size change');
+      } else if (diff > 0) {
+        parts.push('<span class="reduction">' + pct + '% smaller</span>');
+      } else {
+        parts.push('<span class="increase">' + pct + '% larger</span>');
+      }
+
+      statsEl.innerHTML = parts.join(' &middot; ');
+    }
+
+    function doMinify() {
+      hideMsg(msgEl);
+      var input = inputEl.value;
+      if (!input.trim()) {
+        showMsg(msgEl, 'error', 'Please paste some CSS first.');
+        return;
+      }
+      var result = minifyCSS(input);
+      outputEl.value = result;
+      updateStats(input, result, 'minify');
+    }
+
+    function doBeautify() {
+      hideMsg(msgEl);
+      var input = inputEl.value;
+      if (!input.trim()) {
+        showMsg(msgEl, 'error', 'Please paste some CSS first.');
+        return;
+      }
+      var result = beautifyCSS(input);
+      outputEl.value = result;
+      updateStats(input, result, 'beautify');
+    }
+
+    // Buttons
+    document.getElementById('btn-minify').addEventListener('click', doMinify);
+    document.getElementById('btn-beautify').addEventListener('click', doBeautify);
+
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (!outputEl.value.trim()) return;
+      copyToClipboard(outputEl.value, this);
+    });
+
+    document.getElementById('btn-example').addEventListener('click', function () {
+      inputEl.value = EXAMPLE_CSS;
+      outputEl.value = '';
+      statsEl.innerHTML = '';
+      hideMsg(msgEl);
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      inputEl.value = '';
+      outputEl.value = '';
+      statsEl.innerHTML = '';
+      hideMsg(msgEl);
+    });
+
+    // Ctrl+Enter to minify
+    bindCtrlEnter(doMinify);
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

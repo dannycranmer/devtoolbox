@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Entity Encoder/Decoder — DevToolbox</title>
+  <meta name="description" content="Encode special characters to HTML entities and decode HTML entities back to text. Named and numeric entities. 100% client-side, free.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" class="active" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>HTML Entity Encoder / Decoder</h1>
+      <p>Encode special characters to HTML entities or decode entities back to text. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to process</span></p>
+    </div>
+
+    <div class="controls">
+      <div class="tab-row">
+        <button class="tab-btn active" data-mode="encode" type="button">Encode</button>
+        <button class="tab-btn" data-mode="decode" type="button">Decode</button>
+      </div>
+      <div class="control-group">
+        <label for="entity-format">Format:</label>
+        <select id="entity-format">
+          <option value="named">Named (&amp;amp;)</option>
+          <option value="decimal">Decimal (&amp;#38;)</option>
+          <option value="hex">Hex (&amp;#x26;)</option>
+        </select>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="encode-all" aria-label="Encode all characters">
+        Encode all characters
+      </label>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <span class="panel-label" id="input-label">Text Input</span>
+        <textarea id="he-input" placeholder="Enter text to encode..." aria-labelledby="input-label" spellcheck="false"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-process" type="button">Encode</button>
+          <button class="btn" id="btn-example" type="button">Load Example</button>
+          <button class="btn" id="btn-clear" type="button">Clear</button>
+        </div>
+      </div>
+
+      <div class="tool-panel">
+        <span class="panel-label">Output</span>
+        <textarea id="he-output" readonly placeholder="Result will appear here..." aria-label="HTML entity output" spellcheck="false"></textarea>
+        <div class="btn-row">
+          <button class="btn" id="btn-copy" type="button">Copy</button>
+        </div>
+        <div id="he-msg" class="msg" role="status" aria-live="polite"></div>
+        <div class="status-bar" id="he-status"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem;">
+      <span class="panel-label">Common HTML Entities Reference</span>
+      <div class="match-results" style="margin-top:0.5rem;max-height:200px;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.8125rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);text-align:left;">
+              <th style="padding:0.375rem 0.75rem;color:var(--text-secondary);">Character</th>
+              <th style="padding:0.375rem 0.75rem;color:var(--text-secondary);">Named</th>
+              <th style="padding:0.375rem 0.75rem;color:var(--text-secondary);">Decimal</th>
+              <th style="padding:0.375rem 0.75rem;color:var(--text-secondary);">Hex</th>
+              <th style="padding:0.375rem 0.75rem;color:var(--text-secondary);">Description</th>
+            </tr>
+          </thead>
+          <tbody id="ref-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var input = document.getElementById('he-input');
+    var output = document.getElementById('he-output');
+    var msg = document.getElementById('he-msg');
+    var statusEl = document.getElementById('he-status');
+    var inputLabel = document.getElementById('input-label');
+    var formatSelect = document.getElementById('entity-format');
+    var encodeAllToggle = document.getElementById('encode-all');
+    var btnProcess = document.getElementById('btn-process');
+    var tabs = document.querySelectorAll('.tab-btn');
+    var mode = 'encode';
+
+    // Named entity mappings (char -> name)
+    var namedEntities = {
+      '&': 'amp', '<': 'lt', '>': 'gt', '"': 'quot', "'": 'apos',
+      '\u00a0': 'nbsp', '\u00a9': 'copy', '\u00ae': 'reg', '\u2122': 'trade',
+      '\u00ab': 'laquo', '\u00bb': 'raquo', '\u2018': 'lsquo', '\u2019': 'rsquo',
+      '\u201c': 'ldquo', '\u201d': 'rdquo', '\u2013': 'ndash', '\u2014': 'mdash',
+      '\u2026': 'hellip', '\u00b7': 'middot', '\u2022': 'bull', '\u00b0': 'deg',
+      '\u00b1': 'plusmn', '\u00d7': 'times', '\u00f7': 'divide', '\u2260': 'ne',
+      '\u2264': 'le', '\u2265': 'ge', '\u221e': 'infin', '\u00bd': 'frac12',
+      '\u00bc': 'frac14', '\u00be': 'frac34', '\u00a2': 'cent', '\u00a3': 'pound',
+      '\u00a5': 'yen', '\u20ac': 'euro', '\u00a7': 'sect', '\u00b6': 'para',
+      '\u2190': 'larr', '\u2192': 'rarr', '\u2191': 'uarr', '\u2193': 'darr',
+      '\u2194': 'harr', '\u2660': 'spades', '\u2663': 'clubs', '\u2665': 'hearts',
+      '\u2666': 'diams'
+    };
+
+    // Reverse mapping (name -> char)
+    var reverseNamed = {};
+    for (var ch in namedEntities) {
+      reverseNamed[namedEntities[ch]] = ch;
+    }
+
+    // Characters that should always be encoded (HTML-significant)
+    var htmlSpecial = {'&': true, '<': true, '>': true, '"': true, "'": true};
+
+    function shouldEncode(ch, encodeAll) {
+      if (htmlSpecial[ch]) return true;
+      if (encodeAll) return ch.charCodeAt(0) > 127 || htmlSpecial[ch];
+      return namedEntities[ch] && !htmlSpecial[ch] ? false : ch.charCodeAt(0) > 127;
+    }
+
+    function encodeChar(ch, format, encodeAll) {
+      if (!encodeAll && !htmlSpecial[ch] && ch.charCodeAt(0) <= 127) return ch;
+      if (encodeAll && ch.charCodeAt(0) <= 127 && !htmlSpecial[ch]) {
+        // Encode all: encode every character
+        if (format === 'named' && namedEntities[ch]) return '&' + namedEntities[ch] + ';';
+        if (format === 'hex') return '&#x' + ch.charCodeAt(0).toString(16) + ';';
+        return '&#' + ch.charCodeAt(0) + ';';
+      }
+
+      if (format === 'named' && namedEntities[ch]) {
+        return '&' + namedEntities[ch] + ';';
+      }
+      var code = ch.charCodeAt(0);
+      // Handle surrogate pairs for characters above BMP
+      if (ch.length > 1) {
+        code = ch.codePointAt(0);
+      }
+      if (format === 'hex') {
+        return '&#x' + code.toString(16) + ';';
+      }
+      return '&#' + code + ';';
+    }
+
+    function encodeText(text, format, encodeAll) {
+      var result = '';
+      var i = 0;
+      while (i < text.length) {
+        var ch = text[i];
+        var code = text.charCodeAt(i);
+        // Handle surrogate pairs
+        if (code >= 0xD800 && code <= 0xDBFF && i + 1 < text.length) {
+          ch = text[i] + text[i + 1];
+          i += 2;
+        } else {
+          i++;
+        }
+
+        if (encodeAll) {
+          result += encodeChar(ch, format, true);
+        } else if (htmlSpecial[ch] || ch.charCodeAt(0) > 127 || (ch.length > 1)) {
+          result += encodeChar(ch, format, false);
+        } else {
+          result += ch;
+        }
+      }
+      return result;
+    }
+
+    function decodeText(text) {
+      // Decode named, decimal, and hex entities
+      return text.replace(/&(#x([0-9a-fA-F]+)|#(\d+)|([a-zA-Z]+));/g, function (match, full, hex, dec, name) {
+        if (hex) {
+          var code = parseInt(hex, 16);
+          try { return String.fromCodePoint(code); } catch(e) { return match; }
+        }
+        if (dec) {
+          var code = parseInt(dec, 10);
+          try { return String.fromCodePoint(code); } catch(e) { return match; }
+        }
+        if (name) {
+          if (reverseNamed[name]) return reverseNamed[name];
+          // Try using the browser's built-in decoder as fallback
+          var el = document.createElement('span');
+          el.innerHTML = match;
+          if (el.textContent !== match) return el.textContent;
+          return match;
+        }
+        return match;
+      });
+    }
+
+    function setMode(m) {
+      mode = m;
+      tabs.forEach(function (t) {
+        t.classList.toggle('active', t.dataset.mode === m);
+      });
+      if (m === 'encode') {
+        inputLabel.textContent = 'Text Input';
+        input.placeholder = 'Enter text to encode...';
+        btnProcess.textContent = 'Encode';
+      } else {
+        inputLabel.textContent = 'HTML Entity Input';
+        input.placeholder = 'Paste HTML entities to decode...';
+        btnProcess.textContent = 'Decode';
+      }
+    }
+
+    function doProcess() {
+      var raw = input.value;
+      if (!raw.trim()) {
+        hideMsg(msg);
+        output.value = '';
+        statusEl.textContent = '';
+        return;
+      }
+      try {
+        var result;
+        var format = formatSelect.value;
+        var encodeAll = encodeAllToggle.checked;
+        if (mode === 'encode') {
+          result = encodeText(raw, format, encodeAll);
+          showMsg(msg, 'success', 'Encoded successfully');
+        } else {
+          result = decodeText(raw);
+          showMsg(msg, 'success', 'Decoded successfully');
+        }
+        output.value = result;
+
+        var entityCount = (result.match(/&[^;]+;/g) || []).length;
+        if (mode === 'encode') {
+          statusEl.textContent = 'Input: ' + raw.length + ' chars \u00B7 Output: ' + result.length + ' chars \u00B7 Entities: ' + entityCount;
+        } else {
+          var inputEntities = (raw.match(/&[^;]+;/g) || []).length;
+          statusEl.textContent = 'Input: ' + raw.length + ' chars (' + inputEntities + ' entities) \u00B7 Output: ' + result.length + ' chars';
+        }
+      } catch (e) {
+        output.value = '';
+        showMsg(msg, 'error', 'Error: ' + e.message);
+        statusEl.textContent = '';
+      }
+    }
+
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        setMode(this.dataset.mode);
+      });
+    });
+
+    // Auto-detect on paste
+    input.addEventListener('paste', function () {
+      setTimeout(function () {
+        var val = input.value.trim();
+        if (val && /&(#x[0-9a-fA-F]+|#\d+|[a-zA-Z]+);/.test(val)) {
+          setMode('decode');
+        }
+      }, 50);
+    });
+
+    btnProcess.addEventListener('click', doProcess);
+
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      input.value = '';
+      output.value = '';
+      hideMsg(msg);
+      statusEl.textContent = '';
+      input.focus();
+    });
+
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (output.value) copyToClipboard(output.value, this);
+    });
+
+    document.getElementById('btn-example').addEventListener('click', function () {
+      if (mode === 'encode') {
+        input.value = '<div class="hello">\n  <p>Price: $5 & tax \u00a9 2026</p>\n  <p>Use &lt;br&gt; for line breaks</p>\n  <p>\u2018Quotes\u2019 & \u201cDouble Quotes\u201d \u2014 em dash \u2013 en dash</p>\n  <p>\u00bd + \u00bc = \u00be | \u00b0F | \u00b1 5%</p>\n</div>';
+      } else {
+        input.value = '&lt;div class=&quot;hello&quot;&gt;\n  &lt;p&gt;Price: $5 &amp; tax &copy; 2026&lt;/p&gt;\n  &lt;p&gt;&lsquo;Quotes&rsquo; &amp; &ldquo;Double Quotes&rdquo; &mdash; em dash &ndash; en dash&lt;/p&gt;\n  &lt;p&gt;&frac12; + &frac14; = &frac34; | &deg;F | &plusmn; 5%&lt;/p&gt;\n&lt;/div&gt;';
+      }
+      doProcess();
+    });
+
+    bindCtrlEnter(doProcess);
+
+    // Build reference table
+    var refData = [
+      ['&', '&amp;', '&#38;', '&#x26;', 'Ampersand'],
+      ['<', '&lt;', '&#60;', '&#x3c;', 'Less than'],
+      ['>', '&gt;', '&#62;', '&#x3e;', 'Greater than'],
+      ['"', '&quot;', '&#34;', '&#x22;', 'Double quote'],
+      ["'", '&apos;', '&#39;', '&#x27;', 'Single quote / apostrophe'],
+      ['\u00a0', '&nbsp;', '&#160;', '&#xa0;', 'Non-breaking space'],
+      ['\u00a9', '&copy;', '&#169;', '&#xa9;', 'Copyright'],
+      ['\u00ae', '&reg;', '&#174;', '&#xae;', 'Registered'],
+      ['\u2122', '&trade;', '&#8482;', '&#x2122;', 'Trademark'],
+      ['\u20ac', '&euro;', '&#8364;', '&#x20ac;', 'Euro sign'],
+      ['\u00a3', '&pound;', '&#163;', '&#xa3;', 'Pound sign'],
+      ['\u00a5', '&yen;', '&#165;', '&#xa5;', 'Yen sign'],
+      ['\u2013', '&ndash;', '&#8211;', '&#x2013;', 'En dash'],
+      ['\u2014', '&mdash;', '&#8212;', '&#x2014;', 'Em dash'],
+      ['\u2018', '&lsquo;', '&#8216;', '&#x2018;', 'Left single quote'],
+      ['\u2019', '&rsquo;', '&#8217;', '&#x2019;', 'Right single quote'],
+      ['\u201c', '&ldquo;', '&#8220;', '&#x201c;', 'Left double quote'],
+      ['\u201d', '&rdquo;', '&#8221;', '&#x201d;', 'Right double quote'],
+      ['\u2026', '&hellip;', '&#8230;', '&#x2026;', 'Ellipsis'],
+      ['\u00b0', '&deg;', '&#176;', '&#xb0;', 'Degree'],
+      ['\u00b1', '&plusmn;', '&#177;', '&#xb1;', 'Plus-minus'],
+      ['\u00d7', '&times;', '&#215;', '&#xd7;', 'Multiplication'],
+      ['\u00f7', '&divide;', '&#247;', '&#xf7;', 'Division'],
+      ['\u00bd', '&frac12;', '&#189;', '&#xbd;', 'One half'],
+      ['\u00bc', '&frac14;', '&#188;', '&#xbc;', 'One quarter'],
+      ['\u00be', '&frac34;', '&#190;', '&#xbe;', 'Three quarters'],
+    ];
+
+    var tbody = document.getElementById('ref-table');
+    refData.forEach(function (row) {
+      var tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid var(--border)';
+      row.forEach(function (cell, i) {
+        var td = document.createElement('td');
+        td.style.padding = '0.375rem 0.75rem';
+        if (i === 0) {
+          td.style.fontSize = '1.125rem';
+          td.textContent = cell;
+        } else if (i < 4) {
+          td.style.fontFamily = 'var(--font-mono)';
+          td.style.fontSize = '0.75rem';
+          td.style.color = 'var(--accent)';
+          td.textContent = cell;
+        } else {
+          td.style.color = 'var(--text-secondary)';
+          td.textContent = cell;
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Editor &amp; Preview Online Free &mdash; DevToolbox</title>
+  <meta name="description" content="Live Markdown editor with side-by-side preview. Write and preview Markdown in real time. Free, private, runs entirely in your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .md-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      min-height: 500px;
+    }
+    .md-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-height: 0;
+    }
+    .md-editor {
+      flex: 1;
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      padding: 1rem;
+      resize: none;
+      line-height: 1.6;
+      tab-size: 2;
+    }
+    .md-editor:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+    .md-preview {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      overflow-y: auto;
+      line-height: 1.7;
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+    }
+    /* Markdown rendered content styles */
+    .md-preview h1 { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.75rem; padding-bottom: 0.375rem; border-bottom: 1px solid var(--border); }
+    .md-preview h2 { font-size: 1.375rem; font-weight: 600; margin: 1.25rem 0 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border); }
+    .md-preview h3 { font-size: 1.125rem; font-weight: 600; margin: 1rem 0 0.375rem; }
+    .md-preview h4 { font-size: 1rem; font-weight: 600; margin: 0.75rem 0 0.25rem; }
+    .md-preview h5, .md-preview h6 { font-size: 0.875rem; font-weight: 600; margin: 0.5rem 0 0.25rem; color: var(--text-secondary); }
+    .md-preview p { margin: 0 0 0.75rem; }
+    .md-preview a { color: var(--accent); text-decoration: underline; }
+    .md-preview a:hover { color: var(--accent-hover); }
+    .md-preview strong { font-weight: 700; }
+    .md-preview em { font-style: italic; }
+    .md-preview code {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.125rem 0.375rem;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: #f87171;
+    }
+    .md-preview pre {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.875rem 1rem;
+      overflow-x: auto;
+      margin: 0 0 0.75rem;
+    }
+    .md-preview pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--text-primary);
+      font-size: 0.8125rem;
+    }
+    .md-preview blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 0 0 0.75rem;
+      padding: 0.375rem 0 0.375rem 1rem;
+      color: var(--text-secondary);
+    }
+    .md-preview blockquote p:last-child { margin-bottom: 0; }
+    .md-preview ul, .md-preview ol {
+      margin: 0 0 0.75rem 1.5rem;
+    }
+    .md-preview li { margin-bottom: 0.25rem; }
+    .md-preview li > ul, .md-preview li > ol { margin-bottom: 0; }
+    .md-preview hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1rem 0;
+    }
+    .md-preview table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 0 0.75rem;
+      font-size: 0.875rem;
+    }
+    .md-preview th, .md-preview td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    .md-preview th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+    }
+    .md-preview img {
+      max-width: 100%;
+      border-radius: var(--radius);
+    }
+    .md-preview input[type="checkbox"] {
+      margin-right: 0.375rem;
+    }
+    .md-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.875rem;
+    }
+    .md-word-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    @media (max-width: 768px) {
+      .md-layout {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .md-editor {
+        min-height: 250px;
+      }
+      .md-preview {
+        min-height: 250px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" class="active" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Markdown Editor &amp; Preview</h1>
+      <p>Write Markdown on the left, see rendered output on the right — live. <span class="shortcut-hint"><kbd class="kbd">Tab</kbd> to indent</span></p>
+    </div>
+
+    <div class="btn-row" style="margin-bottom: 0.75rem;">
+      <button class="btn" id="btn-example" type="button">Example</button>
+      <button class="btn" id="btn-copy-html" type="button">Copy HTML</button>
+      <button class="btn" id="btn-copy-md" type="button">Copy Markdown</button>
+      <button class="btn" id="btn-clear" type="button">Clear</button>
+      <span id="word-count" class="md-word-count"></span>
+    </div>
+
+    <div class="md-layout">
+      <div class="md-panel">
+        <span class="panel-label">Markdown</span>
+        <textarea id="md-input" class="md-editor" placeholder="Type or paste Markdown here..." aria-label="Markdown input" spellcheck="false"></textarea>
+      </div>
+      <div class="md-panel">
+        <span class="panel-label">Preview</span>
+        <div id="md-output" class="md-preview">
+          <p class="md-empty">Start typing to see your Markdown rendered here.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  /**
+   * Minimal Markdown parser — no external dependencies.
+   * Handles: headings, bold, italic, strikethrough, code (inline + fenced),
+   * blockquotes, ordered/unordered lists, links, images, tables, hr, task lists.
+   */
+  (function () {
+    'use strict';
+
+    function parseMd(src) {
+      // Normalize line endings
+      src = src.replace(/\r\n?/g, '\n');
+
+      var html = '';
+      var lines = src.split('\n');
+      var i = 0;
+
+      while (i < lines.length) {
+        var line = lines[i];
+
+        // Fenced code block
+        var fenceMatch = line.match(/^(`{3,}|~{3,})(\S*)/);
+        if (fenceMatch) {
+          var fence = fenceMatch[1];
+          var lang = fenceMatch[2];
+          var code = [];
+          i++;
+          while (i < lines.length && !lines[i].startsWith(fence)) {
+            code.push(lines[i]);
+            i++;
+          }
+          i++; // skip closing fence
+          html += '<pre><code' + (lang ? ' class="language-' + escapeHtml(lang) + '"' : '') + '>' + escapeHtml(code.join('\n')) + '</code></pre>\n';
+          continue;
+        }
+
+        // Blank line
+        if (line.trim() === '') {
+          i++;
+          continue;
+        }
+
+        // Heading
+        var headingMatch = line.match(/^(#{1,6})\s+(.+)/);
+        if (headingMatch) {
+          var level = headingMatch[1].length;
+          html += '<h' + level + '>' + inlineFormat(headingMatch[2]) + '</h' + level + '>\n';
+          i++;
+          continue;
+        }
+
+        // HR
+        if (/^(\*{3,}|-{3,}|_{3,})\s*$/.test(line.trim())) {
+          html += '<hr>\n';
+          i++;
+          continue;
+        }
+
+        // Table
+        if (i + 1 < lines.length && /^\|/.test(line) && /^\|[\s\-:|]+\|/.test(lines[i + 1])) {
+          var tableLines = [];
+          while (i < lines.length && /^\|/.test(lines[i])) {
+            tableLines.push(lines[i]);
+            i++;
+          }
+          html += parseTable(tableLines);
+          continue;
+        }
+
+        // Blockquote
+        if (/^>\s?/.test(line)) {
+          var bqLines = [];
+          while (i < lines.length && /^>\s?/.test(lines[i])) {
+            bqLines.push(lines[i].replace(/^>\s?/, ''));
+            i++;
+          }
+          html += '<blockquote>' + parseMd(bqLines.join('\n')) + '</blockquote>\n';
+          continue;
+        }
+
+        // Unordered list
+        if (/^[\s]*[-*+]\s/.test(line)) {
+          var listItems = [];
+          while (i < lines.length && /^[\s]*[-*+]\s/.test(lines[i])) {
+            listItems.push(lines[i].replace(/^[\s]*[-*+]\s/, ''));
+            i++;
+          }
+          html += '<ul>\n' + listItems.map(function (item) {
+            // Task list
+            var taskMatch = item.match(/^\[([ xX])\]\s*(.*)/);
+            if (taskMatch) {
+              var checked = taskMatch[1] !== ' ' ? ' checked disabled' : ' disabled';
+              return '<li><input type="checkbox"' + checked + '>' + inlineFormat(taskMatch[2]) + '</li>\n';
+            }
+            return '<li>' + inlineFormat(item) + '</li>\n';
+          }).join('') + '</ul>\n';
+          continue;
+        }
+
+        // Ordered list
+        if (/^[\s]*\d+\.\s/.test(line)) {
+          var olItems = [];
+          while (i < lines.length && /^[\s]*\d+\.\s/.test(lines[i])) {
+            olItems.push(lines[i].replace(/^[\s]*\d+\.\s/, ''));
+            i++;
+          }
+          html += '<ol>\n' + olItems.map(function (item) {
+            return '<li>' + inlineFormat(item) + '</li>\n';
+          }).join('') + '</ol>\n';
+          continue;
+        }
+
+        // Paragraph — collect consecutive non-empty, non-special lines
+        var paraLines = [];
+        while (i < lines.length && lines[i].trim() !== '' &&
+               !lines[i].match(/^(#{1,6}\s|```|~~~|>\s?|[-*+]\s|\d+\.\s|(\*{3,}|-{3,}|_{3,})\s*$|\|)/) &&
+               !(lines[i].match(/^(`{3,}|~{3,})/))) {
+          paraLines.push(lines[i]);
+          i++;
+        }
+        if (paraLines.length > 0) {
+          html += '<p>' + inlineFormat(paraLines.join('\n')) + '</p>\n';
+        } else {
+          i++;
+        }
+      }
+
+      return html;
+    }
+
+    function parseTable(tableLines) {
+      if (tableLines.length < 2) return '';
+      var headers = splitTableRow(tableLines[0]);
+      // skip separator row (tableLines[1])
+      var rows = [];
+      for (var r = 2; r < tableLines.length; r++) {
+        rows.push(splitTableRow(tableLines[r]));
+      }
+      var html = '<table><thead><tr>';
+      for (var h = 0; h < headers.length; h++) {
+        html += '<th>' + inlineFormat(headers[h].trim()) + '</th>';
+      }
+      html += '</tr></thead><tbody>';
+      for (var r = 0; r < rows.length; r++) {
+        html += '<tr>';
+        for (var c = 0; c < headers.length; c++) {
+          html += '<td>' + inlineFormat((rows[r][c] || '').trim()) + '</td>';
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>\n';
+      return html;
+    }
+
+    function splitTableRow(line) {
+      return line.replace(/^\||\|$/g, '').split('|');
+    }
+
+    function inlineFormat(text) {
+      // Images: ![alt](url)
+      text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+      // Links: [text](url)
+      text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      // Inline code (must come before bold/italic to prevent conflicts)
+      text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // Bold + italic
+      text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      text = text.replace(/___(.+?)___/g, '<strong><em>$1</em></strong>');
+      // Bold
+      text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/__(.+?)__/g, '<strong>$1</strong>');
+      // Italic
+      text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      text = text.replace(/_(.+?)_/g, '<em>$1</em>');
+      // Strikethrough
+      text = text.replace(/~~(.+?)~~/g, '<del>$1</del>');
+      // Line breaks
+      text = text.replace(/  \n/g, '<br>');
+
+      return text;
+    }
+
+    // --- DOM ---
+    var inputEl = document.getElementById('md-input');
+    var outputEl = document.getElementById('md-output');
+    var wordCountEl = document.getElementById('word-count');
+
+    function updatePreview() {
+      var src = inputEl.value;
+      if (!src.trim()) {
+        outputEl.innerHTML = '<p class="md-empty">Start typing to see your Markdown rendered here.</p>';
+        wordCountEl.textContent = '';
+        return;
+      }
+      outputEl.innerHTML = parseMd(src);
+      // Word count
+      var words = src.trim().split(/\s+/).length;
+      var chars = src.length;
+      wordCountEl.textContent = words + ' word' + (words !== 1 ? 's' : '') + ' · ' + chars + ' char' + (chars !== 1 ? 's' : '');
+    }
+
+    inputEl.addEventListener('input', updatePreview);
+
+    // Tab key inserts spaces
+    inputEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        var start = this.selectionStart;
+        var end = this.selectionEnd;
+        this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+        this.selectionStart = this.selectionEnd = start + 2;
+        updatePreview();
+      }
+    });
+
+    // Example
+    document.getElementById('btn-example').addEventListener('click', function () {
+      inputEl.value = '# Welcome to DevToolbox Markdown\n\nThis is a **live preview** editor. Type on the left, see the result on the right.\n\n## Features\n\n- **Bold**, *italic*, and ~~strikethrough~~\n- [Links](https://devtoolbox.example.com) and images\n- Inline `code` and fenced code blocks\n- Tables, blockquotes, and lists\n\n### Code Example\n\n```javascript\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\nconsole.log(greet("Developer"));\n```\n\n### Task List\n\n- [x] Write Markdown\n- [x] Preview in real time\n- [ ] Ship to production\n\n### Table\n\n| Feature | Status |\n|---------|--------|\n| Headings | Done |\n| Lists | Done |\n| Code blocks | Done |\n| Tables | Done |\n\n> "The best tool is the one that gets out of your way."\n\n---\n\n*Built with DevToolbox — free, fast, private.*';
+      updatePreview();
+    });
+
+    // Copy HTML
+    document.getElementById('btn-copy-html').addEventListener('click', function () {
+      var src = inputEl.value;
+      if (!src.trim()) return;
+      copyToClipboard(parseMd(src), this);
+    });
+
+    // Copy Markdown
+    document.getElementById('btn-copy-md').addEventListener('click', function () {
+      if (!inputEl.value.trim()) return;
+      copyToClipboard(inputEl.value, this);
+    });
+
+    // Clear
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      inputEl.value = '';
+      outputEl.innerHTML = '<p class="md-empty">Start typing to see your Markdown rendered here.</p>';
+      wordCountEl.textContent = '';
+      inputEl.focus();
+    });
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

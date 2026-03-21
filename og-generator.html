@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open Graph Meta Tag Generator Online Free &mdash; DevToolbox</title>
+  <meta name="description" content="Generate Open Graph and Twitter Card meta tags. Live preview for Facebook, Twitter, LinkedIn. Copy all tags with one click. Free, private, no tracking.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .og-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .og-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .og-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .og-field label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+    .og-field input[type="text"],
+    .og-field textarea {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      padding: 0.625rem 0.75rem;
+      transition: border-color var(--transition);
+    }
+    .og-field input:focus,
+    .og-field textarea:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+    .og-field textarea {
+      min-height: 60px;
+      resize: vertical;
+      font-family: var(--font-sans);
+    }
+    .og-field .char-count {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      text-align: right;
+    }
+    .og-field .char-count.warn {
+      color: var(--warning);
+    }
+    .og-field .char-count.over {
+      color: var(--error);
+    }
+    .og-field select {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      padding: 0.625rem 0.75rem;
+    }
+    .preview-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .preview-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--bg-secondary);
+    }
+    .preview-card-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 0.375rem;
+    }
+    /* Facebook-style preview */
+    .fb-preview-image {
+      width: 100%;
+      height: 160px;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      overflow: hidden;
+    }
+    .fb-preview-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .fb-preview-body {
+      padding: 0.75rem;
+    }
+    .fb-preview-domain {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.03em;
+    }
+    .fb-preview-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .fb-preview-desc {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    /* Twitter-style preview */
+    .tw-preview {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--bg-secondary);
+    }
+    .tw-preview.summary-large {
+      flex-direction: column;
+    }
+    .tw-preview-image {
+      width: 130px;
+      min-height: 130px;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .tw-preview.summary-large .tw-preview-image {
+      width: 100%;
+      height: 160px;
+      min-height: 160px;
+    }
+    .tw-preview-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .tw-preview-body {
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+    .tw-preview-domain {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 0.125rem;
+    }
+    .tw-preview-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.125rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tw-preview.summary-large .tw-preview-title {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .tw-preview-desc {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    /* LinkedIn-style preview */
+    .li-preview-image {
+      width: 100%;
+      height: 160px;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      overflow: hidden;
+    }
+    .li-preview-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .li-preview-body {
+      padding: 0.75rem;
+      background: var(--bg-secondary);
+    }
+    .li-preview-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.125rem;
+    }
+    .li-preview-domain {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .code-output {
+      width: 100%;
+      min-height: 180px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      padding: 1rem;
+      line-height: 1.7;
+      resize: vertical;
+    }
+    .code-output:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+    @media (max-width: 768px) {
+      .og-layout {
+        grid-template-columns: 1fr;
+      }
+      .tw-preview:not(.summary-large) .tw-preview-image {
+        width: 100px;
+        min-height: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" class="active" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Open Graph &amp; Meta Tag Generator</h1>
+      <p>Generate OG and Twitter Card meta tags with live social media previews. <span class="shortcut-hint"><kbd class="kbd">Ctrl+Enter</kbd> to copy</span></p>
+    </div>
+
+    <div class="og-layout">
+      <div class="og-form">
+        <div class="og-field">
+          <label for="og-title">Page Title</label>
+          <input type="text" id="og-title" placeholder="My Awesome Page" maxlength="95">
+          <span class="char-count" id="title-count">0 / 60 recommended</span>
+        </div>
+        <div class="og-field">
+          <label for="og-desc">Description</label>
+          <textarea id="og-desc" placeholder="A brief description of your page content..." maxlength="300"></textarea>
+          <span class="char-count" id="desc-count">0 / 155 recommended</span>
+        </div>
+        <div class="og-field">
+          <label for="og-url">Page URL</label>
+          <input type="text" id="og-url" placeholder="https://example.com/my-page">
+        </div>
+        <div class="og-field">
+          <label for="og-image">Image URL</label>
+          <input type="text" id="og-image" placeholder="https://example.com/image.jpg">
+        </div>
+        <div class="og-field">
+          <label for="og-site-name">Site Name</label>
+          <input type="text" id="og-site-name" placeholder="My Website">
+        </div>
+        <div class="og-field">
+          <label for="og-type">OG Type</label>
+          <select id="og-type">
+            <option value="website">website</option>
+            <option value="article">article</option>
+            <option value="product">product</option>
+            <option value="profile">profile</option>
+          </select>
+        </div>
+        <div class="og-field">
+          <label for="tw-card">Twitter Card Type</label>
+          <select id="tw-card">
+            <option value="summary_large_image">summary_large_image</option>
+            <option value="summary">summary</option>
+          </select>
+        </div>
+        <div class="og-field">
+          <label for="tw-handle">Twitter Handle (optional)</label>
+          <input type="text" id="tw-handle" placeholder="@yourusername">
+        </div>
+
+        <div class="control-label" style="margin-top: 0.5rem;">Generated Meta Tags</div>
+        <textarea id="code-output" class="code-output" readonly aria-label="Generated meta tags"></textarea>
+        <div class="btn-row" style="margin-top: 0.5rem;">
+          <button class="btn btn-primary" id="btn-copy" type="button">Copy All Tags</button>
+          <button class="btn" id="btn-example" type="button">Example</button>
+          <button class="btn" id="btn-clear" type="button">Clear</button>
+        </div>
+      </div>
+
+      <div class="preview-section">
+        <div>
+          <div class="preview-card-label">Facebook / Open Graph Preview</div>
+          <div class="preview-card" id="fb-preview">
+            <div class="fb-preview-image" id="fb-image">No image</div>
+            <div class="fb-preview-body">
+              <div class="fb-preview-domain" id="fb-domain">example.com</div>
+              <div class="fb-preview-title" id="fb-title">Page Title</div>
+              <div class="fb-preview-desc" id="fb-desc">Page description will appear here</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="preview-card-label">Twitter Card Preview</div>
+          <div class="tw-preview summary-large" id="tw-preview">
+            <div class="tw-preview-image" id="tw-image">No image</div>
+            <div class="tw-preview-body">
+              <div class="tw-preview-title" id="tw-title">Page Title</div>
+              <div class="tw-preview-desc" id="tw-desc">Page description will appear here</div>
+              <div class="tw-preview-domain" id="tw-domain">example.com</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="preview-card-label">LinkedIn Preview</div>
+          <div class="preview-card" id="li-preview">
+            <div class="li-preview-image" id="li-image">No image</div>
+            <div class="li-preview-body">
+              <div class="li-preview-title" id="li-title">Page Title</div>
+              <div class="li-preview-domain" id="li-domain">example.com</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    // DOM refs
+    var titleEl = document.getElementById('og-title');
+    var descEl = document.getElementById('og-desc');
+    var urlEl = document.getElementById('og-url');
+    var imageEl = document.getElementById('og-image');
+    var siteNameEl = document.getElementById('og-site-name');
+    var typeEl = document.getElementById('og-type');
+    var twCardEl = document.getElementById('tw-card');
+    var twHandleEl = document.getElementById('tw-handle');
+    var outputEl = document.getElementById('code-output');
+    var titleCount = document.getElementById('title-count');
+    var descCount = document.getElementById('desc-count');
+
+    // Preview refs
+    var fbTitle = document.getElementById('fb-title');
+    var fbDesc = document.getElementById('fb-desc');
+    var fbDomain = document.getElementById('fb-domain');
+    var fbImage = document.getElementById('fb-image');
+    var twTitle = document.getElementById('tw-title');
+    var twDesc = document.getElementById('tw-desc');
+    var twDomain = document.getElementById('tw-domain');
+    var twImage = document.getElementById('tw-image');
+    var twPreview = document.getElementById('tw-preview');
+    var liTitle = document.getElementById('li-title');
+    var liDomain = document.getElementById('li-domain');
+    var liImage = document.getElementById('li-image');
+
+    function getDomain(url) {
+      try {
+        return new URL(url).hostname;
+      } catch (e) {
+        return url ? url.replace(/^https?:\/\//, '').split('/')[0] : 'example.com';
+      }
+    }
+
+    function esc(s) {
+      return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function updateCharCount(el, countEl, recommended) {
+      var len = el.value.length;
+      countEl.textContent = len + ' / ' + recommended + ' recommended';
+      if (len > recommended * 1.3) {
+        countEl.className = 'char-count over';
+      } else if (len > recommended) {
+        countEl.className = 'char-count warn';
+      } else {
+        countEl.className = 'char-count';
+      }
+    }
+
+    function setImagePreview(container, url) {
+      if (url && url.trim()) {
+        var img = document.createElement('img');
+        img.src = url;
+        img.alt = 'Preview';
+        img.onerror = function () {
+          container.innerHTML = '';
+          container.textContent = 'Image failed to load';
+        };
+        container.innerHTML = '';
+        container.appendChild(img);
+      } else {
+        container.innerHTML = '';
+        container.textContent = 'No image';
+      }
+    }
+
+    function update() {
+      var title = titleEl.value.trim();
+      var desc = descEl.value.trim();
+      var url = urlEl.value.trim();
+      var image = imageEl.value.trim();
+      var siteName = siteNameEl.value.trim();
+      var type = typeEl.value;
+      var twCard = twCardEl.value;
+      var twHandle = twHandleEl.value.trim();
+      var domain = getDomain(url);
+
+      // Update previews
+      fbTitle.textContent = title || 'Page Title';
+      fbDesc.textContent = desc || 'Page description will appear here';
+      fbDomain.textContent = domain;
+      setImagePreview(fbImage, image);
+
+      twTitle.textContent = title || 'Page Title';
+      twDesc.textContent = desc || 'Page description will appear here';
+      twDomain.textContent = domain;
+      setImagePreview(twImage, image);
+      twPreview.className = 'tw-preview' + (twCard === 'summary_large_image' ? ' summary-large' : '');
+
+      liTitle.textContent = title || 'Page Title';
+      liDomain.textContent = domain;
+      setImagePreview(liImage, image);
+
+      // Generate meta tags
+      var tags = [];
+      tags.push('<!-- Primary Meta Tags -->');
+      if (title) tags.push('<title>' + esc(title) + '</title>');
+      if (title) tags.push('<meta name="title" content="' + esc(title) + '">');
+      if (desc) tags.push('<meta name="description" content="' + esc(desc) + '">');
+
+      tags.push('');
+      tags.push('<!-- Open Graph / Facebook -->');
+      tags.push('<meta property="og:type" content="' + type + '">');
+      if (url) tags.push('<meta property="og:url" content="' + esc(url) + '">');
+      if (title) tags.push('<meta property="og:title" content="' + esc(title) + '">');
+      if (desc) tags.push('<meta property="og:description" content="' + esc(desc) + '">');
+      if (image) tags.push('<meta property="og:image" content="' + esc(image) + '">');
+      if (siteName) tags.push('<meta property="og:site_name" content="' + esc(siteName) + '">');
+
+      tags.push('');
+      tags.push('<!-- Twitter -->');
+      tags.push('<meta property="twitter:card" content="' + twCard + '">');
+      if (url) tags.push('<meta property="twitter:url" content="' + esc(url) + '">');
+      if (title) tags.push('<meta property="twitter:title" content="' + esc(title) + '">');
+      if (desc) tags.push('<meta property="twitter:description" content="' + esc(desc) + '">');
+      if (image) tags.push('<meta property="twitter:image" content="' + esc(image) + '">');
+      if (twHandle) tags.push('<meta property="twitter:site" content="' + esc(twHandle) + '">');
+
+      outputEl.value = tags.join('\n');
+
+      // Char counts
+      updateCharCount(titleEl, titleCount, 60);
+      updateCharCount(descEl, descCount, 155);
+    }
+
+    // Attach listeners to all inputs
+    [titleEl, descEl, urlEl, imageEl, siteNameEl, typeEl, twCardEl, twHandleEl].forEach(function (el) {
+      el.addEventListener('input', update);
+      el.addEventListener('change', update);
+    });
+
+    // Copy
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (!outputEl.value.trim()) return;
+      copyToClipboard(outputEl.value, this);
+    });
+
+    // Example
+    document.getElementById('btn-example').addEventListener('click', function () {
+      titleEl.value = 'DevToolbox — Free Online Developer Tools';
+      descEl.value = 'Fast, free, privacy-first developer utilities. JSON formatter, Base64 encoder, JWT decoder, and more. No ads, no tracking.';
+      urlEl.value = 'https://dannycranmer.github.io/devtoolbox/';
+      imageEl.value = 'https://dannycranmer.github.io/devtoolbox/icon.png';
+      siteNameEl.value = 'DevToolbox';
+      typeEl.value = 'website';
+      twCardEl.value = 'summary_large_image';
+      twHandleEl.value = '';
+      update();
+    });
+
+    // Clear
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      titleEl.value = '';
+      descEl.value = '';
+      urlEl.value = '';
+      imageEl.value = '';
+      siteNameEl.value = '';
+      typeEl.value = 'website';
+      twCardEl.value = 'summary_large_image';
+      twHandleEl.value = '';
+      update();
+    });
+
+    // Ctrl+Enter to copy
+    bindCtrlEnter(function () {
+      copyToClipboard(outputEl.value, document.getElementById('btn-copy'));
+    });
+
+    // Init
+    update();
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

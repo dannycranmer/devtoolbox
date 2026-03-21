@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unix Timestamp Converter — DevToolbox</title>
+  <meta name="description" content="Convert between Unix epoch timestamps and human-readable dates. Supports seconds and milliseconds. Live clock with UTC and local time. Free, private, runs in your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .ts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .ts-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .ts-panel h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+    .ts-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+      margin-bottom: 1rem;
+    }
+    .ts-field:last-child {
+      margin-bottom: 0;
+    }
+    .ts-field label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+    .ts-field-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .ts-field-row input[type="text"] {
+      flex: 1;
+    }
+    .live-clock {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .clock-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .clock-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+    .clock-value {
+      font-family: var(--font-mono);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .clock-value.secondary {
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+    }
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .result-table td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .result-table td:first-child {
+      color: var(--text-secondary);
+      font-weight: 500;
+      white-space: nowrap;
+      width: 140px;
+    }
+    .result-table td:last-child {
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+    }
+    .result-table tr:last-child td {
+      border-bottom: none;
+    }
+    .unit-toggle {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .unit-btn {
+      padding: 0.375rem 0.75rem;
+      font-family: var(--font-sans);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      background: var(--bg-tertiary);
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .unit-btn.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+    .quick-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+      margin-top: 0.75rem;
+    }
+    @media (max-width: 768px) {
+      .ts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" class="active" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Unix Timestamp Converter</h1>
+      <p>Convert between Unix epoch timestamps and human-readable dates. Live clock with UTC and local time.</p>
+    </div>
+
+    <div class="live-clock" id="liveClock">
+      <div class="clock-item">
+        <span class="clock-label">Current Unix (seconds)</span>
+        <span class="clock-value" id="clockUnix">—</span>
+      </div>
+      <div class="clock-item">
+        <span class="clock-label">UTC</span>
+        <span class="clock-value secondary" id="clockUTC">—</span>
+      </div>
+      <div class="clock-item">
+        <span class="clock-label">Local</span>
+        <span class="clock-value secondary" id="clockLocal">—</span>
+      </div>
+    </div>
+
+    <div class="ts-grid">
+      <div class="ts-panel">
+        <h2>Timestamp &rarr; Date</h2>
+        <div class="ts-field">
+          <label>Unix Timestamp</label>
+          <div class="ts-field-row">
+            <input type="text" id="tsInput" placeholder="e.g. 1710850000 or 1710850000000" autocomplete="off">
+            <button class="btn btn-primary" onclick="convertTimestamp()">Convert</button>
+          </div>
+          <div class="unit-toggle" style="margin-top:0.5rem;">
+            <button class="unit-btn active" data-unit="auto" onclick="setUnit(this)">Auto</button>
+            <button class="unit-btn" data-unit="s" onclick="setUnit(this)">Seconds</button>
+            <button class="unit-btn" data-unit="ms" onclick="setUnit(this)">Milliseconds</button>
+          </div>
+          <div class="quick-btns">
+            <button class="btn btn-sm" onclick="useNow()">Now</button>
+            <button class="btn btn-sm" onclick="useExample('0')">Epoch (0)</button>
+            <button class="btn btn-sm" onclick="useExample('2000000000')">2B</button>
+          </div>
+        </div>
+        <div id="tsResult" style="margin-top:1rem;display:none;">
+          <table class="result-table">
+            <tr><td>UTC</td><td id="rUTC">—</td></tr>
+            <tr><td>Local</td><td id="rLocal">—</td></tr>
+            <tr><td>ISO 8601</td><td id="rISO">—</td></tr>
+            <tr><td>Relative</td><td id="rRelative">—</td></tr>
+            <tr><td>Seconds</td><td id="rSeconds">—</td></tr>
+            <tr><td>Milliseconds</td><td id="rMillis">—</td></tr>
+          </table>
+        </div>
+        <div id="tsMsg" class="msg" style="margin-top:0.75rem;"></div>
+      </div>
+
+      <div class="ts-panel">
+        <h2>Date &rarr; Timestamp</h2>
+        <div class="ts-field">
+          <label>Date &amp; Time (UTC)</label>
+          <div class="ts-field-row">
+            <input type="text" id="dateYear" placeholder="YYYY" style="width:5rem;" maxlength="4">
+            <input type="text" id="dateMonth" placeholder="MM" style="width:3.5rem;" maxlength="2">
+            <input type="text" id="dateDay" placeholder="DD" style="width:3.5rem;" maxlength="2">
+          </div>
+          <div class="ts-field-row" style="margin-top:0.375rem;">
+            <input type="text" id="dateHour" placeholder="HH" style="width:3.5rem;" maxlength="2" value="00">
+            <span style="color:var(--text-muted);">:</span>
+            <input type="text" id="dateMin" placeholder="MM" style="width:3.5rem;" maxlength="2" value="00">
+            <span style="color:var(--text-muted);">:</span>
+            <input type="text" id="dateSec" placeholder="SS" style="width:3.5rem;" maxlength="2" value="00">
+            <button class="btn btn-primary" onclick="convertDate()">Convert</button>
+          </div>
+          <div class="quick-btns">
+            <button class="btn btn-sm" onclick="fillNow()">Now</button>
+            <button class="btn btn-sm" onclick="fillDate(2000,1,1)">Y2K</button>
+            <button class="btn btn-sm" onclick="fillDate(1970,1,1)">Epoch</button>
+          </div>
+        </div>
+        <div id="dateResult" style="margin-top:1rem;display:none;">
+          <table class="result-table">
+            <tr><td>Seconds</td><td id="dSeconds">—</td></tr>
+            <tr><td>Milliseconds</td><td id="dMillis">—</td></tr>
+            <tr><td>ISO 8601</td><td id="dISO">—</td></tr>
+          </table>
+          <div class="btn-row" style="margin-top:0.75rem;">
+            <button class="btn btn-sm" onclick="copyToClipboard(document.getElementById('dSeconds').textContent,this)">Copy seconds</button>
+            <button class="btn btn-sm" onclick="copyToClipboard(document.getElementById('dMillis').textContent,this)">Copy ms</button>
+          </div>
+        </div>
+        <div id="dateMsg" class="msg" style="margin-top:0.75rem;"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    var currentUnit = 'auto';
+
+    // Live clock
+    function updateClock() {
+      var now = new Date();
+      document.getElementById('clockUnix').textContent = Math.floor(now.getTime() / 1000);
+      document.getElementById('clockUTC').textContent = now.toUTCString();
+      document.getElementById('clockLocal').textContent = now.toLocaleString();
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Unit toggle
+    window.setUnit = function(btn) {
+      currentUnit = btn.dataset.unit;
+      var btns = btn.parentElement.querySelectorAll('.unit-btn');
+      btns.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    };
+
+    // Detect if timestamp is seconds or milliseconds
+    function detectUnit(val) {
+      if (currentUnit !== 'auto') return currentUnit;
+      // If the number has more than 12 digits, it's likely milliseconds
+      // Seconds timestamps are typically 10 digits (until 2286)
+      return Math.abs(val) > 9999999999 ? 'ms' : 's';
+    }
+
+    // Relative time
+    function relativeTime(date) {
+      var now = new Date();
+      var diff = date.getTime() - now.getTime();
+      var absDiff = Math.abs(diff);
+      var past = diff < 0;
+      var label;
+
+      if (absDiff < 60000) {
+        label = Math.floor(absDiff / 1000) + ' seconds';
+      } else if (absDiff < 3600000) {
+        label = Math.floor(absDiff / 60000) + ' minutes';
+      } else if (absDiff < 86400000) {
+        label = Math.floor(absDiff / 3600000) + ' hours';
+      } else if (absDiff < 2592000000) {
+        label = Math.floor(absDiff / 86400000) + ' days';
+      } else if (absDiff < 31536000000) {
+        label = Math.floor(absDiff / 2592000000) + ' months';
+      } else {
+        label = (absDiff / 31536000000).toFixed(1) + ' years';
+      }
+      return past ? label + ' ago' : 'in ' + label;
+    }
+
+    // Timestamp -> Date
+    window.convertTimestamp = function() {
+      var raw = document.getElementById('tsInput').value.trim();
+      var msgEl = document.getElementById('tsMsg');
+      var resultEl = document.getElementById('tsResult');
+      hideMsg(msgEl);
+      resultEl.style.display = 'none';
+
+      if (!raw) {
+        showMsg(msgEl, 'error', 'Please enter a Unix timestamp.');
+        return;
+      }
+
+      var val = Number(raw);
+      if (isNaN(val) || !isFinite(val)) {
+        showMsg(msgEl, 'error', 'Invalid number. Enter a numeric timestamp.');
+        return;
+      }
+
+      var unit = detectUnit(val);
+      var ms = unit === 'ms' ? val : val * 1000;
+      var date = new Date(ms);
+
+      if (isNaN(date.getTime())) {
+        showMsg(msgEl, 'error', 'Timestamp out of range.');
+        return;
+      }
+
+      document.getElementById('rUTC').textContent = date.toUTCString();
+      document.getElementById('rLocal').textContent = date.toLocaleString();
+      document.getElementById('rISO').textContent = date.toISOString();
+      document.getElementById('rRelative').textContent = relativeTime(date);
+      document.getElementById('rSeconds').textContent = Math.floor(ms / 1000);
+      document.getElementById('rMillis').textContent = ms;
+      resultEl.style.display = 'block';
+    };
+
+    // Quick buttons
+    window.useNow = function() {
+      document.getElementById('tsInput').value = Math.floor(Date.now() / 1000);
+      convertTimestamp();
+    };
+
+    window.useExample = function(val) {
+      document.getElementById('tsInput').value = val;
+      convertTimestamp();
+    };
+
+    // Date -> Timestamp
+    window.convertDate = function() {
+      var msgEl = document.getElementById('dateMsg');
+      var resultEl = document.getElementById('dateResult');
+      hideMsg(msgEl);
+      resultEl.style.display = 'none';
+
+      var y = parseInt(document.getElementById('dateYear').value, 10);
+      var m = parseInt(document.getElementById('dateMonth').value, 10);
+      var d = parseInt(document.getElementById('dateDay').value, 10);
+      var h = parseInt(document.getElementById('dateHour').value || '0', 10);
+      var min = parseInt(document.getElementById('dateMin').value || '0', 10);
+      var s = parseInt(document.getElementById('dateSec').value || '0', 10);
+
+      if (isNaN(y) || isNaN(m) || isNaN(d)) {
+        showMsg(msgEl, 'error', 'Please fill in year, month, and day.');
+        return;
+      }
+
+      var date = new Date(Date.UTC(y, m - 1, d, h, min, s));
+      if (isNaN(date.getTime())) {
+        showMsg(msgEl, 'error', 'Invalid date.');
+        return;
+      }
+
+      var sec = Math.floor(date.getTime() / 1000);
+      var ms = date.getTime();
+
+      document.getElementById('dSeconds').textContent = sec;
+      document.getElementById('dMillis').textContent = ms;
+      document.getElementById('dISO').textContent = date.toISOString();
+      resultEl.style.display = 'block';
+    };
+
+    window.fillNow = function() {
+      var now = new Date();
+      document.getElementById('dateYear').value = now.getUTCFullYear();
+      document.getElementById('dateMonth').value = String(now.getUTCMonth() + 1).padStart(2, '0');
+      document.getElementById('dateDay').value = String(now.getUTCDate()).padStart(2, '0');
+      document.getElementById('dateHour').value = String(now.getUTCHours()).padStart(2, '0');
+      document.getElementById('dateMin').value = String(now.getUTCMinutes()).padStart(2, '0');
+      document.getElementById('dateSec').value = String(now.getUTCSeconds()).padStart(2, '0');
+      convertDate();
+    };
+
+    window.fillDate = function(y, m, d) {
+      document.getElementById('dateYear').value = y;
+      document.getElementById('dateMonth').value = String(m).padStart(2, '0');
+      document.getElementById('dateDay').value = String(d).padStart(2, '0');
+      document.getElementById('dateHour').value = '00';
+      document.getElementById('dateMin').value = '00';
+      document.getElementById('dateSec').value = '00';
+      convertDate();
+    };
+
+    // Enter key triggers conversion
+    document.getElementById('tsInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') convertTimestamp();
+    });
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

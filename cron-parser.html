@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cron Expression Parser — DevToolbox</title>
+  <meta name="description" content="Parse and explain cron expressions. See human-readable descriptions, next 5 run times, supports standard 5-field and extended 6-field (seconds) cron. Free, private, runs in your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .parser-input-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: stretch;
+      margin-bottom: 1.25rem;
+    }
+    .parser-input-row input[type="text"] {
+      flex: 1;
+      font-size: 1.25rem;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+      padding: 1rem 1.25rem;
+    }
+    .parser-input-row .btn-primary {
+      font-size: 1rem;
+      padding: 1rem 1.5rem;
+    }
+    .result-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .result-card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+    .explanation {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+    .field-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .field-chip {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      text-align: center;
+    }
+    .field-chip-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+    .field-chip-value {
+      font-family: var(--font-mono);
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .field-chip-desc {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+    .run-times-list {
+      list-style: none;
+      padding: 0;
+    }
+    .run-times-list li {
+      padding: 0.625rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .run-times-list li:last-child {
+      border-bottom: none;
+    }
+    .run-index {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      min-width: 1.5rem;
+    }
+    .run-relative {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      margin-left: auto;
+    }
+    .presets-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .preset-btn {
+      padding: 0.5rem 0.875rem;
+      font-family: var(--font-sans);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .preset-btn:hover {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .preset-btn code {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-left: 0.375rem;
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .error-msg {
+      color: var(--error);
+      font-size: 0.875rem;
+      padding: 0.75rem 1rem;
+      background: var(--error-bg);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: var(--radius-sm);
+      display: none;
+    }
+    .error-msg.show {
+      display: block;
+    }
+    .format-badge {
+      display: inline-block;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      background: var(--accent-dim);
+      color: var(--accent);
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    @media (max-width: 768px) {
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+      .parser-input-row {
+        flex-direction: column;
+      }
+      .field-breakdown {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 480px) {
+      .field-breakdown {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" class="active" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Cron Expression Parser</h1>
+      <p>Paste a cron expression to get a human-readable explanation and see the next scheduled run times. Supports standard 5-field and extended 6-field (with seconds) cron.</p>
+    </div>
+
+    <div class="parser-input-row">
+      <input type="text" id="cronInput" value="0 9 * * 1-5" placeholder="e.g. */5 * * * * or 0 30 9 * * 1-5" autocomplete="off" spellcheck="false" aria-label="Cron expression">
+      <button class="btn btn-primary" onclick="parseCron()">Parse</button>
+      <button class="btn" onclick="clearAll()">Clear</button>
+    </div>
+
+    <div id="errorMsg" class="error-msg"></div>
+
+    <div class="result-card" id="explanationCard">
+      <h2>Explanation <span class="format-badge" id="formatBadge">5-field</span></h2>
+      <div class="explanation" id="explanation">At 9:00 AM, Monday through Friday</div>
+      <div class="field-breakdown" id="fieldBreakdown"></div>
+    </div>
+
+    <div class="results-grid">
+      <div class="result-card">
+        <h2>Next 5 Run Times</h2>
+        <ul class="run-times-list" id="runTimes">
+          <li><span class="run-index">#1</span><span>—</span><span class="run-relative"></span></li>
+          <li><span class="run-index">#2</span><span>—</span><span class="run-relative"></span></li>
+          <li><span class="run-index">#3</span><span>—</span><span class="run-relative"></span></li>
+          <li><span class="run-index">#4</span><span>—</span><span class="run-relative"></span></li>
+          <li><span class="run-index">#5</span><span>—</span><span class="run-relative"></span></li>
+        </ul>
+      </div>
+
+      <div class="result-card">
+        <h2>Common Presets</h2>
+        <div class="presets-grid">
+          <button class="preset-btn" onclick="loadPreset('* * * * *')">Every minute <code>* * * * *</code></button>
+          <button class="preset-btn" onclick="loadPreset('0 * * * *')">Hourly <code>0 * * * *</code></button>
+          <button class="preset-btn" onclick="loadPreset('0 0 * * *')">Daily midnight <code>0 0 * * *</code></button>
+          <button class="preset-btn" onclick="loadPreset('0 9 * * 1-5')">Weekdays 9 AM <code>0 9 * * 1-5</code></button>
+          <button class="preset-btn" onclick="loadPreset('0 0 * * 0')">Weekly Sunday <code>0 0 * * 0</code></button>
+          <button class="preset-btn" onclick="loadPreset('0 0 1 * *')">Monthly 1st <code>0 0 1 * *</code></button>
+          <button class="preset-btn" onclick="loadPreset('*/5 * * * *')">Every 5 min <code>*/5 * * * *</code></button>
+          <button class="preset-btn" onclick="loadPreset('0 */4 * * *')">Every 4 hours <code>0 */4 * * *</code></button>
+          <button class="preset-btn" onclick="loadPreset('0 0 1 1 *')">Yearly Jan 1st <code>0 0 1 1 *</code></button>
+          <button class="preset-btn" onclick="loadPreset('0 30 9 * * 1-5')">6-field weekdays <code>0 30 9 * * 1-5</code></button>
+          <button class="preset-btn" onclick="loadPreset('*/10 * * * * *')">Every 10 sec <code>*/10 * * * * *</code></button>
+          <button class="preset-btn" onclick="loadPreset('30 0 0 * * *')">Daily at 00:00:30 <code>30 0 0 * * *</code></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="shortcut-hint" style="text-align:center; margin-top:0.5rem;">
+      <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to parse &bull; <span class="kbd">Ctrl</span> + <span class="kbd">L</span> to clear
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    var input = document.getElementById('cronInput');
+    var explanationEl = document.getElementById('explanation');
+    var formatBadge = document.getElementById('formatBadge');
+    var errorMsg = document.getElementById('errorMsg');
+    var fieldBreakdown = document.getElementById('fieldBreakdown');
+
+    var monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+    var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var shortMonths = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    // Keyboard shortcuts
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        parseCron();
+      }
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'l' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        clearAll();
+      }
+    });
+
+    // Auto-parse on input change (debounced)
+    var debounceTimer;
+    input.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(parseCron, 300);
+    });
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('show');
+    }
+
+    function hideError() {
+      errorMsg.classList.remove('show');
+    }
+
+    function expandField(field, min, max) {
+      var result = new Set();
+      var parts = field.split(',');
+      for (var p = 0; p < parts.length; p++) {
+        var part = parts[p].trim();
+        if (part === '*') {
+          for (var i = min; i <= max; i++) result.add(i);
+        } else if (part.indexOf('/') !== -1) {
+          var slashParts = part.split('/');
+          var step = parseInt(slashParts[1], 10);
+          if (isNaN(step) || step <= 0) throw new Error('Invalid step: ' + part);
+          var base = slashParts[0];
+          var start = min, end = max;
+          if (base !== '*') {
+            if (base.indexOf('-') !== -1) {
+              var rng = base.split('-');
+              start = parseInt(rng[0], 10);
+              end = parseInt(rng[1], 10);
+            } else {
+              start = parseInt(base, 10);
+            }
+          }
+          for (var s = start; s <= end; s += step) result.add(s);
+        } else if (part.indexOf('-') !== -1) {
+          var rangeParts = part.split('-');
+          var rStart = parseInt(rangeParts[0], 10);
+          var rEnd = parseInt(rangeParts[1], 10);
+          if (isNaN(rStart) || isNaN(rEnd)) throw new Error('Invalid range: ' + part);
+          for (var r = rStart; r <= rEnd; r++) result.add(r);
+        } else {
+          var val = parseInt(part, 10);
+          if (isNaN(val)) throw new Error('Invalid value: ' + part);
+          result.add(val);
+        }
+      }
+      return result;
+    }
+
+    function describeField(field, min, max, names) {
+      if (field === '*') return 'every value';
+      var parts = field.split(',');
+      var descriptions = [];
+      for (var p = 0; p < parts.length; p++) {
+        var part = parts[p].trim();
+        if (part.indexOf('/') !== -1) {
+          var slashParts = part.split('/');
+          var step = slashParts[1];
+          var base = slashParts[0];
+          if (base === '*') {
+            descriptions.push('every ' + step);
+          } else {
+            descriptions.push('every ' + step + ' from ' + formatValue(base, names));
+          }
+        } else if (part.indexOf('-') !== -1) {
+          var rangeParts = part.split('-');
+          descriptions.push(formatValue(rangeParts[0], names) + ' through ' + formatValue(rangeParts[1], names));
+        } else {
+          descriptions.push(formatValue(part, names));
+        }
+      }
+      return descriptions.join(', ');
+    }
+
+    function formatValue(val, names) {
+      if (!names) return val;
+      var n = parseInt(val, 10);
+      if (!isNaN(n) && names[n]) return names[n];
+      return val;
+    }
+
+    function formatHour(h) {
+      var n = parseInt(h, 10);
+      if (isNaN(n)) return h;
+      if (n === 0) return '12:00 AM';
+      if (n === 12) return '12:00 PM';
+      if (n < 12) return n + ':00 AM';
+      return (n - 12) + ':00 PM';
+    }
+
+    function padTwo(v) {
+      var n = parseInt(v, 10);
+      return isNaN(n) ? v : (n < 10 ? '0' + n : '' + n);
+    }
+
+    function describeExpression(parts, isSixField) {
+      var sec, min, hr, dom, mon, dow;
+      if (isSixField) {
+        sec = parts[0]; min = parts[1]; hr = parts[2];
+        dom = parts[3]; mon = parts[4]; dow = parts[5];
+      } else {
+        sec = null; min = parts[0]; hr = parts[1];
+        dom = parts[2]; mon = parts[3]; dow = parts[4];
+      }
+
+      var pieces = [];
+
+      // Special cases
+      var fullExpr = parts.join(' ');
+      if (!isSixField && fullExpr === '* * * * *') return 'Every minute';
+      if (isSixField && fullExpr === '* * * * * *') return 'Every second';
+
+      // Seconds (6-field only)
+      if (isSixField) {
+        if (sec === '*') {
+          pieces.push('Every second');
+        } else if (sec.indexOf('/') !== -1) {
+          pieces.push('Every ' + sec.split('/')[1] + ' seconds');
+        } else {
+          pieces.push('At second ' + sec);
+        }
+      }
+
+      // Minute
+      if (min === '*') {
+        if (!isSixField) pieces.push('Every minute');
+      } else if (min.indexOf('/') !== -1) {
+        var mStep = min.split('/')[1];
+        pieces.push('every ' + mStep + ' minutes');
+      } else {
+        // handled below with hour combo
+      }
+
+      // Hour + minute combo
+      if (hr !== '*' && min !== '*' && min.indexOf('/') === -1) {
+        if (hr.indexOf('/') === -1 && hr.indexOf('-') === -1 && hr.indexOf(',') === -1 &&
+            min.indexOf('-') === -1 && min.indexOf(',') === -1) {
+          // Simple time
+          var hN = parseInt(hr, 10);
+          var suffix = hN < 12 ? ' AM' : ' PM';
+          var displayH = hN === 0 ? 12 : (hN > 12 ? hN - 12 : hN);
+          if (hN === 12) suffix = ' PM';
+          // Remove any previous minute description
+          pieces = pieces.filter(function(p) { return p.indexOf('minute') === -1 && p !== 'At minute ' + min; });
+          if (isSixField && sec !== '*' && sec.indexOf('/') === -1) {
+            pieces = pieces.filter(function(p) { return p.indexOf('second') === -1; });
+            pieces.push('At ' + displayH + ':' + padTwo(min) + ':' + padTwo(sec) + suffix);
+          } else {
+            pieces.push('At ' + displayH + ':' + padTwo(min) + suffix);
+          }
+        } else {
+          if (pieces.indexOf('At minute ' + min) === -1 && !pieces.some(function(p) { return p.indexOf('minute') !== -1; })) {
+            pieces.push('at minute ' + min);
+          }
+          // Hour
+          if (hr.indexOf('/') !== -1) {
+            pieces.push('every ' + hr.split('/')[1] + ' hours');
+          } else if (hr.indexOf('-') !== -1) {
+            var hRange = hr.split('-');
+            pieces.push('during hours ' + formatHour(hRange[0]).replace(':00', '') + ' to ' + formatHour(hRange[1]).replace(':00', ''));
+          } else if (hr.indexOf(',') !== -1) {
+            pieces.push('at hours ' + hr);
+          } else {
+            pieces.push('during the ' + formatHour(hr).replace(':00 ', ' ') + ' hour');
+          }
+        }
+      } else if (hr !== '*') {
+        if (hr.indexOf('/') !== -1) {
+          pieces.push('every ' + hr.split('/')[1] + ' hours');
+        } else if (hr.indexOf('-') !== -1) {
+          var hrRange = hr.split('-');
+          pieces.push('during hours ' + formatHour(hrRange[0]).replace(':00', '') + ' to ' + formatHour(hrRange[1]).replace(':00', ''));
+        } else if (hr.indexOf(',') !== -1) {
+          pieces.push('at hours ' + hr);
+        } else {
+          if (min === '*') {
+            pieces.push('during the ' + formatHour(hr).replace(':00 ', ' ') + ' hour');
+          }
+        }
+      }
+
+      // Day of month
+      if (dom !== '*') {
+        if (dom.indexOf('/') !== -1) {
+          pieces.push('every ' + dom.split('/')[1] + ' days');
+        } else if (dom.indexOf(',') !== -1) {
+          pieces.push('on day ' + dom + ' of the month');
+        } else if (dom.indexOf('-') !== -1) {
+          var domRange = dom.split('-');
+          pieces.push('on days ' + domRange[0] + ' through ' + domRange[1] + ' of the month');
+        } else {
+          pieces.push('on day ' + dom + ' of the month');
+        }
+      }
+
+      // Month
+      if (mon !== '*') {
+        if (mon.indexOf('/') !== -1) {
+          pieces.push('every ' + mon.split('/')[1] + ' months');
+        } else if (mon.indexOf(',') !== -1) {
+          var months = mon.split(',').map(function(m) { return monthNames[parseInt(m, 10)] || m; });
+          pieces.push('in ' + months.join(', '));
+        } else if (mon.indexOf('-') !== -1) {
+          var monRange = mon.split('-');
+          pieces.push('in ' + (monthNames[parseInt(monRange[0], 10)] || monRange[0]) + ' through ' + (monthNames[parseInt(monRange[1], 10)] || monRange[1]));
+        } else {
+          pieces.push('in ' + (monthNames[parseInt(mon, 10)] || mon));
+        }
+      }
+
+      // Day of week
+      if (dow !== '*') {
+        if (dow === '1-5') {
+          pieces.push('Monday through Friday');
+        } else if (dow === '0,6') {
+          pieces.push('on weekends');
+        } else if (dow.indexOf(',') !== -1) {
+          var days = dow.split(',').map(function(d) { return dayNames[parseInt(d, 10)] || d; });
+          pieces.push('on ' + days.join(', '));
+        } else if (dow.indexOf('-') !== -1) {
+          var dowRange = dow.split('-');
+          pieces.push('' + (dayNames[parseInt(dowRange[0], 10)] || dowRange[0]) + ' through ' + (dayNames[parseInt(dowRange[1], 10)] || dowRange[1]));
+        } else {
+          pieces.push('on ' + (dayNames[parseInt(dow, 10)] || dow));
+        }
+      }
+
+      return pieces.join(', ') || 'Every minute';
+    }
+
+    function renderFieldBreakdown(parts, isSixField) {
+      var fields;
+      if (isSixField) {
+        fields = [
+          { label: 'Second', value: parts[0], min: 0, max: 59, names: null },
+          { label: 'Minute', value: parts[1], min: 0, max: 59, names: null },
+          { label: 'Hour', value: parts[2], min: 0, max: 23, names: null },
+          { label: 'Day (Month)', value: parts[3], min: 1, max: 31, names: null },
+          { label: 'Month', value: parts[4], min: 1, max: 12, names: monthNames },
+          { label: 'Day (Week)', value: parts[5], min: 0, max: 6, names: dayNames }
+        ];
+      } else {
+        fields = [
+          { label: 'Minute', value: parts[0], min: 0, max: 59, names: null },
+          { label: 'Hour', value: parts[1], min: 0, max: 23, names: null },
+          { label: 'Day (Month)', value: parts[2], min: 1, max: 31, names: null },
+          { label: 'Month', value: parts[3], min: 1, max: 12, names: monthNames },
+          { label: 'Day (Week)', value: parts[4], min: 0, max: 6, names: dayNames }
+        ];
+      }
+
+      fieldBreakdown.innerHTML = '';
+      for (var i = 0; i < fields.length; i++) {
+        var f = fields[i];
+        var chip = document.createElement('div');
+        chip.className = 'field-chip';
+        chip.innerHTML = '<div class="field-chip-label">' + f.label + '</div>' +
+          '<div class="field-chip-value">' + escapeHtml(f.value) + '</div>' +
+          '<div class="field-chip-desc">' + escapeHtml(describeField(f.value, f.min, f.max, f.names)) + '</div>';
+        fieldBreakdown.appendChild(chip);
+      }
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+
+    function computeNextRuns(parts, isSixField) {
+      var list = document.getElementById('runTimes');
+      var items = list.querySelectorAll('li');
+
+      try {
+        var secSet, minSet, hrSet, domSet, monSet, dowSet;
+        if (isSixField) {
+          secSet = expandField(parts[0], 0, 59);
+          minSet = expandField(parts[1], 0, 59);
+          hrSet = expandField(parts[2], 0, 23);
+          domSet = expandField(parts[3], 1, 31);
+          monSet = expandField(parts[4], 1, 12);
+          dowSet = expandField(parts[5], 0, 6);
+        } else {
+          secSet = new Set([0]);
+          minSet = expandField(parts[0], 0, 59);
+          hrSet = expandField(parts[1], 0, 23);
+          domSet = expandField(parts[2], 1, 31);
+          monSet = expandField(parts[3], 1, 12);
+          dowSet = expandField(parts[4], 0, 6);
+        }
+      } catch (e) {
+        for (var k = 0; k < 5; k++) {
+          items[k].querySelectorAll('span')[1].textContent = k === 0 ? 'Invalid expression' : '—';
+          items[k].querySelectorAll('span')[2].textContent = '';
+        }
+        return;
+      }
+
+      var results = [];
+      var now = new Date();
+      var candidate;
+      if (isSixField) {
+        candidate = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                             now.getHours(), now.getMinutes(), now.getSeconds() + 1, 0);
+      } else {
+        candidate = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                             now.getHours(), now.getMinutes() + 1, 0, 0);
+      }
+
+      // For 6-field, iterate by second; for 5-field, by minute
+      var maxIterations = isSixField ? 31536000 : 525960; // 1 year
+      var stepMs = isSixField ? 1000 : 60000;
+      // Optimization: limit to reasonable iterations
+      var maxIter = Math.min(maxIterations, isSixField ? 2000000 : 525960);
+
+      for (var i = 0; i < maxIter && results.length < 5; i++) {
+        var cMonth = candidate.getMonth() + 1;
+        var cDom = candidate.getDate();
+        var cDow = candidate.getDay();
+        var cHr = candidate.getHours();
+        var cMin = candidate.getMinutes();
+        var cSec = candidate.getSeconds();
+
+        if (monSet.has(cMonth) && domSet.has(cDom) && dowSet.has(cDow) &&
+            hrSet.has(cHr) && minSet.has(cMin) && secSet.has(cSec)) {
+          results.push(new Date(candidate));
+        }
+
+        if (isSixField) {
+          candidate.setSeconds(candidate.getSeconds() + 1);
+        } else {
+          candidate.setMinutes(candidate.getMinutes() + 1);
+        }
+      }
+
+      for (var j = 0; j < 5; j++) {
+        var spans = items[j].querySelectorAll('span');
+        if (results[j]) {
+          spans[1].textContent = formatRunTime(results[j], isSixField);
+          spans[2].textContent = relativeTime(results[j], now);
+        } else {
+          spans[1].textContent = j < results.length ? '—' : 'No match within search range';
+          spans[2].textContent = '';
+        }
+      }
+    }
+
+    function formatRunTime(date, showSeconds) {
+      var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      var str = days[date.getDay()] + ', ' +
+                months[date.getMonth()] + ' ' +
+                date.getDate() + ', ' +
+                date.getFullYear() + ' ' +
+                padTwo(date.getHours()) + ':' +
+                padTwo(date.getMinutes());
+      if (showSeconds) str += ':' + padTwo(date.getSeconds());
+      return str;
+    }
+
+    function relativeTime(future, now) {
+      var diffMs = future - now;
+      if (diffMs < 0) return '';
+      var diffSec = Math.floor(diffMs / 1000);
+      if (diffSec < 60) return 'in ' + diffSec + 's';
+      var diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return 'in ' + diffMin + 'm';
+      var diffHr = Math.floor(diffMin / 60);
+      var remMin = diffMin % 60;
+      if (diffHr < 24) return 'in ' + diffHr + 'h' + (remMin > 0 ? ' ' + remMin + 'm' : '');
+      var diffDays = Math.floor(diffHr / 24);
+      var remHr = diffHr % 24;
+      if (diffDays < 30) return 'in ' + diffDays + 'd' + (remHr > 0 ? ' ' + remHr + 'h' : '');
+      var diffMonths = Math.floor(diffDays / 30);
+      return 'in ~' + diffMonths + ' month' + (diffMonths > 1 ? 's' : '');
+    }
+
+    // Validate cron field
+    function validateField(field, min, max, name) {
+      var parts = field.split(',');
+      for (var p = 0; p < parts.length; p++) {
+        var part = parts[p].trim();
+        if (part === '*') continue;
+        if (part.indexOf('/') !== -1) {
+          var sp = part.split('/');
+          if (sp.length !== 2) throw new Error('Invalid step in ' + name + ': ' + part);
+          var step = parseInt(sp[1], 10);
+          if (isNaN(step) || step <= 0) throw new Error('Invalid step value in ' + name + ': ' + sp[1]);
+          if (sp[0] !== '*') {
+            if (sp[0].indexOf('-') !== -1) {
+              validateRange(sp[0], min, max, name);
+            } else {
+              var base = parseInt(sp[0], 10);
+              if (isNaN(base) || base < min || base > max) throw new Error('Value out of range in ' + name + ': ' + sp[0]);
+            }
+          }
+        } else if (part.indexOf('-') !== -1) {
+          validateRange(part, min, max, name);
+        } else {
+          var val = parseInt(part, 10);
+          if (isNaN(val) || val < min || val > max) throw new Error('Value out of range in ' + name + ': ' + part + ' (allowed: ' + min + '-' + max + ')');
+        }
+      }
+    }
+
+    function validateRange(range, min, max, name) {
+      var rp = range.split('-');
+      if (rp.length !== 2) throw new Error('Invalid range in ' + name + ': ' + range);
+      var a = parseInt(rp[0], 10), b = parseInt(rp[1], 10);
+      if (isNaN(a) || isNaN(b)) throw new Error('Invalid range in ' + name + ': ' + range);
+      if (a < min || a > max || b < min || b > max) throw new Error('Range out of bounds in ' + name + ': ' + range);
+    }
+
+    window.parseCron = function() {
+      hideError();
+      var raw = input.value.trim();
+      if (!raw) {
+        showError('Please enter a cron expression.');
+        return;
+      }
+
+      var parts = raw.split(/\s+/);
+      var isSixField = parts.length === 6;
+
+      if (parts.length !== 5 && parts.length !== 6) {
+        showError('Invalid cron expression. Expected 5 fields (minute hour day month weekday) or 6 fields (second minute hour day month weekday). Got ' + parts.length + ' fields.');
+        return;
+      }
+
+      // Validate each field
+      try {
+        if (isSixField) {
+          validateField(parts[0], 0, 59, 'second');
+          validateField(parts[1], 0, 59, 'minute');
+          validateField(parts[2], 0, 23, 'hour');
+          validateField(parts[3], 1, 31, 'day of month');
+          validateField(parts[4], 1, 12, 'month');
+          validateField(parts[5], 0, 6, 'day of week');
+        } else {
+          validateField(parts[0], 0, 59, 'minute');
+          validateField(parts[1], 0, 23, 'hour');
+          validateField(parts[2], 1, 31, 'day of month');
+          validateField(parts[3], 1, 12, 'month');
+          validateField(parts[4], 0, 6, 'day of week');
+        }
+      } catch (e) {
+        showError(e.message);
+        return;
+      }
+
+      formatBadge.textContent = isSixField ? '6-field (with seconds)' : '5-field (standard)';
+      explanationEl.textContent = describeExpression(parts, isSixField);
+      renderFieldBreakdown(parts, isSixField);
+      computeNextRuns(parts, isSixField);
+    };
+
+    window.clearAll = function() {
+      input.value = '';
+      hideError();
+      explanationEl.textContent = '—';
+      formatBadge.textContent = '';
+      fieldBreakdown.innerHTML = '';
+      var items = document.getElementById('runTimes').querySelectorAll('li');
+      for (var i = 0; i < 5; i++) {
+        items[i].querySelectorAll('span')[1].textContent = '—';
+        items[i].querySelectorAll('span')[2].textContent = '';
+      }
+      input.focus();
+    };
+
+    window.loadPreset = function(expr) {
+      input.value = expr;
+      parseCron();
+    };
+
+    // Parse on load
+    parseCron();
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

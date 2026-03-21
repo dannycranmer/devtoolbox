@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YAML Validator &amp; Formatter Online Free &mdash; DevToolbox</title>
+  <meta name="description" content="Validate and format YAML instantly. Convert between YAML and JSON. Line numbers, error highlighting. Free, private, no tracking — runs entirely in your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .yaml-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 0.5rem;
+    }
+    .yaml-stats .valid {
+      color: var(--success);
+      font-weight: 600;
+    }
+    .yaml-stats .invalid {
+      color: var(--error, #ef4444);
+      font-weight: 600;
+    }
+    .convert-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .yaml-input-wrap {
+      position: relative;
+      display: flex;
+    }
+    .line-numbers {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3rem;
+      padding: 0.875rem 0.5rem 0.875rem 0;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      text-align: right;
+      color: var(--text-muted);
+      user-select: none;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 0.5;
+    }
+    #yaml-input {
+      padding-left: 3.5rem;
+    }
+    .error-line {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      margin-top: 0.5rem;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 6px;
+      color: #ef4444;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .error-line .error-loc {
+      font-weight: 600;
+    }
+    .indent-select {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .indent-select select {
+      background: var(--bg-input);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+    }
+    .indent-select select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .options-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" class="active" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>YAML Validator &amp; Formatter</h1>
+      <p>Validate YAML syntax, format/beautify, and convert between YAML and JSON. <span class="shortcut-hint"><kbd class="kbd">Ctrl+Enter</kbd> to validate</span></p>
+    </div>
+
+    <div class="options-row">
+      <div class="indent-select">
+        <label for="indent-size">Indent:</label>
+        <select id="indent-size">
+          <option value="2" selected>2 spaces</option>
+          <option value="4">4 spaces</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-bottom: 0.75rem;">
+      <button class="btn btn-primary" id="btn-validate" type="button">Validate</button>
+      <button class="btn" id="btn-format" type="button">Format</button>
+      <button class="btn" id="btn-yaml-to-json" type="button">YAML &rarr; JSON</button>
+      <button class="btn" id="btn-json-to-yaml" type="button">JSON &rarr; YAML</button>
+      <button class="btn" id="btn-copy" type="button">Copy</button>
+      <button class="btn" id="btn-example" type="button">Example</button>
+      <button class="btn" id="btn-clear" type="button">Clear</button>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <span class="panel-label">Input</span>
+        <div class="yaml-input-wrap" style="flex:1;display:flex;">
+          <div id="line-numbers" class="line-numbers" aria-hidden="true">1</div>
+          <textarea id="yaml-input" placeholder="Paste your YAML or JSON here..." aria-label="YAML input" spellcheck="false"></textarea>
+        </div>
+      </div>
+      <div class="tool-panel">
+        <span class="panel-label">Output</span>
+        <textarea id="yaml-output" readonly placeholder="Validated/formatted output will appear here..." aria-label="YAML output"></textarea>
+      </div>
+    </div>
+
+    <div id="yaml-stats" class="yaml-stats"></div>
+    <div id="yaml-msg" class="msg" style="margin-top: 0.5rem;"></div>
+    <div id="yaml-error" style="margin-top: 0;"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var inputEl = document.getElementById('yaml-input');
+    var outputEl = document.getElementById('yaml-output');
+    var statsEl = document.getElementById('yaml-stats');
+    var msgEl = document.getElementById('yaml-msg');
+    var errorEl = document.getElementById('yaml-error');
+    var lineNumEl = document.getElementById('line-numbers');
+    var indentEl = document.getElementById('indent-size');
+
+    // ===================== Minimal YAML Parser =====================
+    // Handles: scalars, strings (quoted/unquoted), arrays, objects, multi-line strings (| and >), comments, nested structures
+
+    function YAMLError(message, line) {
+      this.message = message;
+      this.line = line;
+    }
+
+    function parseYAML(text) {
+      if (!text.trim()) throw new YAMLError('Empty input', 1);
+
+      var lines = text.split('\n');
+      var result = parseBlock(lines, 0, 0);
+      return result.value;
+    }
+
+    function getIndentLevel(line) {
+      var match = line.match(/^( *)/);
+      return match ? match[1].length : 0;
+    }
+
+    function stripComment(line) {
+      // Remove inline comments but not inside strings
+      var inSingle = false, inDouble = false;
+      for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (ch === "'" && !inDouble) inSingle = !inSingle;
+        else if (ch === '"' && !inSingle) inDouble = !inDouble;
+        else if (ch === '#' && !inSingle && !inDouble && (i === 0 || line[i-1] === ' ')) {
+          return line.substring(0, i).trimEnd();
+        }
+      }
+      return line;
+    }
+
+    function parseScalar(val) {
+      if (val === '' || val === '~' || val === 'null' || val === 'Null' || val === 'NULL') return null;
+      if (val === 'true' || val === 'True' || val === 'TRUE') return true;
+      if (val === 'false' || val === 'False' || val === 'FALSE') return false;
+
+      // Quoted strings
+      if ((val[0] === '"' && val[val.length-1] === '"') || (val[0] === "'" && val[val.length-1] === "'")) {
+        return val.slice(1, -1);
+      }
+
+      // Numbers
+      if (/^-?\d+$/.test(val)) return parseInt(val, 10);
+      if (/^-?\d*\.\d+$/.test(val)) return parseFloat(val);
+      if (/^-?\d+\.\d*[eE][+-]?\d+$/.test(val)) return parseFloat(val);
+      if (/^0x[0-9a-fA-F]+$/.test(val)) return parseInt(val, 16);
+      if (/^0o[0-7]+$/.test(val)) return parseInt(val.slice(2), 8);
+
+      // Infinity / NaN
+      if (val === '.inf' || val === '.Inf' || val === '.INF') return Infinity;
+      if (val === '-.inf' || val === '-.Inf' || val === '-.INF') return -Infinity;
+      if (val === '.nan' || val === '.NaN' || val === '.NAN') return NaN;
+
+      return val;
+    }
+
+    function parseInlineArray(str, lineNum) {
+      // Parse [a, b, c] style
+      str = str.trim();
+      if (str[0] !== '[' || str[str.length-1] !== ']') throw new YAMLError('Invalid inline array', lineNum);
+      var inner = str.slice(1, -1).trim();
+      if (inner === '') return [];
+
+      var items = splitFlow(inner, lineNum);
+      return items.map(function(item) {
+        item = item.trim();
+        if (item[0] === '{') return parseInlineObject(item, lineNum);
+        if (item[0] === '[') return parseInlineArray(item, lineNum);
+        return parseScalar(item);
+      });
+    }
+
+    function parseInlineObject(str, lineNum) {
+      str = str.trim();
+      if (str[0] !== '{' || str[str.length-1] !== '}') throw new YAMLError('Invalid inline object', lineNum);
+      var inner = str.slice(1, -1).trim();
+      if (inner === '') return {};
+
+      var items = splitFlow(inner, lineNum);
+      var obj = {};
+      items.forEach(function(item) {
+        var colonIdx = item.indexOf(':');
+        if (colonIdx === -1) throw new YAMLError('Invalid key-value pair in inline object', lineNum);
+        var key = item.substring(0, colonIdx).trim();
+        var val = item.substring(colonIdx + 1).trim();
+        if ((key[0] === '"' && key[key.length-1] === '"') || (key[0] === "'" && key[key.length-1] === "'")) {
+          key = key.slice(1, -1);
+        }
+        if (val[0] === '{') obj[key] = parseInlineObject(val, lineNum);
+        else if (val[0] === '[') obj[key] = parseInlineArray(val, lineNum);
+        else obj[key] = parseScalar(val);
+      });
+      return obj;
+    }
+
+    function splitFlow(str, lineNum) {
+      var items = [];
+      var depth = 0;
+      var current = '';
+      var inSingle = false, inDouble = false;
+
+      for (var i = 0; i < str.length; i++) {
+        var ch = str[i];
+        if (ch === "'" && !inDouble) { inSingle = !inSingle; current += ch; continue; }
+        if (ch === '"' && !inSingle) { inDouble = !inDouble; current += ch; continue; }
+        if (inSingle || inDouble) { current += ch; continue; }
+        if (ch === '[' || ch === '{') { depth++; current += ch; continue; }
+        if (ch === ']' || ch === '}') { depth--; current += ch; continue; }
+        if (ch === ',' && depth === 0) {
+          items.push(current);
+          current = '';
+          continue;
+        }
+        current += ch;
+      }
+      if (current.trim()) items.push(current);
+      return items;
+    }
+
+    function parseBlock(lines, startIdx, expectedIndent) {
+      if (startIdx >= lines.length) return { value: null, nextIdx: startIdx };
+
+      // Skip blank lines and comments
+      var idx = startIdx;
+      while (idx < lines.length) {
+        var stripped = lines[idx].trim();
+        if (stripped === '' || stripped[0] === '#') {
+          idx++;
+          continue;
+        }
+        break;
+      }
+
+      if (idx >= lines.length) return { value: null, nextIdx: idx };
+
+      var line = lines[idx];
+      var indent = getIndentLevel(line);
+      var trimmed = line.trim();
+
+      // Document separator
+      if (trimmed === '---' || trimmed === '...') {
+        idx++;
+        return parseBlock(lines, idx, expectedIndent);
+      }
+
+      // Detect if this is a list
+      if (trimmed[0] === '-' && (trimmed.length === 1 || trimmed[1] === ' ')) {
+        return parseArray(lines, idx, indent);
+      }
+
+      // Detect if this is a mapping
+      var colonIdx = findColon(trimmed);
+      if (colonIdx !== -1) {
+        return parseMapping(lines, idx, indent);
+      }
+
+      // Inline array or object
+      if (trimmed[0] === '[') {
+        return { value: parseInlineArray(stripComment(trimmed), idx + 1), nextIdx: idx + 1 };
+      }
+      if (trimmed[0] === '{') {
+        return { value: parseInlineObject(stripComment(trimmed), idx + 1), nextIdx: idx + 1 };
+      }
+
+      // Plain scalar
+      return { value: parseScalar(stripComment(trimmed)), nextIdx: idx + 1 };
+    }
+
+    function findColon(line) {
+      // Find the key: value separator, skipping quoted strings
+      var inSingle = false, inDouble = false;
+      for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (ch === "'" && !inDouble) { inSingle = !inSingle; continue; }
+        if (ch === '"' && !inSingle) { inDouble = !inDouble; continue; }
+        if (!inSingle && !inDouble && ch === ':' && (i + 1 >= line.length || line[i+1] === ' ' || line[i+1] === '\t')) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    function parseArray(lines, startIdx, blockIndent) {
+      var arr = [];
+      var idx = startIdx;
+
+      while (idx < lines.length) {
+        var line = lines[idx];
+        var trimmed = line.trim();
+
+        if (trimmed === '' || trimmed[0] === '#') { idx++; continue; }
+
+        var indent = getIndentLevel(line);
+        if (indent < blockIndent) break;
+        if (indent > blockIndent) break;
+
+        if (trimmed[0] !== '-' || (trimmed.length > 1 && trimmed[1] !== ' ' && trimmed !== '-')) break;
+
+        var rest = trimmed.length > 2 ? trimmed.substring(2) : '';
+        rest = rest.trim();
+
+        if (rest === '') {
+          // Value on next line(s)
+          var childResult = parseBlock(lines, idx + 1, indent + 2);
+          arr.push(childResult.value);
+          idx = childResult.nextIdx;
+        } else if (rest[0] === '[') {
+          arr.push(parseInlineArray(stripComment(rest), idx + 1));
+          idx++;
+        } else if (rest[0] === '{') {
+          arr.push(parseInlineObject(stripComment(rest), idx + 1));
+          idx++;
+        } else {
+          // Check if rest is a key: value (nested mapping inside list item)
+          var restColon = findColon(rest);
+          if (restColon !== -1) {
+            // Inline key: value — this is a mapping item in the list
+            // We need to parse it as a mapping block starting from the current indented content
+            var mapResult = parseListItemMapping(lines, idx, blockIndent);
+            arr.push(mapResult.value);
+            idx = mapResult.nextIdx;
+          } else if (rest === '|' || rest === '>' || rest === '|-' || rest === '>-' || rest === '|+' || rest === '>+') {
+            var multiResult = parseMultilineString(lines, idx, rest);
+            arr.push(multiResult.value);
+            idx = multiResult.nextIdx;
+          } else {
+            arr.push(parseScalar(stripComment(rest)));
+            idx++;
+          }
+        }
+      }
+
+      return { value: arr, nextIdx: idx };
+    }
+
+    function parseListItemMapping(lines, startIdx, listIndent) {
+      // The first line is "- key: value", parse the key:value part
+      var line = lines[startIdx];
+      var trimmed = line.trim();
+      var rest = trimmed.substring(2); // skip "- "
+      var itemIndent = getIndentLevel(line) + 2; // content indent
+
+      // Build a virtual mapping from the rest of the first line + continuation lines
+      var obj = {};
+      var colonIdx = findColon(rest);
+      var key = rest.substring(0, colonIdx).trim();
+      if ((key[0] === '"' && key[key.length-1] === '"') || (key[0] === "'" && key[key.length-1] === "'")) {
+        key = key.slice(1, -1);
+      }
+      var valStr = rest.substring(colonIdx + 1).trim();
+
+      var idx = startIdx + 1;
+
+      if (valStr === '' || valStr === '|' || valStr === '>' || valStr === '|-' || valStr === '>-' || valStr === '|+' || valStr === '>+') {
+        if (valStr === '' ) {
+          // Value on next lines
+          var childResult = parseBlock(lines, idx, itemIndent + 2);
+          obj[key] = childResult.value;
+          idx = childResult.nextIdx;
+        } else {
+          var multiResult = parseMultilineString(lines, startIdx, valStr, colonIdx);
+          obj[key] = multiResult.value;
+          idx = multiResult.nextIdx;
+        }
+      } else if (valStr[0] === '[') {
+        obj[key] = parseInlineArray(stripComment(valStr), startIdx + 1);
+      } else if (valStr[0] === '{') {
+        obj[key] = parseInlineObject(stripComment(valStr), startIdx + 1);
+      } else {
+        obj[key] = parseScalar(stripComment(valStr));
+      }
+
+      // Parse continuation keys at the item indent level
+      while (idx < lines.length) {
+        var cline = lines[idx];
+        var ctrimmed = cline.trim();
+
+        if (ctrimmed === '' || ctrimmed[0] === '#') { idx++; continue; }
+
+        var cindent = getIndentLevel(cline);
+        if (cindent < itemIndent) break;
+        if (cindent > itemIndent) {
+          // This belongs to a sub-value, skip
+          idx++;
+          continue;
+        }
+
+        var ccolon = findColon(ctrimmed);
+        if (ccolon === -1) break;
+
+        var ckey = ctrimmed.substring(0, ccolon).trim();
+        if ((ckey[0] === '"' && ckey[ckey.length-1] === '"') || (ckey[0] === "'" && ckey[ckey.length-1] === "'")) {
+          ckey = ckey.slice(1, -1);
+        }
+        var cvalStr = ctrimmed.substring(ccolon + 1).trim();
+
+        idx++;
+
+        if (cvalStr === '') {
+          var cchild = parseBlock(lines, idx, cindent + 2);
+          obj[ckey] = cchild.value;
+          idx = cchild.nextIdx;
+        } else if (cvalStr[0] === '[') {
+          obj[ckey] = parseInlineArray(stripComment(cvalStr), idx);
+        } else if (cvalStr[0] === '{') {
+          obj[ckey] = parseInlineObject(stripComment(cvalStr), idx);
+        } else if (cvalStr === '|' || cvalStr === '>' || cvalStr === '|-' || cvalStr === '>-' || cvalStr === '|+' || cvalStr === '>+') {
+          var cmulti = parseMultilineStringFromNext(lines, idx, cvalStr, cindent);
+          obj[ckey] = cmulti.value;
+          idx = cmulti.nextIdx;
+        } else {
+          obj[ckey] = parseScalar(stripComment(cvalStr));
+        }
+      }
+
+      return { value: obj, nextIdx: idx };
+    }
+
+    function parseMapping(lines, startIdx, blockIndent) {
+      var obj = {};
+      var idx = startIdx;
+
+      while (idx < lines.length) {
+        var line = lines[idx];
+        var trimmed = line.trim();
+
+        if (trimmed === '' || trimmed[0] === '#') { idx++; continue; }
+
+        var indent = getIndentLevel(line);
+        if (indent < blockIndent) break;
+        if (indent > blockIndent) {
+          // Unexpected indent — skip or error
+          idx++;
+          continue;
+        }
+
+        // Check for list item at same indent (end of mapping)
+        if (trimmed[0] === '-' && (trimmed.length === 1 || trimmed[1] === ' ')) break;
+
+        var colonIdx = findColon(trimmed);
+        if (colonIdx === -1) break;
+
+        var key = trimmed.substring(0, colonIdx).trim();
+        if ((key[0] === '"' && key[key.length-1] === '"') || (key[0] === "'" && key[key.length-1] === "'")) {
+          key = key.slice(1, -1);
+        }
+        var valStr = trimmed.substring(colonIdx + 1).trim();
+
+        idx++;
+
+        if (valStr === '') {
+          // Value is a block on next lines
+          var childResult = parseBlock(lines, idx, indent + 2);
+          obj[key] = childResult.value;
+          idx = childResult.nextIdx;
+        } else if (valStr[0] === '[') {
+          obj[key] = parseInlineArray(stripComment(valStr), idx);
+        } else if (valStr[0] === '{') {
+          obj[key] = parseInlineObject(stripComment(valStr), idx);
+        } else if (valStr === '|' || valStr === '>' || valStr === '|-' || valStr === '>-' || valStr === '|+' || valStr === '>+') {
+          var multiResult = parseMultilineStringFromNext(lines, idx, valStr, indent);
+          obj[key] = multiResult.value;
+          idx = multiResult.nextIdx;
+        } else {
+          obj[key] = parseScalar(stripComment(valStr));
+        }
+      }
+
+      return { value: obj, nextIdx: idx };
+    }
+
+    function parseMultilineString(lines, startIdx, style, extraOffset) {
+      return parseMultilineStringFromNext(lines, startIdx + 1, style, getIndentLevel(lines[startIdx]));
+    }
+
+    function parseMultilineStringFromNext(lines, startIdx, style, parentIndent) {
+      var idx = startIdx;
+      var contentLines = [];
+      var contentIndent = -1;
+
+      while (idx < lines.length) {
+        var line = lines[idx];
+        if (line.trim() === '') {
+          contentLines.push('');
+          idx++;
+          continue;
+        }
+        var lineIndent = getIndentLevel(line);
+        if (lineIndent <= parentIndent) break;
+
+        if (contentIndent === -1) contentIndent = lineIndent;
+        contentLines.push(line.substring(contentIndent));
+        idx++;
+      }
+
+      // Remove trailing empty lines for clip (default) and strip
+      var chomp = style.indexOf('-') !== -1 ? 'strip' : (style.indexOf('+') !== -1 ? 'keep' : 'clip');
+      var isLiteral = style[0] === '|';
+
+      if (chomp === 'strip') {
+        while (contentLines.length > 0 && contentLines[contentLines.length - 1] === '') contentLines.pop();
+      } else if (chomp === 'clip') {
+        while (contentLines.length > 1 && contentLines[contentLines.length - 1] === '') contentLines.pop();
+      }
+
+      var result;
+      if (isLiteral) {
+        result = contentLines.join('\n');
+      } else {
+        // Folded: replace single newlines with spaces, keep double newlines
+        result = '';
+        for (var i = 0; i < contentLines.length; i++) {
+          if (contentLines[i] === '') {
+            result += '\n';
+          } else if (i > 0 && contentLines[i-1] !== '' && result[result.length-1] !== '\n') {
+            result += ' ' + contentLines[i];
+          } else {
+            result += contentLines[i];
+          }
+        }
+      }
+
+      if (chomp === 'clip' || chomp === 'keep') result += '\n';
+
+      return { value: result, nextIdx: idx };
+    }
+
+    // ===================== YAML Serializer =====================
+    function toYAML(value, indent, level) {
+      if (value === null || value === undefined) return 'null';
+      if (typeof value === 'boolean') return value ? 'true' : 'false';
+      if (typeof value === 'number') {
+        if (value !== value) return '.nan';
+        if (value === Infinity) return '.inf';
+        if (value === -Infinity) return '-.inf';
+        return String(value);
+      }
+      if (typeof value === 'string') return yamlString(value);
+
+      var ind = '';
+      for (var i = 0; i < level; i++) ind += indent;
+      var childInd = ind + indent;
+
+      if (Array.isArray(value)) {
+        if (value.length === 0) return '[]';
+        var lines = [];
+        value.forEach(function(item) {
+          if (item !== null && typeof item === 'object' && !Array.isArray(item)) {
+            var keys = Object.keys(item);
+            if (keys.length > 0) {
+              var firstKey = keys[0];
+              var firstVal = toYAML(item[firstKey], indent, level + 1);
+              var isBlock = typeof item[firstKey] === 'object' && item[firstKey] !== null;
+              var firstLine;
+              if (isBlock) {
+                firstLine = ind + '- ' + yamlString(firstKey) + ':';
+                var blockVal = toYAML(item[firstKey], indent, level + 2);
+                firstLine += '\n' + childInd + indent + blockVal.split('\n').join('\n' + childInd + indent);
+              } else {
+                firstLine = ind + '- ' + yamlString(firstKey) + ': ' + firstVal;
+              }
+              var restLines = [];
+              for (var k = 1; k < keys.length; k++) {
+                var rk = keys[k];
+                var rv = toYAML(item[rk], indent, level + 2);
+                var isBlockR = typeof item[rk] === 'object' && item[rk] !== null;
+                if (isBlockR) {
+                  restLines.push(childInd + yamlString(rk) + ':\n' + childInd + indent + rv.split('\n').join('\n' + childInd + indent));
+                } else {
+                  restLines.push(childInd + yamlString(rk) + ': ' + rv);
+                }
+              }
+              lines.push(firstLine + (restLines.length > 0 ? '\n' + restLines.join('\n') : ''));
+              return;
+            }
+          }
+          var v = toYAML(item, indent, level + 1);
+          if (typeof item === 'object' && item !== null) {
+            lines.push(ind + '-\n' + childInd + v.split('\n').join('\n' + childInd));
+          } else {
+            lines.push(ind + '- ' + v);
+          }
+        });
+        return lines.join('\n').replace(new RegExp('^' + ind), '');
+      }
+
+      if (typeof value === 'object') {
+        var keys = Object.keys(value);
+        if (keys.length === 0) return '{}';
+        var lines = [];
+        keys.forEach(function(key) {
+          var v = value[key];
+          var vStr = toYAML(v, indent, level + 1);
+          var isBlock = typeof v === 'object' && v !== null;
+          if (isBlock) {
+            lines.push(ind + yamlString(key) + ':\n' + childInd + vStr.split('\n').join('\n' + childInd));
+          } else {
+            lines.push(ind + yamlString(key) + ': ' + vStr);
+          }
+        });
+        return lines.join('\n').replace(new RegExp('^' + ind), '');
+      }
+
+      return String(value);
+    }
+
+    function yamlString(str) {
+      if (typeof str !== 'string') return String(str);
+      // Check if it needs quoting
+      if (str === '') return "''";
+      if (str === 'null' || str === 'true' || str === 'false' || str === '~' ||
+          str === 'Null' || str === 'True' || str === 'False' ||
+          str === 'NULL' || str === 'TRUE' || str === 'FALSE') {
+        return "'" + str + "'";
+      }
+      if (/^-?\d+(\.\d+)?$/.test(str) || /^0x/.test(str) || /^0o/.test(str)) {
+        return "'" + str + "'";
+      }
+      if (/[:{}\[\],&*?|>!%@`#\n\r]/.test(str) || str[0] === ' ' || str[str.length-1] === ' ') {
+        if (str.indexOf("'") === -1) return "'" + str + "'";
+        return '"' + str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
+      }
+      return str;
+    }
+
+    // ===================== Line Numbers =====================
+    function updateLineNumbers() {
+      var text = inputEl.value;
+      var lineCount = text.split('\n').length;
+      var nums = [];
+      for (var i = 1; i <= lineCount; i++) nums.push(i);
+      lineNumEl.textContent = nums.join('\n');
+    }
+
+    inputEl.addEventListener('input', updateLineNumbers);
+    inputEl.addEventListener('scroll', function() {
+      lineNumEl.style.transform = 'translateY(-' + inputEl.scrollTop + 'px)';
+    });
+
+    // ===================== Actions =====================
+
+    function getIndentStr() {
+      return parseInt(indentEl.value, 10);
+    }
+
+    function doValidate() {
+      hideMsg(msgEl);
+      errorEl.innerHTML = '';
+      var input = inputEl.value;
+      if (!input.trim()) {
+        showMsg(msgEl, 'error', 'Please paste some YAML first.');
+        return;
+      }
+
+      try {
+        var parsed = parseYAML(input);
+        outputEl.value = input;
+        statsEl.innerHTML = '<span class="valid">&#10003; Valid YAML</span>';
+        showMsg(msgEl, 'success', 'YAML is valid!');
+      } catch (e) {
+        statsEl.innerHTML = '<span class="invalid">&#10007; Invalid YAML</span>';
+        var errHtml = '<div class="error-line">';
+        if (e.line) errHtml += '<span class="error-loc">Line ' + e.line + ':</span> ';
+        errHtml += escapeHtml(e.message) + '</div>';
+        errorEl.innerHTML = errHtml;
+        outputEl.value = '';
+      }
+    }
+
+    function doFormat() {
+      hideMsg(msgEl);
+      errorEl.innerHTML = '';
+      var input = inputEl.value;
+      if (!input.trim()) {
+        showMsg(msgEl, 'error', 'Please paste some YAML first.');
+        return;
+      }
+
+      try {
+        var parsed = parseYAML(input);
+        var indentNum = getIndentStr();
+        var indentStr = new Array(indentNum + 1).join(' ');
+        var result = toYAML(parsed, indentStr, 0);
+        outputEl.value = result + '\n';
+        statsEl.innerHTML = '<span class="valid">&#10003; Valid YAML &middot; Formatted</span>';
+      } catch (e) {
+        statsEl.innerHTML = '<span class="invalid">&#10007; Invalid YAML</span>';
+        var errHtml = '<div class="error-line">';
+        if (e.line) errHtml += '<span class="error-loc">Line ' + e.line + ':</span> ';
+        errHtml += escapeHtml(e.message) + '</div>';
+        errorEl.innerHTML = errHtml;
+        outputEl.value = '';
+      }
+    }
+
+    function doYAMLtoJSON() {
+      hideMsg(msgEl);
+      errorEl.innerHTML = '';
+      var input = inputEl.value;
+      if (!input.trim()) {
+        showMsg(msgEl, 'error', 'Please paste some YAML first.');
+        return;
+      }
+
+      try {
+        var parsed = parseYAML(input);
+        var indentNum = getIndentStr();
+        outputEl.value = JSON.stringify(parsed, null, indentNum);
+        statsEl.innerHTML = '<span class="valid">&#10003; Converted to JSON</span>';
+      } catch (e) {
+        statsEl.innerHTML = '<span class="invalid">&#10007; Invalid YAML</span>';
+        var errHtml = '<div class="error-line">';
+        if (e.line) errHtml += '<span class="error-loc">Line ' + e.line + ':</span> ';
+        errHtml += escapeHtml(e.message) + '</div>';
+        errorEl.innerHTML = errHtml;
+        outputEl.value = '';
+      }
+    }
+
+    function doJSONtoYAML() {
+      hideMsg(msgEl);
+      errorEl.innerHTML = '';
+      var input = inputEl.value;
+      if (!input.trim()) {
+        showMsg(msgEl, 'error', 'Please paste some JSON first.');
+        return;
+      }
+
+      try {
+        var parsed = JSON.parse(input);
+        var indentNum = getIndentStr();
+        var indentStr = new Array(indentNum + 1).join(' ');
+        var result = toYAML(parsed, indentStr, 0);
+        outputEl.value = result + '\n';
+        statsEl.innerHTML = '<span class="valid">&#10003; Converted to YAML</span>';
+      } catch (e) {
+        statsEl.innerHTML = '<span class="invalid">&#10007; Invalid JSON</span>';
+        var errHtml = '<div class="error-line">' + escapeHtml('JSON parse error: ' + e.message) + '</div>';
+        errorEl.innerHTML = errHtml;
+        outputEl.value = '';
+      }
+    }
+
+    var EXAMPLE_YAML = "# Docker Compose configuration\nversion: '3.8'\n\nservices:\n  web:\n    image: nginx:alpine\n    ports:\n      - '80:80'\n      - '443:443'\n    volumes:\n      - ./html:/usr/share/nginx/html\n      - ./nginx.conf:/etc/nginx/nginx.conf\n    environment:\n      NODE_ENV: production\n      DEBUG: false\n      MAX_CONNECTIONS: 1000\n    depends_on:\n      - api\n      - redis\n    deploy:\n      replicas: 3\n      resources:\n        limits:\n          cpus: '0.5'\n          memory: 256M\n    labels:\n      - traefik.enable=true\n      - traefik.http.routers.web.rule=Host(`example.com`)\n\n  api:\n    build:\n      context: ./api\n      dockerfile: Dockerfile\n    ports:\n      - '3000:3000'\n    environment:\n      DATABASE_URL: postgresql://user:pass@db:5432/myapp\n      REDIS_URL: redis://redis:6379\n      SECRET_KEY: change-me-in-production\n    healthcheck:\n      test: [\"CMD\", \"curl\", \"-f\", \"http://localhost:3000/health\"]\n      interval: 30s\n      timeout: 10s\n      retries: 3\n\n  db:\n    image: postgres:15\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n    environment:\n      POSTGRES_DB: myapp\n      POSTGRES_USER: user\n      POSTGRES_PASSWORD: pass\n\n  redis:\n    image: redis:7-alpine\n    command: redis-server --maxmemory 128mb\n\nvolumes:\n  pgdata:\n    driver: local";
+
+    // Button bindings
+    document.getElementById('btn-validate').addEventListener('click', doValidate);
+    document.getElementById('btn-format').addEventListener('click', doFormat);
+    document.getElementById('btn-yaml-to-json').addEventListener('click', doYAMLtoJSON);
+    document.getElementById('btn-json-to-yaml').addEventListener('click', doJSONtoYAML);
+
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (!outputEl.value.trim()) return;
+      copyToClipboard(outputEl.value, this);
+    });
+
+    document.getElementById('btn-example').addEventListener('click', function () {
+      inputEl.value = EXAMPLE_YAML;
+      outputEl.value = '';
+      statsEl.innerHTML = '';
+      errorEl.innerHTML = '';
+      hideMsg(msgEl);
+      updateLineNumbers();
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      inputEl.value = '';
+      outputEl.value = '';
+      statsEl.innerHTML = '';
+      errorEl.innerHTML = '';
+      hideMsg(msgEl);
+      updateLineNumbers();
+    });
+
+    bindCtrlEnter(doValidate);
+    updateLineNumbers();
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
