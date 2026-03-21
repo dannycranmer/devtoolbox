@@ -774,6 +774,21 @@ select:focus-visible {
   color: var(--text-muted);
 }
 
+.footer-github {
+  margin-bottom: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.footer-github a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-github a:hover {
+  color: var(--accent);
+}
+
 /* === KEYBOARD SHORTCUT HINT === */
 .shortcut-hint {
   font-size: 0.7rem;
