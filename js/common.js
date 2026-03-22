@@ -6,9 +6,9 @@
   var toggle = document.querySelector('.nav-toggle');
   var navLinks = document.querySelector('.nav-links');
   var nav = document.querySelector('.nav');
-  var VISIBLE_DESKTOP = 8;
+  var VISIBLE_DESKTOP = 6;
 
-  /* --- Desktop "More" dropdown --- */
+  /* --- Desktop "More" mega-dropdown --- */
   function buildMoreDropdown() {
     if (document.querySelector('.nav-more')) return;
     if (!navLinks) return;
@@ -28,7 +28,7 @@
     moreLi.className = 'nav-more';
     var moreBtn = document.createElement('button');
     moreBtn.className = 'nav-more-btn';
-    moreBtn.textContent = 'More \u25BE';
+    moreBtn.innerHTML = 'All Tools <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     moreBtn.setAttribute('aria-expanded', 'false');
     moreLi.appendChild(moreBtn);
 
