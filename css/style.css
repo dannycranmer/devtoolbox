@@ -86,11 +86,7 @@ body {
 }
 
 .nav-links {
-  display: flex;
-  align-items: center;
-  gap: 0.125rem;
-  list-style: none;
-  flex: 1;
+  display: none !important;
 }
 
 .nav-links a {
@@ -142,7 +138,7 @@ body {
 
 /* --- Hamburger toggle (CSS-only animated icon) --- */
 .nav-toggle {
-  display: none;
+  display: flex;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   cursor: pointer;
@@ -159,6 +155,7 @@ body {
   position: relative;
   z-index: 110;
   transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  margin-left: auto;
 }
 
 .nav-toggle:hover {
@@ -236,22 +233,36 @@ body {
 
 .mobile-nav {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  width: 100%;
+  max-width: 420px;
   z-index: 200;
   background: var(--bg-primary);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  opacity: 0;
   pointer-events: none;
-  transform: translateY(-12px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  opacity: 0;
   padding: 0 1rem 2rem;
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.4);
 }
 .mobile-nav.open {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(0);
+  transform: translateX(0);
+}
+@media (max-width: 480px) {
+  .mobile-nav {
+    max-width: 100%;
+    border-left: none;
+    box-shadow: none;
+  }
 }
 
 .mobile-nav-header {
@@ -330,11 +341,11 @@ body {
 
 .mobile-nav-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0.4rem;
 }
-@media (min-width: 400px) {
-  .mobile-nav-grid { grid-template-columns: 1fr 1fr; }
+@media (max-width: 360px) {
+  .mobile-nav-grid { grid-template-columns: 1fr; }
 }
 
 .mobile-nav-item {
@@ -1416,16 +1427,7 @@ select:focus-visible {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@media (max-width: 1200px) {
-  .nav-toggle {
-    display: flex;
-  }
-
-  /* Hide desktop nav links on mobile — mobile-nav takes over */
-  .nav-links {
-    display: none !important;
-  }
-}
+/* nav-toggle always visible, nav-links always hidden — hamburger menu on all screen sizes */
 
 @media (max-width: 768px) {
   .hero h1 {

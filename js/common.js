@@ -4,60 +4,9 @@
   'use strict';
 
   var toggle = document.querySelector('.nav-toggle');
-  var navLinks = document.querySelector('.nav-links');
   var nav = document.querySelector('.nav');
-  var VISIBLE_DESKTOP = 6;
 
-  /* --- Desktop "More" mega-dropdown --- */
-  function buildMoreDropdown() {
-    if (document.querySelector('.nav-more')) return;
-    if (!navLinks) return;
-
-    var items = Array.from(navLinks.querySelectorAll(':scope > li'));
-    var coffeeItem = null;
-    var toolItems = [];
-    items.forEach(function (li) {
-      if (li.querySelector('.nav-coffee')) coffeeItem = li;
-      else toolItems.push(li);
-    });
-
-    if (toolItems.length <= VISIBLE_DESKTOP) return;
-
-    var overflowItems = toolItems.slice(VISIBLE_DESKTOP);
-    var moreLi = document.createElement('li');
-    moreLi.className = 'nav-more';
-    var moreBtn = document.createElement('button');
-    moreBtn.className = 'nav-more-btn';
-    moreBtn.innerHTML = 'All Tools <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left:2px"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    moreBtn.setAttribute('aria-expanded', 'false');
-    moreLi.appendChild(moreBtn);
-
-    var moreDropdown = document.createElement('ul');
-    moreDropdown.className = 'nav-more-dropdown';
-    var hasActive = false;
-    overflowItems.forEach(function (li) {
-      if (li.querySelector('.active')) hasActive = true;
-      moreDropdown.appendChild(li);
-    });
-    moreLi.appendChild(moreDropdown);
-    if (hasActive) moreLi.classList.add('has-active');
-
-    if (coffeeItem) navLinks.insertBefore(moreLi, coffeeItem);
-    else navLinks.appendChild(moreLi);
-
-    moreBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var isOpen = moreLi.classList.toggle('open');
-      moreBtn.setAttribute('aria-expanded', String(isOpen));
-    });
-
-    document.addEventListener('click', function () {
-      moreLi.classList.remove('open');
-      moreBtn.setAttribute('aria-expanded', 'false');
-    });
-  }
-
-  /* --- Mobile full-screen categorized nav (generated from JS) --- */
+  /* --- Full-screen categorized nav (hamburger menu for all screen sizes) --- */
   function initMobileNav() {
     if (!nav || !toggle) return;
 
@@ -188,7 +137,6 @@
   }
 
   // Init
-  buildMoreDropdown();
   initMobileNav();
 
   /* --- Copy to clipboard --- */
