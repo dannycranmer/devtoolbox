@@ -6,6 +6,17 @@
   <title>DevBrew — Free Online Developer Tools</title>
   <meta name="description" content="Free, fast, private developer utilities. JSON formatter, Base64 encoder, JWT decoder, Regex tester. No tracking, no ads, works offline.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="canonical" href="https://devbrew.org/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://devbrew.org/">
+  <meta property="og:title" content="DevBrew — Free Online Developer Tools">
+  <meta property="og:description" content="Free, fast, private developer utilities. JSON formatter, Base64 encoder, JWT decoder, Regex tester. No tracking, no ads, works offline.">
+  <meta property="og:image" content="https://devbrew.org/og-image.png">
+  <meta property="og:site_name" content="DevBrew">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DevBrew — Free Online Developer Tools">
+  <meta name="twitter:description" content="Free, fast, private developer utilities. JSON formatter, Base64 encoder, JWT decoder, Regex tester. No tracking, no ads, works offline.">
+  <meta name="twitter:image" content="https://devbrew.org/og-image.png">
   <link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
@@ -52,138 +63,153 @@
       <p>Fast, free, offline-capable utilities. Everything runs in your browser. No data ever leaves your machine.</p>
     </section>
 
-    <div class="tool-grid">
-      <a href="json-formatter.html" class="tool-card">
+    <div class="tool-filter">
+      <div class="tool-search-wrap">
+        <svg class="tool-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="toolSearch" class="tool-search" placeholder="Search 27 tools..." autocomplete="off">
+      </div>
+      <div class="tool-categories" role="tablist">
+        <button class="cat-pill active" data-cat="all" role="tab" aria-selected="true">All <span class="cat-count">27</span></button>
+        <button class="cat-pill" data-cat="data" role="tab">Data Formats</button>
+        <button class="cat-pill" data-cat="code" role="tab">Code Tools</button>
+        <button class="cat-pill" data-cat="generators" role="tab">Generators</button>
+        <button class="cat-pill" data-cat="utilities" role="tab">Utilities</button>
+      </div>
+    </div>
+
+    <div class="tool-grid" id="toolGrid">
+      <a href="json-formatter.html" class="tool-card" data-cat="data" data-keywords="json format validate minify beautify">
         <div class="tool-card-icon" aria-hidden="true">{ }</div>
         <h2>JSON Formatter</h2>
         <p>Format, validate, and minify JSON with syntax highlighting and tree view.</p>
       </a>
-      <a href="base64.html" class="tool-card">
+      <a href="base64.html" class="tool-card" data-cat="data" data-keywords="base64 encode decode binary text">
         <div class="tool-card-icon" aria-hidden="true">&#9879;</div>
         <h2>Base64 Encoder/Decoder</h2>
         <p>Encode and decode Base64 strings. Supports URL-safe variant and file uploads.</p>
       </a>
-      <a href="jwt-decoder.html" class="tool-card">
+      <a href="jwt-decoder.html" class="tool-card" data-cat="data" data-keywords="jwt token decode auth claims payload">
         <div class="tool-card-icon" aria-hidden="true">&#128273;</div>
         <h2>JWT Decoder</h2>
         <p>Decode JWT tokens. View header, payload, expiry status, and claims.</p>
       </a>
-      <a href="regex-tester.html" class="tool-card">
+      <a href="regex-tester.html" class="tool-card" data-cat="code" data-keywords="regex regexp pattern match test">
         <div class="tool-card-icon" aria-hidden="true">.*</div>
         <h2>Regex Tester</h2>
         <p>Test regular expressions with live highlighting, match groups, and common patterns.</p>
       </a>
-      <a href="url-encoder.html" class="tool-card">
+      <a href="url-encoder.html" class="tool-card" data-cat="data" data-keywords="url encode decode percent query">
         <div class="tool-card-icon" aria-hidden="true">%</div>
         <h2>URL Encoder/Decoder</h2>
         <p>Encode and decode URLs with component parsing and query parameter breakdown.</p>
       </a>
-      <a href="hash-generator.html" class="tool-card">
+      <a href="hash-generator.html" class="tool-card" data-cat="generators" data-keywords="hash md5 sha sha256 sha512 checksum">
         <div class="tool-card-icon" aria-hidden="true">#</div>
         <h2>Hash Generator</h2>
         <p>Generate MD5, SHA-1, SHA-256, and SHA-512 hashes from text or files.</p>
       </a>
-      <a href="color-picker.html" class="tool-card">
+      <a href="color-picker.html" class="tool-card" data-cat="utilities" data-keywords="color hex rgb hsl picker converter">
         <div class="tool-card-icon" aria-hidden="true">&#127912;</div>
         <h2>Color Picker &amp; Converter</h2>
         <p>Pick colors and convert between HEX, RGB, and HSL. Preview swatches and contrast ratios.</p>
       </a>
-      <a href="timestamp.html" class="tool-card">
+      <a href="timestamp.html" class="tool-card" data-cat="utilities" data-keywords="unix timestamp epoch date time converter">
         <div class="tool-card-icon" aria-hidden="true">&#128339;</div>
         <h2>Unix Timestamp Converter</h2>
         <p>Convert between Unix epoch timestamps and human-readable dates. Live clock with UTC and local time.</p>
       </a>
-      <a href="diff-checker.html" class="tool-card">
+      <a href="diff-checker.html" class="tool-card" data-cat="code" data-keywords="diff compare text difference merge">
         <div class="tool-card-icon" aria-hidden="true">&#177;</div>
         <h2>Diff Checker</h2>
         <p>Compare two texts side by side. See added, removed, and unchanged lines with highlighting and stats.</p>
       </a>
-      <a href="cron-builder.html" class="tool-card">
+      <a href="cron-builder.html" class="tool-card" data-cat="utilities" data-keywords="cron schedule job expression builder">
         <div class="tool-card-icon" aria-hidden="true">&#128336;</div>
         <h2>Cron Expression Builder</h2>
         <p>Build cron expressions visually with live preview, human-readable descriptions, and next run times.</p>
       </a>
-      <a href="cron-parser.html" class="tool-card">
+      <a href="cron-parser.html" class="tool-card" data-cat="utilities" data-keywords="cron parse explain schedule next run">
         <div class="tool-card-icon" aria-hidden="true">&#128269;</div>
         <h2>Cron Expression Parser</h2>
         <p>Parse cron expressions into human-readable explanations. See next 5 run times. Supports 5 &amp; 6-field cron.</p>
       </a>
-      <a href="markdown.html" class="tool-card">
+      <a href="markdown.html" class="tool-card" data-cat="code" data-keywords="markdown editor preview md write">
         <div class="tool-card-icon" aria-hidden="true">&#9997;</div>
         <h2>Markdown Editor &amp; Preview</h2>
         <p>Write Markdown with a live side-by-side preview. Copy rendered HTML or source. No dependencies.</p>
       </a>
-      <a href="lorem-ipsum.html" class="tool-card">
+      <a href="lorem-ipsum.html" class="tool-card" data-cat="generators" data-keywords="lorem ipsum placeholder text dummy">
         <div class="tool-card-icon" aria-hidden="true">&#182;</div>
         <h2>Lorem Ipsum Generator</h2>
         <p>Generate placeholder text by paragraphs, sentences, or words. Copy to clipboard instantly.</p>
       </a>
-      <a href="uuid-generator.html" class="tool-card">
+      <a href="uuid-generator.html" class="tool-card" data-cat="generators" data-keywords="uuid guid unique id v4 generate">
         <div class="tool-card-icon" aria-hidden="true">&#128273;</div>
         <h2>UUID Generator</h2>
         <p>Generate UUID v4 identifiers. Bulk generate 1&ndash;100, with or without hyphens, copy to clipboard.</p>
       </a>
-      <a href="css-minifier.html" class="tool-card">
+      <a href="css-minifier.html" class="tool-card" data-cat="code" data-keywords="css minify beautify compress format">
         <div class="tool-card-icon" aria-hidden="true">{ }</div>
         <h2>CSS Minifier &amp; Beautifier</h2>
         <p>Minify or beautify CSS with one click. See size reduction percentage, copy to clipboard.</p>
       </a>
-      <a href="js-minifier.html" class="tool-card">
+      <a href="js-minifier.html" class="tool-card" data-cat="code" data-keywords="javascript js minify beautify compress format">
         <div class="tool-card-icon" aria-hidden="true">JS</div>
         <h2>JavaScript Minifier &amp; Beautifier</h2>
         <p>Minify or beautify JavaScript with one click. See size reduction percentage, copy to clipboard.</p>
       </a>
-      <a href="html-entity.html" class="tool-card">
+      <a href="html-entity.html" class="tool-card" data-cat="data" data-keywords="html entity encode decode amp special characters">
         <div class="tool-card-icon" aria-hidden="true">&amp;</div>
         <h2>HTML Entity Encoder/Decoder</h2>
         <p>Encode special characters to HTML entities and decode back. Named, decimal, and hex formats.</p>
       </a>
-      <a href="password-generator.html" class="tool-card">
+      <a href="password-generator.html" class="tool-card" data-cat="generators" data-keywords="password generate secure strong random">
         <div class="tool-card-icon" aria-hidden="true">&#128274;</div>
         <h2>Password Generator</h2>
         <p>Generate strong, secure passwords. Adjustable length, character sets, strength meter, bulk generate.</p>
       </a>
-      <a href="sql-formatter.html" class="tool-card">
+      <a href="sql-formatter.html" class="tool-card" data-cat="code" data-keywords="sql format beautify minify query mysql postgres">
         <div class="tool-card-icon" aria-hidden="true">&#128451;</div>
         <h2>SQL Formatter &amp; Beautifier</h2>
         <p>Format, beautify, and minify SQL queries. Syntax highlighting. MySQL, PostgreSQL, SQLite support.</p>
       </a>
-      <a href="yaml-formatter.html" class="tool-card">
+      <a href="yaml-formatter.html" class="tool-card" data-cat="data" data-keywords="yaml validate format json convert">
         <div class="tool-card-icon" aria-hidden="true">&#128196;</div>
         <h2>YAML Validator &amp; Formatter</h2>
         <p>Validate YAML syntax, format/beautify, convert between YAML and JSON. Error highlighting.</p>
       </a>
-      <a href="gradient-generator.html" class="tool-card">
+      <a href="gradient-generator.html" class="tool-card" data-cat="generators" data-keywords="css gradient linear radial color stops">
         <div class="tool-card-icon" aria-hidden="true">&#127912;</div>
         <h2>CSS Gradient Generator</h2>
         <p>Create beautiful CSS gradients visually. Linear &amp; radial, color stops, direction picker, copy CSS with vendor prefixes.</p>
       </a>
-      <a href="og-generator.html" class="tool-card">
+      <a href="og-generator.html" class="tool-card" data-cat="generators" data-keywords="open graph og meta tags twitter card social">
         <div class="tool-card-icon" aria-hidden="true">&#128279;</div>
         <h2>Open Graph Meta Tag Generator</h2>
         <p>Generate OG &amp; Twitter Card meta tags. Live preview for Facebook, Twitter, LinkedIn. Copy all tags.</p>
       </a>
-      <a href="csv-viewer.html" class="tool-card">
+      <a href="csv-viewer.html" class="tool-card" data-cat="data" data-keywords="csv viewer editor table spreadsheet sort filter">
         <div class="tool-card-icon" aria-hidden="true">&#128203;</div>
         <h2>CSV Viewer &amp; Editor</h2>
         <p>Upload, view, sort, filter, and edit CSV files. Add/delete rows and columns, export modified CSV.</p>
       </a>
-      <a href="svg-optimizer.html" class="tool-card">
+      <a href="svg-optimizer.html" class="tool-card" data-cat="utilities" data-keywords="svg optimize clean minify metadata remove">
         <div class="tool-card-icon" aria-hidden="true">&#9998;</div>
         <h2>SVG Optimizer</h2>
         <p>Optimize SVG files by removing metadata, comments, empty elements. Prettify or minify. Live preview.</p>
       </a>
-      <a href="favicon-generator.html" class="tool-card">
+      <a href="favicon-generator.html" class="tool-card" data-cat="generators" data-keywords="favicon ico png generate image icon">
         <div class="tool-card-icon" aria-hidden="true">&#127912;</div>
         <h2>Favicon Generator</h2>
         <p>Generate favicon.ico + PNG favicons from images, text, or emoji. Download all sizes as a ZIP file.</p>
       </a>
-      <a href="chart-generator.html" class="tool-card">
+      <a href="chart-generator.html" class="tool-card" data-cat="generators" data-keywords="chart graph bar line pie doughnut csv visualize">
         <div class="tool-card-icon" aria-hidden="true">&#128202;</div>
         <h2>Chart &amp; Graph Generator</h2>
         <p>Create bar, line, pie, and doughnut charts from CSV data. Customize colors and styles. Export as PNG or SVG.</p>
       </a>
     </div>
+    <p class="tool-no-results" id="noResults" style="display:none;">No tools match your search. Try a different keyword.</p>
   </main>
 
   <footer class="footer">
@@ -201,6 +227,45 @@
     Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
   </footer>
 
+  <script>
+  (function() {
+    const search = document.getElementById('toolSearch');
+    const grid = document.getElementById('toolGrid');
+    const cards = Array.from(grid.querySelectorAll('.tool-card'));
+    const pills = document.querySelectorAll('.cat-pill');
+    const noResults = document.getElementById('noResults');
+    let activeCat = 'all';
+
+    function filterTools() {
+      const q = search.value.toLowerCase().trim();
+      let visible = 0;
+      cards.forEach(card => {
+        const title = card.querySelector('h2').textContent.toLowerCase();
+        const desc = card.querySelector('p').textContent.toLowerCase();
+        const kw = (card.dataset.keywords || '').toLowerCase();
+        const cat = card.dataset.cat;
+        const matchSearch = !q || title.includes(q) || desc.includes(q) || kw.includes(q);
+        const matchCat = activeCat === 'all' || cat === activeCat;
+        const show = matchSearch && matchCat;
+        card.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
+      noResults.style.display = visible === 0 ? '' : 'none';
+    }
+
+    search.addEventListener('input', filterTools);
+
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        pills.forEach(p => { p.classList.remove('active'); p.setAttribute('aria-selected', 'false'); });
+        pill.classList.add('active');
+        pill.setAttribute('aria-selected', 'true');
+        activeCat = pill.dataset.cat;
+        filterTools();
+      });
+    });
+  })();
+  </script>
   <script src="js/common.js?v=11"></script>
   <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>

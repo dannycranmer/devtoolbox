@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="50%" style="stop-color:#0d0d1a"/>
+      <stop offset="100%" style="stop-color:#0a0a0f"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:0.15"/>
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:0.08"/>
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.04" stroke="#6366f1" stroke-width="0.5">
+    <line x1="0" y1="0" x2="0" y2="630"/><line x1="60" y1="0" x2="60" y2="630"/>
+    <line x1="120" y1="0" x2="120" y2="630"/><line x1="180" y1="0" x2="180" y2="630"/>
+    <line x1="240" y1="0" x2="240" y2="630"/><line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="360" y1="0" x2="360" y2="630"/><line x1="420" y1="0" x2="420" y2="630"/>
+    <line x1="480" y1="0" x2="480" y2="630"/><line x1="540" y1="0" x2="540" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/><line x1="660" y1="0" x2="660" y2="630"/>
+    <line x1="720" y1="0" x2="720" y2="630"/><line x1="780" y1="0" x2="780" y2="630"/>
+    <line x1="840" y1="0" x2="840" y2="630"/><line x1="900" y1="0" x2="900" y2="630"/>
+    <line x1="960" y1="0" x2="960" y2="630"/><line x1="1020" y1="0" x2="1020" y2="630"/>
+    <line x1="1080" y1="0" x2="1080" y2="630"/><line x1="1140" y1="0" x2="1140" y2="630"/>
+    <line x1="1200" y1="0" x2="1200" y2="630"/>
+    <line x1="0" y1="0" x2="1200" y2="0"/><line x1="0" y1="60" x2="1200" y2="60"/>
+    <line x1="0" y1="120" x2="1200" y2="120"/><line x1="0" y1="180" x2="1200" y2="180"/>
+    <line x1="0" y1="240" x2="1200" y2="240"/><line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="360" x2="1200" y2="360"/><line x1="0" y1="420" x2="1200" y2="420"/>
+    <line x1="0" y1="480" x2="1200" y2="480"/><line x1="0" y1="540" x2="1200" y2="540"/>
+    <line x1="0" y1="600" x2="1200" y2="600"/>
+  </g>
+
+  <!-- Glow effect behind text -->
+  <ellipse cx="600" cy="280" rx="400" ry="200" fill="url(#glow)"/>
+
+  <!-- Code bracket decorations - left -->
+  <text x="80" y="320" font-family="monospace" font-size="180" font-weight="300" fill="#6366f1" opacity="0.12">{</text>
+
+  <!-- Code bracket decorations - right -->
+  <text x="1020" y="320" font-family="monospace" font-size="180" font-weight="300" fill="#8b5cf6" opacity="0.12">}</text>
+
+  <!-- Decorative code snippets - top left -->
+  <text x="100" y="100" font-family="monospace" font-size="14" fill="#6366f1" opacity="0.15">const tools = await import('devbrew');</text>
+  <text x="100" y="120" font-family="monospace" font-size="14" fill="#8b5cf6" opacity="0.12">tools.format({ json, yaml, sql });</text>
+
+  <!-- Decorative code snippets - bottom right -->
+  <text x="750" y="540" font-family="monospace" font-size="14" fill="#6366f1" opacity="0.15">export default { encode, decode, hash };</text>
+  <text x="750" y="560" font-family="monospace" font-size="14" fill="#8b5cf6" opacity="0.12">// 25+ free tools for developers</text>
+
+  <!-- Accent line above title -->
+  <rect x="500" y="210" width="200" height="3" rx="1.5" fill="url(#accent)" opacity="0.6"/>
+
+  <!-- Main title: DevBrew -->
+  <text x="600" y="310" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="96" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="-2">DevBrew</text>
+
+  <!-- Tagline -->
+  <text x="600" y="370" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="400" fill="#a0a0b8" text-anchor="middle" letter-spacing="4">Free Developer Tools</text>
+
+  <!-- Accent line below tagline -->
+  <rect x="500" y="395" width="200" height="3" rx="1.5" fill="url(#accent)" opacity="0.6"/>
+
+  <!-- URL -->
+  <text x="600" y="450" font-family="monospace" font-size="18" fill="#6366f1" text-anchor="middle" opacity="0.7">devbrew.dev</text>
+
+  <!-- Top border accent -->
+  <rect x="0" y="0" width="1200" height="3" fill="url(#accent)"/>
+
+  <!-- Bottom border accent -->
+  <rect x="0" y="627" width="1200" height="3" fill="url(#accent)"/>
+</svg>
