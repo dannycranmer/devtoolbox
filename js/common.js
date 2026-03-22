@@ -30,7 +30,8 @@
       { href: 'favicon-generator.html', icon: '\u2B50', label: 'Favicon' },
       { href: 'gradient-generator.html', icon: '\uD83C\uDF1F', label: 'Gradient' },
       { href: 'og-generator.html', icon: '\uD83D\uDCE2', label: 'OG Meta' },
-      { href: 'chart-generator.html', icon: '\uD83D\uDCC8', label: 'Charts' }
+      { href: 'chart-generator.html', icon: '\uD83D\uDCC8', label: 'Charts' },
+      { href: 'qrcode.html', icon: '\uD83D\uDD33', label: 'QR Code' }
     ]},
     { title: '\uD83D\uDD04 Converters', items: [
       { href: 'markdown.html', icon: '\u270D\uFE0F', label: 'Markdown' },
