@@ -948,11 +948,13 @@ select:focus-visible {
   .nav-links {
     /* Use display:none for reliability — no invisible overlays */
     display: none !important;
-    position: fixed;
+    /* Use absolute (not fixed) because backdrop-filter on .nav creates a
+       new containing block that breaks position:fixed in most browsers. */
+    position: absolute;
     top: 56px;
     left: 0;
     right: 0;
-    bottom: 0;
+    height: calc(100vh - 56px);
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border);
     flex-direction: column;
