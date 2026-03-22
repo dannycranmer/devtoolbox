@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon Generator Online Free &mdash; DevToolbox</title>
+  <meta name="description" content="Generate favicons from images, text, or emoji. Download favicon.ico + PNG favicons (16x16 to 512x512) as a ZIP. Free, private — runs entirely in your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css?v=4">
+  <style>
+    .fav-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    .fav-tab {
+      padding: 0.625rem 1.25rem;
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .fav-tab:hover { color: var(--text-secondary); }
+    .fav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .fav-panel { display: none; }
+    .fav-panel.active { display: block; }
+
+    /* Upload panel */
+    .fav-drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 3rem 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      transition: all var(--transition);
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    .fav-drop-zone:hover,
+    .fav-drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--text-secondary);
+    }
+    .fav-drop-zone input[type="file"] { display: none; }
+    .fav-drop-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .fav-drop-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.375rem; }
+
+    /* Text panel */
+    .text-config {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .text-config-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+    }
+    .text-config-field label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+    .text-config-field input[type="text"],
+    .text-config-field input[type="color"],
+    .text-config-field input[type="number"],
+    .text-config-field select {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+    }
+    .text-config-field input[type="color"] {
+      height: 42px;
+      padding: 4px;
+      cursor: pointer;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .text-input-large {
+      font-size: 3rem !important;
+      text-align: center;
+      padding: 0.5rem !important;
+      font-family: var(--font-sans) !important;
+    }
+
+    /* Canvas preview */
+    .fav-preview-section {
+      margin-top: 1.5rem;
+    }
+    .fav-canvas-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 1rem;
+      min-height: 200px;
+    }
+    .fav-canvas-preview canvas {
+      border-radius: var(--radius-sm);
+      image-rendering: pixelated;
+    }
+    .fav-source-canvas {
+      max-width: 256px;
+      max-height: 256px;
+      border: 1px solid var(--border);
+    }
+
+    /* Output sizes grid */
+    .fav-sizes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .fav-size-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .fav-size-card canvas {
+      border-radius: 2px;
+      background: repeating-conic-gradient(#222 0% 25%, #333 0% 50%) 50% / 8px 8px;
+    }
+    .fav-size-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+    .fav-size-use {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
+    /* Download section */
+    .fav-download-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 768px) {
+      .text-config {
+        grid-template-columns: 1fr;
+      }
+      .fav-sizes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span class="nav-toggle-icon"><span></span></span></button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="csv-viewer.html" role="menuitem">CSV</a></li>
+        <li><a href="svg-optimizer.html" role="menuitem">SVG</a></li>
+        <li><a href="favicon-generator.html" class="active" role="menuitem">Favicon</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Favicon Generator</h1>
+      <p>Generate favicon.ico + PNG favicons from an image, text, or emoji. Download all sizes as a ZIP file.</p>
+    </div>
+
+    <div class="fav-tabs">
+      <button class="fav-tab active" data-tab="upload">Upload Image</button>
+      <button class="fav-tab" data-tab="text">Text / Emoji</button>
+    </div>
+
+    <!-- Upload Panel -->
+    <div class="fav-panel active" id="panel-upload">
+      <div class="fav-drop-zone" id="dropZone">
+        <div class="fav-drop-icon">&#128444;</div>
+        <div>Drop an image here or <strong>click to browse</strong></div>
+        <div class="fav-drop-hint">PNG, JPG, SVG, GIF &mdash; any size, square recommended</div>
+        <input type="file" id="fileInput" accept="image/*">
+      </div>
+    </div>
+
+    <!-- Text Panel -->
+    <div class="fav-panel" id="panel-text">
+      <div class="text-config">
+        <div class="text-config-field">
+          <label for="textChar">Character / Emoji</label>
+          <input type="text" id="textChar" class="text-input-large" value="D" maxlength="2" placeholder="A">
+        </div>
+        <div class="text-config-field">
+          <label for="bgColor">Background Color</label>
+          <input type="color" id="bgColor" value="#0ea5e9">
+        </div>
+        <div class="text-config-field">
+          <label for="textColor">Text Color</label>
+          <input type="color" id="textColor" value="#ffffff">
+        </div>
+        <div class="text-config-field">
+          <label for="fontFamily">Font</label>
+          <select id="fontFamily">
+            <option value="sans-serif">Sans-serif</option>
+            <option value="serif">Serif</option>
+            <option value="monospace">Monospace</option>
+            <option value="cursive">Cursive</option>
+          </select>
+        </div>
+        <div class="text-config-field">
+          <label for="borderRadius">Corner Radius</label>
+          <select id="borderRadius">
+            <option value="0">Square</option>
+            <option value="0.15" selected>Rounded</option>
+            <option value="0.5">Circle</option>
+          </select>
+        </div>
+        <div class="text-config-field">
+          <label for="fontSize">Font Size</label>
+          <select id="fontSize">
+            <option value="0.5">Small</option>
+            <option value="0.65" selected>Medium</option>
+            <option value="0.8">Large</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="generateTextBtn">Generate Preview</button>
+      </div>
+    </div>
+
+    <div id="msgArea" class="msg"></div>
+
+    <!-- Preview + Output -->
+    <div id="previewSection" class="fav-preview-section" style="display:none;">
+      <div class="panel-label">Source Preview</div>
+      <div class="fav-canvas-preview">
+        <canvas id="sourceCanvas" class="fav-source-canvas" width="512" height="512"></canvas>
+      </div>
+
+      <div class="panel-label">Generated Favicons</div>
+      <div class="fav-sizes-grid" id="sizesGrid"></div>
+
+      <div class="fav-download-section">
+        <button class="btn btn-primary" id="downloadZipBtn">&#128230; Download All as ZIP</button>
+        <button class="btn" id="downloadIcoBtn">&#128190; Download favicon.ico</button>
+        <span class="shortcut-hint" style="align-self:center;">Includes favicon.ico + PNG at 6 sizes</span>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    <div class="footer-github">
+      <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; margin-right: 4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub
+      </a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js?v=4"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    var SIZES = [
+      { w: 16, h: 16, label: '16x16', use: 'favicon.ico' },
+      { w: 32, h: 32, label: '32x32', use: 'favicon.ico / tab' },
+      { w: 48, h: 48, label: '48x48', use: 'Windows site' },
+      { w: 180, h: 180, label: '180x180', use: 'Apple Touch' },
+      { w: 192, h: 192, label: '192x192', use: 'Android Chrome' },
+      { w: 512, h: 512, label: '512x512', use: 'PWA / splash' }
+    ];
+
+    var sourceCanvas = document.getElementById('sourceCanvas');
+    var sourceCtx = sourceCanvas.getContext('2d');
+    var previewSection = document.getElementById('previewSection');
+    var sizesGrid = document.getElementById('sizesGrid');
+    var msgArea = document.getElementById('msgArea');
+    var dropZone = document.getElementById('dropZone');
+    var fileInput = document.getElementById('fileInput');
+
+    var generatedCanvases = {}; // size -> canvas
+
+    // --- Tab switching ---
+    var tabs = document.querySelectorAll('.fav-tab');
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        document.querySelectorAll('.fav-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // --- File upload ---
+    dropZone.addEventListener('click', function() { fileInput.click(); });
+    dropZone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+    dropZone.addEventListener('dragleave', function() {
+      dropZone.classList.remove('drag-over');
+    });
+    dropZone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      var files = e.dataTransfer.files;
+      if (files.length > 0) handleFile(files[0]);
+    });
+    fileInput.addEventListener('change', function() {
+      if (fileInput.files.length > 0) handleFile(fileInput.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showMsg(msgArea, 'error', 'Please select an image file.');
+        return;
+      }
+      hideMsg(msgArea);
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          drawSourceFromImage(img);
+          generateAllSizes();
+        };
+        img.onerror = function() {
+          showMsg(msgArea, 'error', 'Failed to load image.');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function drawSourceFromImage(img) {
+      var size = 512;
+      sourceCanvas.width = size;
+      sourceCanvas.height = size;
+      sourceCtx.clearRect(0, 0, size, size);
+
+      // Fit image into 512x512 square, centered
+      var scale = Math.min(size / img.width, size / img.height);
+      var w = img.width * scale;
+      var h = img.height * scale;
+      var x = (size - w) / 2;
+      var y = (size - h) / 2;
+
+      sourceCtx.drawImage(img, x, y, w, h);
+    }
+
+    // --- Text / Emoji generation ---
+    document.getElementById('generateTextBtn').addEventListener('click', generateFromText);
+
+    // Auto-generate on any config change
+    ['textChar', 'bgColor', 'textColor', 'fontFamily', 'borderRadius', 'fontSize'].forEach(function(id) {
+      var el = document.getElementById(id);
+      el.addEventListener('input', generateFromText);
+      el.addEventListener('change', generateFromText);
+    });
+
+    function generateFromText() {
+      var char = document.getElementById('textChar').value || 'D';
+      var bg = document.getElementById('bgColor').value;
+      var fg = document.getElementById('textColor').value;
+      var font = document.getElementById('fontFamily').value;
+      var radiusRatio = parseFloat(document.getElementById('borderRadius').value);
+      var fontSizeRatio = parseFloat(document.getElementById('fontSize').value);
+
+      hideMsg(msgArea);
+
+      var size = 512;
+      sourceCanvas.width = size;
+      sourceCanvas.height = size;
+      sourceCtx.clearRect(0, 0, size, size);
+
+      // Draw rounded rect background
+      var r = radiusRatio * size;
+      sourceCtx.beginPath();
+      sourceCtx.moveTo(r, 0);
+      sourceCtx.lineTo(size - r, 0);
+      sourceCtx.quadraticCurveTo(size, 0, size, r);
+      sourceCtx.lineTo(size, size - r);
+      sourceCtx.quadraticCurveTo(size, size, size - r, size);
+      sourceCtx.lineTo(r, size);
+      sourceCtx.quadraticCurveTo(0, size, 0, size - r);
+      sourceCtx.lineTo(0, r);
+      sourceCtx.quadraticCurveTo(0, 0, r, 0);
+      sourceCtx.closePath();
+      sourceCtx.fillStyle = bg;
+      sourceCtx.fill();
+
+      // Draw text centered
+      var fontSize = Math.floor(size * fontSizeRatio);
+      sourceCtx.fillStyle = fg;
+      sourceCtx.font = '700 ' + fontSize + 'px ' + font;
+      sourceCtx.textAlign = 'center';
+      sourceCtx.textBaseline = 'middle';
+      sourceCtx.fillText(char, size / 2, size / 2 + fontSize * 0.04);
+
+      generateAllSizes();
+    }
+
+    // --- Generate all favicon sizes ---
+    function generateAllSizes() {
+      previewSection.style.display = '';
+      sizesGrid.innerHTML = '';
+      generatedCanvases = {};
+
+      SIZES.forEach(function(s) {
+        var c = document.createElement('canvas');
+        c.width = s.w;
+        c.height = s.h;
+        var ctx = c.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(sourceCanvas, 0, 0, s.w, s.h);
+        generatedCanvases[s.label] = c;
+
+        // Display card
+        var card = document.createElement('div');
+        card.className = 'fav-size-card';
+
+        var displayCanvas = document.createElement('canvas');
+        var displaySize = Math.min(s.w, 64);
+        displayCanvas.width = displaySize;
+        displayCanvas.height = displaySize;
+        displayCanvas.style.width = displaySize + 'px';
+        displayCanvas.style.height = displaySize + 'px';
+        var dCtx = displayCanvas.getContext('2d');
+        dCtx.imageSmoothingEnabled = true;
+        dCtx.drawImage(c, 0, 0, displaySize, displaySize);
+
+        var label = document.createElement('div');
+        label.className = 'fav-size-label';
+        label.textContent = s.label;
+
+        var use = document.createElement('div');
+        use.className = 'fav-size-use';
+        use.textContent = s.use;
+
+        card.appendChild(displayCanvas);
+        card.appendChild(label);
+        card.appendChild(use);
+        sizesGrid.appendChild(card);
+      });
+
+      showMsg(msgArea, 'success', 'Favicons generated! Download the ZIP or individual files below.');
+    }
+
+    // --- ICO file builder ---
+    function buildIco(pngDataArrays) {
+      // ICO format: header + directory entries + image data
+      var numImages = pngDataArrays.length;
+      var headerSize = 6;
+      var dirEntrySize = 16;
+      var dirSize = dirEntrySize * numImages;
+      var dataOffset = headerSize + dirSize;
+
+      // Calculate total size
+      var totalSize = dataOffset;
+      pngDataArrays.forEach(function(d) { totalSize += d.byteLength; });
+
+      var buffer = new ArrayBuffer(totalSize);
+      var view = new DataView(buffer);
+
+      // ICO header
+      view.setUint16(0, 0, true);     // reserved
+      view.setUint16(2, 1, true);     // type: 1 = ICO
+      view.setUint16(4, numImages, true);
+
+      var currentOffset = dataOffset;
+      var sizes = [16, 32, 48];
+
+      for (var i = 0; i < numImages; i++) {
+        var entryOffset = headerSize + i * dirEntrySize;
+        var s = sizes[i] || 32;
+        var pngData = pngDataArrays[i];
+
+        view.setUint8(entryOffset, s < 256 ? s : 0);     // width
+        view.setUint8(entryOffset + 1, s < 256 ? s : 0); // height
+        view.setUint8(entryOffset + 2, 0);   // color palette
+        view.setUint8(entryOffset + 3, 0);   // reserved
+        view.setUint16(entryOffset + 4, 1, true);  // color planes
+        view.setUint16(entryOffset + 6, 32, true);  // bits per pixel
+        view.setUint32(entryOffset + 8, pngData.byteLength, true);  // size
+        view.setUint32(entryOffset + 12, currentOffset, true);  // offset
+
+        // Copy PNG data
+        var src = new Uint8Array(pngData);
+        var dst = new Uint8Array(buffer, currentOffset, pngData.byteLength);
+        dst.set(src);
+        currentOffset += pngData.byteLength;
+      }
+
+      return new Blob([buffer], { type: 'image/x-icon' });
+    }
+
+    function canvasToArrayBuffer(canvas) {
+      return new Promise(function(resolve) {
+        canvas.toBlob(function(blob) {
+          var reader = new FileReader();
+          reader.onload = function() { resolve(reader.result); };
+          reader.readAsArrayBuffer(blob);
+        }, 'image/png');
+      });
+    }
+
+    // --- Minimal ZIP builder ---
+    function buildZip(files) {
+      // files: array of { name: string, data: Uint8Array }
+      var localHeaders = [];
+      var centralHeaders = [];
+      var offset = 0;
+
+      files.forEach(function(file) {
+        var nameBytes = new TextEncoder().encode(file.name);
+        var data = file.data;
+
+        // Local file header
+        var localHeader = new ArrayBuffer(30 + nameBytes.length);
+        var lv = new DataView(localHeader);
+        lv.setUint32(0, 0x04034b50, true);  // signature
+        lv.setUint16(4, 20, true);           // version needed
+        lv.setUint16(6, 0, true);            // flags
+        lv.setUint16(8, 0, true);            // compression: stored
+        lv.setUint16(10, 0, true);           // mod time
+        lv.setUint16(12, 0, true);           // mod date
+        lv.setUint32(14, crc32(data), true); // crc32
+        lv.setUint32(18, data.length, true); // compressed size
+        lv.setUint32(22, data.length, true); // uncompressed size
+        lv.setUint16(26, nameBytes.length, true);
+        lv.setUint16(28, 0, true);           // extra field length
+        new Uint8Array(localHeader, 30).set(nameBytes);
+
+        localHeaders.push({ header: localHeader, data: data, offset: offset });
+
+        // Central directory header
+        var centralHeader = new ArrayBuffer(46 + nameBytes.length);
+        var cv = new DataView(centralHeader);
+        cv.setUint32(0, 0x02014b50, true);   // signature
+        cv.setUint16(4, 20, true);            // version made by
+        cv.setUint16(6, 20, true);            // version needed
+        cv.setUint16(8, 0, true);             // flags
+        cv.setUint16(10, 0, true);            // compression
+        cv.setUint16(12, 0, true);            // mod time
+        cv.setUint16(14, 0, true);            // mod date
+        cv.setUint32(16, crc32(data), true);  // crc32
+        cv.setUint32(20, data.length, true);  // compressed size
+        cv.setUint32(24, data.length, true);  // uncompressed size
+        cv.setUint16(28, nameBytes.length, true);
+        cv.setUint16(30, 0, true);            // extra field length
+        cv.setUint16(32, 0, true);            // comment length
+        cv.setUint16(34, 0, true);            // disk number
+        cv.setUint16(36, 0, true);            // internal attrs
+        cv.setUint32(38, 0, true);            // external attrs
+        cv.setUint32(42, offset, true);       // local header offset
+        new Uint8Array(centralHeader, 46).set(nameBytes);
+
+        centralHeaders.push(centralHeader);
+        offset += localHeader.byteLength + data.length;
+      });
+
+      var centralDirOffset = offset;
+      var centralDirSize = 0;
+      centralHeaders.forEach(function(h) { centralDirSize += h.byteLength; });
+
+      // End of central directory
+      var eocd = new ArrayBuffer(22);
+      var ev = new DataView(eocd);
+      ev.setUint32(0, 0x06054b50, true);
+      ev.setUint16(4, 0, true);
+      ev.setUint16(6, 0, true);
+      ev.setUint16(8, files.length, true);
+      ev.setUint16(10, files.length, true);
+      ev.setUint32(12, centralDirSize, true);
+      ev.setUint32(16, centralDirOffset, true);
+      ev.setUint16(20, 0, true);
+
+      // Combine
+      var parts = [];
+      localHeaders.forEach(function(l) {
+        parts.push(new Uint8Array(l.header));
+        parts.push(l.data);
+      });
+      centralHeaders.forEach(function(h) { parts.push(new Uint8Array(h)); });
+      parts.push(new Uint8Array(eocd));
+
+      return new Blob(parts, { type: 'application/zip' });
+    }
+
+    // CRC32 table
+    var crc32Table = null;
+    function crc32(data) {
+      if (!crc32Table) {
+        crc32Table = new Uint32Array(256);
+        for (var i = 0; i < 256; i++) {
+          var c = i;
+          for (var j = 0; j < 8; j++) {
+            c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+          }
+          crc32Table[i] = c;
+        }
+      }
+      var crc = 0xFFFFFFFF;
+      for (var k = 0; k < data.length; k++) {
+        crc = crc32Table[(crc ^ data[k]) & 0xFF] ^ (crc >>> 8);
+      }
+      return (crc ^ 0xFFFFFFFF) >>> 0;
+    }
+
+    // --- Download handlers ---
+    document.getElementById('downloadZipBtn').addEventListener('click', function() {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+
+      var promises = [];
+      var fileNames = [];
+
+      // ICO (16, 32, 48)
+      var icoSizes = ['16x16', '32x32', '48x48'];
+      var icoPngs = icoSizes.map(function(s) {
+        return canvasToArrayBuffer(generatedCanvases[s]);
+      });
+
+      // All PNGs
+      SIZES.forEach(function(s) {
+        fileNames.push('favicon-' + s.w + 'x' + s.h + '.png');
+        promises.push(canvasToArrayBuffer(generatedCanvases[s.label]));
+      });
+
+      Promise.all(icoPngs.concat(promises)).then(function(results) {
+        var icoArrayBuffers = results.slice(0, 3);
+        var pngArrayBuffers = results.slice(3);
+
+        var files = [];
+
+        // favicon.ico
+        var icoBlob = buildIco(icoArrayBuffers);
+        return icoBlob.arrayBuffer().then(function(icoBuffer) {
+          files.push({ name: 'favicon.ico', data: new Uint8Array(icoBuffer) });
+
+          // PNG files
+          for (var i = 0; i < pngArrayBuffers.length; i++) {
+            files.push({ name: fileNames[i], data: new Uint8Array(pngArrayBuffers[i]) });
+          }
+
+          var zip = buildZip(files);
+          downloadBlob(zip, 'favicons.zip');
+          btn.disabled = false;
+          btn.textContent = '\u{1F4E6} Download All as ZIP';
+        });
+      });
+    });
+
+    document.getElementById('downloadIcoBtn').addEventListener('click', function() {
+      var icoSizes = ['16x16', '32x32', '48x48'];
+      var promises = icoSizes.map(function(s) {
+        return canvasToArrayBuffer(generatedCanvases[s]);
+      });
+      Promise.all(promises).then(function(results) {
+        var blob = buildIco(results);
+        downloadBlob(blob, 'favicon.ico');
+      });
+    });
+
+    function downloadBlob(blob, filename) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // --- Keyboard shortcut ---
+    bindCtrlEnter(function() {
+      var activeTab = document.querySelector('.fav-tab.active');
+      if (activeTab && activeTab.dataset.tab === 'text') {
+        generateFromText();
+      }
+    });
+
+    // Auto-generate text favicon on load
+    generateFromText();
+
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
