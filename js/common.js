@@ -92,9 +92,13 @@
       '<button class="nav-more-btn" aria-expanded="false">More \u25BE</button>' +
       '<div class="nav-more-dropdown">' + dropdownHTML + '</div>';
 
-    // Insert before the BMC li (last child)
-    var bmcLi = navLinks.querySelector('li:last-child');
-    navLinks.insertBefore(moreLi, bmcLi);
+    // Insert before the BMC li
+    var bmcLi = navLinks.querySelector('li.nav-bmc');
+    if (bmcLi) {
+      navLinks.insertBefore(moreLi, bmcLi);
+    } else {
+      navLinks.appendChild(moreLi);
+    }
 
     // Click toggle for the dropdown
     var btn = moreLi.querySelector('.nav-more-btn');

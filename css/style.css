@@ -107,7 +107,7 @@ body {
   .nav-links li.nav-more {
     display: list-item !important;
   }
-  .nav-links li:last-child {
+  .nav-links li.nav-bmc {
     display: list-item !important;
     margin-left: auto;
   }
