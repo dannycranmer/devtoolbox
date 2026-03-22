@@ -86,7 +86,31 @@ body {
 }
 
 .nav-links {
-  display: none !important;
+  display: none;
+}
+
+/* Desktop: show nav-links, hide hamburger */
+@media (min-width: 769px) {
+  .nav-links {
+    display: flex !important;
+    align-items: center;
+    list-style: none;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+  }
+  /* Hide excess tool links — show first 6 tools + BMC */
+  .nav-links li:nth-child(n+8) {
+    display: none;
+  }
+  /* Always show the last li (BMC link) */
+  .nav-links li:last-child {
+    display: list-item !important;
+    margin-left: auto;
+  }
+  .nav-toggle {
+    display: none !important;
+  }
 }
 
 .nav-links a {
