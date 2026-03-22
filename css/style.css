@@ -143,49 +143,61 @@ body {
 /* --- Hamburger toggle (CSS-only animated icon) --- */
 .nav-toggle {
   display: none;
-  background: none;
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
   cursor: pointer;
   padding: 0;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
   position: relative;
   z-index: 110;
+  transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 }
 
-.nav-toggle:hover,
+.nav-toggle:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--text-muted);
+}
+
 .nav-toggle:active {
   background: var(--bg-tertiary);
   border-color: var(--text-muted);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 /* Hamburger bars (injected by JS) */
 .hamburger-bar {
   display: block;
   width: 18px;
-  height: 2px;
-  background: var(--text-primary);
+  height: 2.5px;
+  background: var(--text-secondary);
   border-radius: 2px;
   transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 200ms ease;
+              opacity 200ms ease,
+              background 150ms ease;
+}
+
+.nav-toggle:hover .hamburger-bar,
+.nav-toggle.active .hamburger-bar {
+  background: var(--text-primary);
 }
 
 /* Animate to X when open */
 .nav-toggle.active .hamburger-bar:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
+  transform: translateY(7.5px) rotate(45deg);
 }
 .nav-toggle.active .hamburger-bar:nth-child(2) {
   opacity: 0;
 }
 .nav-toggle.active .hamburger-bar:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
+  transform: translateY(-7.5px) rotate(-45deg);
 }
 
 /* --- Mobile nav overlay backdrop --- */
