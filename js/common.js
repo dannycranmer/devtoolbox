@@ -5,8 +5,112 @@
 
   var toggle = document.querySelector('.nav-toggle');
   var nav = document.querySelector('.nav');
+  var currentPage = location.pathname.split('/').pop() || 'index.html';
 
-  /* --- Full-screen categorized nav (hamburger menu for all screen sizes) --- */
+  var categories = [
+    { title: '\uD83D\uDD27 Formatters', items: [
+      { href: 'json-formatter.html', icon: '{ }', label: 'JSON' },
+      { href: 'sql-formatter.html', icon: '\uD83D\uDDC3\uFE0F', label: 'SQL' },
+      { href: 'yaml-formatter.html', icon: '\uD83D\uDCC4', label: 'YAML' },
+      { href: 'css-minifier.html', icon: '\uD83C\uDFA8', label: 'CSS Minify' },
+      { href: 'js-minifier.html', icon: '\u26A1', label: 'JS Minify' }
+    ]},
+    { title: '\uD83D\uDD10 Encoders', items: [
+      { href: 'base64.html', icon: '\uD83D\uDD04', label: 'Base64' },
+      { href: 'url-encoder.html', icon: '\uD83D\uDD17', label: 'URL Encode' },
+      { href: 'jwt-decoder.html', icon: '\uD83D\uDD11', label: 'JWT Decode' },
+      { href: 'hash-generator.html', icon: '#\uFE0F\u20E3', label: 'Hash' },
+      { href: 'html-entity.html', icon: '\uD83C\uDFF7\uFE0F', label: 'HTML Entity' }
+    ]},
+    { title: '\uD83C\uDFA8 Generators', items: [
+      { href: 'uuid-generator.html', icon: '\uD83C\uDD94', label: 'UUID' },
+      { href: 'lorem-ipsum.html', icon: '\uD83D\uDCDC', label: 'Lorem Ipsum' },
+      { href: 'password-generator.html', icon: '\uD83D\uDD12', label: 'Password' },
+      { href: 'color-picker.html', icon: '\uD83C\uDF08', label: 'Color Picker' },
+      { href: 'favicon-generator.html', icon: '\u2B50', label: 'Favicon' },
+      { href: 'gradient-generator.html', icon: '\uD83C\uDF1F', label: 'Gradient' },
+      { href: 'og-generator.html', icon: '\uD83D\uDCE2', label: 'OG Meta' },
+      { href: 'chart-generator.html', icon: '\uD83D\uDCC8', label: 'Charts' }
+    ]},
+    { title: '\uD83D\uDD04 Converters', items: [
+      { href: 'markdown.html', icon: '\u270D\uFE0F', label: 'Markdown' },
+      { href: 'timestamp.html', icon: '\uD83D\uDD51', label: 'Timestamp' },
+      { href: 'cron-parser.html', icon: '\u23F0', label: 'Cron Parse' },
+      { href: 'cron-builder.html', icon: '\uD83D\uDD52', label: 'Cron Build' },
+      { href: 'csv-viewer.html', icon: '\uD83D\uDCCA', label: 'CSV Viewer' },
+      { href: 'svg-optimizer.html', icon: '\uD83D\uDDBC\uFE0F', label: 'SVG Optimize' }
+    ]},
+    { title: '\uD83D\uDCDD Text Tools', items: [
+      { href: 'regex-tester.html', icon: '.*', label: 'Regex Test' },
+      { href: 'diff-checker.html', icon: '\uD83D\uDD0D', label: 'Diff Check' }
+    ]}
+  ];
+
+  /* --- Desktop "More" dropdown with all tools --- */
+  function initDesktopDropdown() {
+    var navLinks = document.querySelector('.nav-links');
+    if (!navLinks) return;
+
+    // Collect hrefs of visible links (first 7 items: Home + 6 tools)
+    var visibleHrefs = new Set();
+    var items = navLinks.querySelectorAll('li');
+    for (var i = 0; i < Math.min(7, items.length); i++) {
+      var a = items[i].querySelector('a');
+      if (a) visibleHrefs.add(a.getAttribute('href'));
+    }
+
+    // Check if current page is in the hidden tools
+    var hasActive = false;
+    categories.forEach(function (cat) {
+      cat.items.forEach(function (item) {
+        if (!visibleHrefs.has(item.href) && currentPage === item.href) {
+          hasActive = true;
+        }
+      });
+    });
+
+    // Build dropdown content — categorized
+    var dropdownHTML = '';
+    categories.forEach(function (cat) {
+      var catItems = cat.items.filter(function (item) {
+        return !visibleHrefs.has(item.href);
+      });
+      if (catItems.length === 0) return;
+      dropdownHTML += '<div class="nav-more-section-title">' + cat.title + '</div>';
+      catItems.forEach(function (item) {
+        var active = (currentPage === item.href) ? ' active' : '';
+        dropdownHTML += '<a href="' + item.href + '"' + (active ? ' class="active"' : '') + '>' +
+          '<span class="nav-more-icon">' + item.icon + '</span> ' + item.label + '</a>';
+      });
+    });
+
+    // Create the "More" li with dropdown
+    var moreLi = document.createElement('li');
+    moreLi.className = 'nav-more' + (hasActive ? ' has-active' : '');
+    moreLi.innerHTML =
+      '<button class="nav-more-btn" aria-expanded="false">More \u25BE</button>' +
+      '<div class="nav-more-dropdown">' + dropdownHTML + '</div>';
+
+    // Insert before the BMC li (last child)
+    var bmcLi = navLinks.querySelector('li:last-child');
+    navLinks.insertBefore(moreLi, bmcLi);
+
+    // Click toggle for the dropdown
+    var btn = moreLi.querySelector('.nav-more-btn');
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      moreLi.classList.toggle('open');
+      btn.setAttribute('aria-expanded', moreLi.classList.contains('open'));
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', function () {
+      moreLi.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  /* --- Full-screen categorized nav (hamburger menu for mobile) --- */
   function initMobileNav() {
     if (!nav || !toggle) return;
 
@@ -17,47 +121,6 @@
       bar.className = 'hamburger-bar';
       toggle.appendChild(bar);
     }
-
-    var currentPage = location.pathname.split('/').pop() || 'index.html';
-
-    var categories = [
-      { title: '\uD83D\uDD27 Formatters', items: [
-        { href: 'json-formatter.html', icon: '{ }', label: 'JSON' },
-        { href: 'sql-formatter.html', icon: '\uD83D\uDDC3\uFE0F', label: 'SQL' },
-        { href: 'yaml-formatter.html', icon: '\uD83D\uDCC4', label: 'YAML' },
-        { href: 'css-minifier.html', icon: '\uD83C\uDFA8', label: 'CSS Minify' },
-        { href: 'js-minifier.html', icon: '\u26A1', label: 'JS Minify' }
-      ]},
-      { title: '\uD83D\uDD10 Encoders', items: [
-        { href: 'base64.html', icon: '\uD83D\uDD04', label: 'Base64' },
-        { href: 'url-encoder.html', icon: '\uD83D\uDD17', label: 'URL Encode' },
-        { href: 'jwt-decoder.html', icon: '\uD83D\uDD11', label: 'JWT Decode' },
-        { href: 'hash-generator.html', icon: '#\uFE0F\u20E3', label: 'Hash' },
-        { href: 'html-entity.html', icon: '\uD83C\uDFF7\uFE0F', label: 'HTML Entity' }
-      ]},
-      { title: '\uD83C\uDFA8 Generators', items: [
-        { href: 'uuid-generator.html', icon: '\uD83C\uDD94', label: 'UUID' },
-        { href: 'lorem-ipsum.html', icon: '\uD83D\uDCDC', label: 'Lorem Ipsum' },
-        { href: 'password-generator.html', icon: '\uD83D\uDD12', label: 'Password' },
-        { href: 'color-picker.html', icon: '\uD83C\uDF08', label: 'Color Picker' },
-        { href: 'favicon-generator.html', icon: '\u2B50', label: 'Favicon' },
-        { href: 'gradient-generator.html', icon: '\uD83C\uDF1F', label: 'Gradient' },
-        { href: 'og-generator.html', icon: '\uD83D\uDCE2', label: 'OG Meta' },
-        { href: 'chart-generator.html', icon: '\uD83D\uDCC8', label: 'Charts' }
-      ]},
-      { title: '\uD83D\uDD04 Converters', items: [
-        { href: 'markdown.html', icon: '\u270D\uFE0F', label: 'Markdown' },
-        { href: 'timestamp.html', icon: '\uD83D\uDD51', label: 'Timestamp' },
-        { href: 'cron-parser.html', icon: '\u23F0', label: 'Cron Parse' },
-        { href: 'cron-builder.html', icon: '\uD83D\uDD52', label: 'Cron Build' },
-        { href: 'csv-viewer.html', icon: '\uD83D\uDCCA', label: 'CSV Viewer' },
-        { href: 'svg-optimizer.html', icon: '\uD83D\uDDBC\uFE0F', label: 'SVG Optimize' }
-      ]},
-      { title: '\uD83D\uDCDD Text Tools', items: [
-        { href: 'regex-tester.html', icon: '.*', label: 'Regex Test' },
-        { href: 'diff-checker.html', icon: '\uD83D\uDD0D', label: 'Diff Check' }
-      ]}
-    ];
 
     // Build sections HTML
     var sectionsHTML = categories.map(function (cat) {
@@ -137,6 +200,7 @@
   }
 
   // Init
+  initDesktopDropdown();
   initMobileNav();
 
   /* --- Copy to clipboard --- */
