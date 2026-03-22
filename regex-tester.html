@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Regex Tester — DevToolbox</title>
+  <title>Regex Tester — DevBrew</title>
   <meta name="description" content="Test regular expressions with live highlighting, match groups, and a library of common patterns. 100% client-side.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css?v=4">
@@ -12,7 +12,7 @@
 
   <nav class="nav" aria-label="Main navigation">
     <div class="nav-inner">
-      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <a href="index.html" class="nav-brand">Dev<span>Brew</span></a>
       <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span class="nav-toggle-icon"><span></span></span></button>
       <ul class="nav-links" role="menubar">
         <li><a href="index.html" role="menuitem">Home</a></li>
@@ -272,7 +272,7 @@
 
     document.getElementById('btn-example').addEventListener('click', function () {
       patternInput.value = '(\\w+)@([\\w.]+)';
-      testInput.value = 'Contact us at support@devtoolbox.com or sales@example.org.\nInvalid emails: @missing.com, noat.sign\nMore: admin@test.io, hello@world.co.uk';
+      testInput.value = 'Contact us at support@devbrew.org or sales@example.org.\nInvalid emails: @missing.com, noat.sign\nMore: admin@test.io, hello@world.co.uk';
       // Make sure 'g' flag is on
       flagBtns.forEach(function (b) {
         if (b.dataset.flag === 'g') {

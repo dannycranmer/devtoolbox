@@ -1,12 +1,12 @@
-# DevToolbox
+# DevBrew
 
 **Free, fast, privacy-focused developer tools — right in your browser.**
 
 [**Live Site**](https://devbrew.org/)
 
-## What is DevToolbox?
+## What is DevBrew?
 
-DevToolbox is a collection of 25 free online developer utilities. No ads, no tracking, no server-side processing — everything runs client-side in your browser.
+DevBrew is a collection of 25 free online developer utilities. No ads, no tracking, no server-side processing — everything runs client-side in your browser.
 
 ## Available Tools
 
@@ -37,7 +37,7 @@ DevToolbox is a collection of 25 free online developer utilities. No ads, no tra
 | [CSV Viewer & Editor](https://devbrew.org/csv-viewer.html) | View, edit, and export CSV files |
 | [SVG Optimizer](https://devbrew.org/svg-optimizer.html) | Optimize SVG files by removing unnecessary data |
 
-## Why DevToolbox?
+## Why DevBrew?
 
 - **Privacy-first** — All processing happens in your browser. Your data never leaves your machine.
 - **No ads, no tracking** — Just clean, fast tools.

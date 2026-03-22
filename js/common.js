@@ -1,4 +1,4 @@
-/* === DevToolbox — Shared Utilities === */
+/* === DevBrew — Shared Utilities === */
 
 (function () {
   'use strict';
