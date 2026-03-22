@@ -6,14 +6,14 @@
   <title>HTML Entity Encoder/Decoder — DevBrew</title>
   <meta name="description" content="Encode special characters to HTML entities and decode HTML entities back to text. Named and numeric entities. 100% client-side, free.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 
   <nav class="nav" aria-label="Main navigation">
     <div class="nav-inner">
       <a href="index.html" class="nav-brand">Dev<span>Brew</span></a>
-      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span class="nav-toggle-icon"><span></span></span></button>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"></button>
       <ul class="nav-links" role="menubar">
         <li><a href="index.html" role="menuitem">Home</a></li>
         <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
@@ -46,69 +46,6 @@
       </ul>
     </div>
   </nav>
-  <div class="nav-overlay"></div>
-  <nav class="mobile-nav" aria-label="Tool navigation">
-    <div class="mobile-nav-header">
-      <a href="index.html" class="mobile-nav-brand">Dev<span>Brew</span></a>
-      <button class="mobile-nav-close" aria-label="Close menu">&times;</button>
-    </div>
-    <a href="index.html" class="mobile-nav-home">&#x1f3e0; All Tools</a>
-    <div class="mobile-nav-section">
-      <div class="mobile-nav-section-title">&#x1f4cb; Formatters</div>
-      <div class="mobile-nav-grid">
-        <a href="json-formatter.html" class="mobile-nav-item"><span class="mobile-nav-icon">{ }</span><span class="mobile-nav-label">JSON</span></a>
-        <a href="sql-formatter.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f5c3;&#xfe0f;</span><span class="mobile-nav-label">SQL</span></a>
-        <a href="yaml-formatter.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f4c4;</span><span class="mobile-nav-label">YAML</span></a>
-        <a href="css-minifier.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f3a8;</span><span class="mobile-nav-label">CSS Minify</span></a>
-        <a href="js-minifier.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x26a1;</span><span class="mobile-nav-label">JS Minify</span></a>
-      </div>
-    </div>
-    <div class="mobile-nav-section">
-      <div class="mobile-nav-section-title">&#x1f510; Encode &amp; Decode</div>
-      <div class="mobile-nav-grid">
-        <a href="base64.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f504;</span><span class="mobile-nav-label">Base64</span></a>
-        <a href="url-encoder.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f517;</span><span class="mobile-nav-label">URL Encode</span></a>
-        <a href="jwt-decoder.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f511;</span><span class="mobile-nav-label">JWT Decode</span></a>
-        <a href="hash-generator.html" class="mobile-nav-item"><span class="mobile-nav-icon">#&#xfe0f;&#x20e3;</span><span class="mobile-nav-label">Hash</span></a>
-        <a href="html-entity.html" class="mobile-nav-item active"><span class="mobile-nav-icon">&#x1f3f7;&#xfe0f;</span><span class="mobile-nav-label">HTML Entity</span></a>
-      </div>
-    </div>
-    <div class="mobile-nav-section">
-      <div class="mobile-nav-section-title">&#x1f4dd; Text &amp; Data</div>
-      <div class="mobile-nav-grid">
-        <a href="markdown.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x270d;&#xfe0f;</span><span class="mobile-nav-label">Markdown</span></a>
-        <a href="diff-checker.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f504;</span><span class="mobile-nav-label">Diff Check</span></a>
-        <a href="csv-viewer.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f4ca;</span><span class="mobile-nav-label">CSV Viewer</span></a>
-        <a href="lorem-ipsum.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f4dc;</span><span class="mobile-nav-label">Lorem Ipsum</span></a>
-        <a href="cron-parser.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x23f0;</span><span class="mobile-nav-label">Cron Parse</span></a>
-      </div>
-    </div>
-    <div class="mobile-nav-section">
-      <div class="mobile-nav-section-title">&#x2728; Generators</div>
-      <div class="mobile-nav-grid">
-        <a href="uuid-generator.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f194;</span><span class="mobile-nav-label">UUID</span></a>
-        <a href="password-generator.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f512;</span><span class="mobile-nav-label">Password</span></a>
-        <a href="gradient-generator.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f308;</span><span class="mobile-nav-label">Gradient</span></a>
-        <a href="og-generator.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f4e2;</span><span class="mobile-nav-label">OG Meta</span></a>
-        <a href="favicon-generator.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x2b50;</span><span class="mobile-nav-label">Favicon</span></a>
-        <a href="chart-generator.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f4c8;</span><span class="mobile-nav-label">Charts</span></a>
-        <a href="cron-builder.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f552;</span><span class="mobile-nav-label">Cron Build</span></a>
-      </div>
-    </div>
-    <div class="mobile-nav-section">
-      <div class="mobile-nav-section-title">&#x1f527; Utilities</div>
-      <div class="mobile-nav-grid">
-        <a href="color-picker.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f3a8;</span><span class="mobile-nav-label">Color Pick</span></a>
-        <a href="timestamp.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f551;</span><span class="mobile-nav-label">Timestamp</span></a>
-        <a href="regex-tester.html" class="mobile-nav-item"><span class="mobile-nav-icon">.*</span><span class="mobile-nav-label">Regex Test</span></a>
-        <a href="svg-optimizer.html" class="mobile-nav-item"><span class="mobile-nav-icon">&#x1f5bc;&#xfe0f;</span><span class="mobile-nav-label">SVG Optimize</span></a>
-      </div>
-    </div>
-    <a href="https://buymeacoffee.com/dairylea" class="mobile-nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a>
-    <div class="mobile-nav-privacy">&#x1f512; 100% Private &middot; All processing in your browser</div>
-  </nav>
-
-
   <main class="main">
     <div class="tool-header">
       <h1>HTML Entity Encoder / Decoder</h1>
@@ -190,7 +127,7 @@
     Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
   </footer>
 
-  <script src="js/common.js?v=5"></script>
+  <script src="js/common.js?v=6"></script>
   <script>
   (function () {
     'use strict';

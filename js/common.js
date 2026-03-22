@@ -6,7 +6,6 @@
   var toggle = document.querySelector('.nav-toggle');
   var navLinks = document.querySelector('.nav-links');
   var nav = document.querySelector('.nav');
-  var MOBILE_BP = 1200;
   var VISIBLE_DESKTOP = 8;
 
   /* --- Desktop "More" dropdown --- */
@@ -52,68 +51,145 @@
       moreBtn.setAttribute('aria-expanded', String(isOpen));
     });
 
-    // Close More on outside click
     document.addEventListener('click', function () {
       moreLi.classList.remove('open');
       moreBtn.setAttribute('aria-expanded', 'false');
     });
   }
 
-  /* --- Mobile full-screen nav --- */
-  var mobileNav = document.querySelector('.mobile-nav');
-  var overlay = document.querySelector('.nav-overlay');
-  var mobileNavOpen = false;
+  /* --- Mobile full-screen categorized nav (generated from JS) --- */
+  function initMobileNav() {
+    if (!nav || !toggle) return;
 
-  function openMobileMenu() {
-    if (mobileNavOpen || !mobileNav) return;
-    mobileNavOpen = true;
-    if (toggle) toggle.setAttribute('aria-expanded', 'true');
-    mobileNav.classList.add('open');
-    if (overlay) overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
+    // Replace hamburger content with animated bars
+    toggle.innerHTML = '';
+    for (var i = 0; i < 3; i++) {
+      var bar = document.createElement('span');
+      bar.className = 'hamburger-bar';
+      toggle.appendChild(bar);
+    }
 
-  function closeMobileMenu() {
-    if (!mobileNavOpen || !mobileNav) return;
-    mobileNavOpen = false;
-    if (toggle) toggle.setAttribute('aria-expanded', 'false');
-    mobileNav.classList.remove('open');
-    if (overlay) overlay.classList.remove('open');
-    document.body.style.overflow = '';
-  }
+    var currentPage = location.pathname.split('/').pop() || 'index.html';
 
-  if (toggle) {
+    var categories = [
+      { title: '\uD83D\uDD27 Formatters', items: [
+        { href: 'json-formatter.html', icon: '{ }', label: 'JSON' },
+        { href: 'sql-formatter.html', icon: '\uD83D\uDDC3\uFE0F', label: 'SQL' },
+        { href: 'yaml-formatter.html', icon: '\uD83D\uDCC4', label: 'YAML' },
+        { href: 'css-minifier.html', icon: '\uD83C\uDFA8', label: 'CSS Minify' },
+        { href: 'js-minifier.html', icon: '\u26A1', label: 'JS Minify' }
+      ]},
+      { title: '\uD83D\uDD10 Encoders', items: [
+        { href: 'base64.html', icon: '\uD83D\uDD04', label: 'Base64' },
+        { href: 'url-encoder.html', icon: '\uD83D\uDD17', label: 'URL Encode' },
+        { href: 'jwt-decoder.html', icon: '\uD83D\uDD11', label: 'JWT Decode' },
+        { href: 'hash-generator.html', icon: '#\uFE0F\u20E3', label: 'Hash' },
+        { href: 'html-entity.html', icon: '\uD83C\uDFF7\uFE0F', label: 'HTML Entity' }
+      ]},
+      { title: '\uD83C\uDFA8 Generators', items: [
+        { href: 'uuid-generator.html', icon: '\uD83C\uDD94', label: 'UUID' },
+        { href: 'lorem-ipsum.html', icon: '\uD83D\uDCDC', label: 'Lorem Ipsum' },
+        { href: 'password-generator.html', icon: '\uD83D\uDD12', label: 'Password' },
+        { href: 'color-picker.html', icon: '\uD83C\uDF08', label: 'Color Picker' },
+        { href: 'favicon-generator.html', icon: '\u2B50', label: 'Favicon' },
+        { href: 'gradient-generator.html', icon: '\uD83C\uDF1F', label: 'Gradient' },
+        { href: 'og-generator.html', icon: '\uD83D\uDCE2', label: 'OG Meta' },
+        { href: 'chart-generator.html', icon: '\uD83D\uDCC8', label: 'Charts' }
+      ]},
+      { title: '\uD83D\uDD04 Converters', items: [
+        { href: 'markdown.html', icon: '\u270D\uFE0F', label: 'Markdown' },
+        { href: 'timestamp.html', icon: '\uD83D\uDD51', label: 'Timestamp' },
+        { href: 'cron-parser.html', icon: '\u23F0', label: 'Cron Parse' },
+        { href: 'cron-builder.html', icon: '\uD83D\uDD52', label: 'Cron Build' },
+        { href: 'csv-viewer.html', icon: '\uD83D\uDCCA', label: 'CSV Viewer' },
+        { href: 'svg-optimizer.html', icon: '\uD83D\uDDBC\uFE0F', label: 'SVG Optimize' }
+      ]},
+      { title: '\uD83D\uDCDD Text Tools', items: [
+        { href: 'regex-tester.html', icon: '.*', label: 'Regex Test' },
+        { href: 'diff-checker.html', icon: '\uD83D\uDD0D', label: 'Diff Check' }
+      ]}
+    ];
+
+    // Build sections HTML
+    var sectionsHTML = categories.map(function (cat) {
+      var itemsHTML = cat.items.map(function (item) {
+        var active = (currentPage === item.href) ? ' active' : '';
+        return '<a href="' + item.href + '" class="mobile-nav-item' + active + '">' +
+          '<span class="mobile-nav-icon">' + item.icon + '</span>' +
+          '<span class="mobile-nav-label">' + item.label + '</span></a>';
+      }).join('');
+      return '<div class="mobile-nav-section"><div class="mobile-nav-section-title">' +
+        cat.title + '</div><div class="mobile-nav-grid">' + itemsHTML + '</div></div>';
+    }).join('');
+
+    var homeActive = (currentPage === 'index.html' || currentPage === '') ? ' active' : '';
+
+    // Create overlay
+    var overlay = document.createElement('div');
+    overlay.className = 'nav-overlay';
+
+    // Create mobile nav
+    var mobileNav = document.createElement('nav');
+    mobileNav.className = 'mobile-nav';
+    mobileNav.setAttribute('aria-label', 'Mobile navigation');
+    mobileNav.innerHTML =
+      '<div class="mobile-nav-header">' +
+        '<a href="index.html" class="mobile-nav-brand">Dev<span>Brew</span></a>' +
+        '<button class="mobile-nav-close" aria-label="Close menu">\u2715</button>' +
+      '</div>' +
+      '<a href="index.html" class="mobile-nav-home' + homeActive + '">\uD83C\uDFE0 All Tools</a>' +
+      sectionsHTML +
+      '<a href="https://buymeacoffee.com/dairylea" class="mobile-nav-coffee" target="_blank" rel="noopener">\u2615 Buy Me a Coffee</a>' +
+      '<div class="mobile-nav-privacy">\uD83D\uDD12 100% Private \u00B7 All processing in your browser</div>';
+
+    // Insert after the nav element
+    nav.after(overlay);
+    overlay.after(mobileNav);
+
+    // Toggle state
+    var isOpen = false;
+
+    function openNav() {
+      if (isOpen) return;
+      isOpen = true;
+      toggle.classList.add('active');
+      toggle.setAttribute('aria-expanded', 'true');
+      mobileNav.classList.add('open');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeNav() {
+      if (!isOpen) return;
+      isOpen = false;
+      toggle.classList.remove('active');
+      toggle.setAttribute('aria-expanded', 'false');
+      mobileNav.classList.remove('open');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
     toggle.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
-      mobileNavOpen ? closeMobileMenu() : openMobileMenu();
+      isOpen ? closeNav() : openNav();
     });
-  }
-
-  // Close on overlay tap
-  if (overlay) overlay.addEventListener('click', closeMobileMenu);
-
-  // Close on X button
-  if (mobileNav) {
-    var closeBtn = mobileNav.querySelector('.mobile-nav-close');
-    if (closeBtn) closeBtn.addEventListener('click', closeMobileMenu);
-
-    // Close on link click
+    overlay.addEventListener('click', closeNav);
+    mobileNav.querySelector('.mobile-nav-close').addEventListener('click', closeNav);
     mobileNav.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', closeMobileMenu);
+      a.addEventListener('click', closeNav);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen) {
+        closeNav();
+        toggle.focus();
+      }
     });
   }
 
-  // Close on Escape key
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && mobileNavOpen) {
-      closeMobileMenu();
-      if (toggle) toggle.focus();
-    }
-  });
-
-  // Build desktop More dropdown (only affects desktop via CSS)
+  // Init
   buildMoreDropdown();
+  initMobileNav();
 
   /* --- Copy to clipboard --- */
   window.copyToClipboard = function (text, btn) {
@@ -124,7 +200,6 @@
         setTimeout(function () { btn.textContent = orig; }, 1500);
       }
     }).catch(function () {
-      // Fallback
       var ta = document.createElement('textarea');
       ta.value = text;
       ta.style.position = 'fixed';
