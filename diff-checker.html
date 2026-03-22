@@ -176,7 +176,11 @@
 
     <div id="diff-stats" class="diff-stats"></div>
 
-    <div id="diff-output" class="diff-output" style="margin-top: 0.75rem;">
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.75rem;">
+      <span class="panel-label" style="margin:0;">Diff Output</span>
+      <button class="btn btn-sm" id="btn-copy-diff" type="button" style="display:none;">Copy Diff</button>
+    </div>
+    <div id="diff-output" class="diff-output" style="margin-top: 0.25rem;">
       <div class="diff-empty">Paste text in both panels and click Compare to see differences.</div>
     </div>
   </main>
@@ -377,6 +381,29 @@
       statsEl.innerHTML = '';
       originalEl.focus();
     });
+
+    // Copy diff output as text
+    var copyBtn = document.getElementById('btn-copy-diff');
+    copyBtn.addEventListener('click', function () {
+      var table = outputEl.querySelector('.diff-table');
+      if (!table) return;
+      var rows = table.querySelectorAll('tr');
+      var lines = [];
+      for (var i = 0; i < rows.length; i++) {
+        var cells = rows[i].querySelectorAll('td');
+        if (cells.length >= 4) {
+          var marker = cells[2].textContent;
+          var content = cells[3].textContent;
+          lines.push(marker + ' ' + content);
+        }
+      }
+      copyToClipboard(lines.join('\n'), copyBtn);
+    });
+
+    // Toggle copy button visibility after any output change
+    new MutationObserver(function () {
+      copyBtn.style.display = outputEl.querySelector('.diff-table') ? '' : 'none';
+    }).observe(outputEl, { childList: true });
 
     bindCtrlEnter(doCompare);
   })();

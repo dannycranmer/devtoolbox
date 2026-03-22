@@ -260,6 +260,17 @@
 
     document.getElementById('btn-decode').addEventListener('click', doDecode);
 
+    // Auto-decode on paste/type with debounce
+    var decodeTimer = null;
+    input.addEventListener('input', function () {
+      clearTimeout(decodeTimer);
+      decodeTimer = setTimeout(function () {
+        if (input.value.trim()) {
+          doDecode();
+        }
+      }, 300);
+    });
+
     document.getElementById('btn-clear').addEventListener('click', function () {
       input.value = '';
       hideMsg(msg);
