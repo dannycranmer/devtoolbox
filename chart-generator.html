@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chart &amp; Graph Generator Online Free &mdash; DevToolbox</title>
+  <meta name="description" content="Create bar, line, pie, and doughnut charts from CSV or manual data. Customize colors, labels, and styles. Export as PNG or SVG. Free, private — runs in your browser.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css?v=4">
+  <style>
+    .chart-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .chart-layout { grid-template-columns: 1fr; }
+    }
+
+    .chart-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .chart-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .chart-section h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin: 0 0 0.75rem;
+    }
+    .chart-field {
+      margin-bottom: 0.75rem;
+    }
+    .chart-field:last-child { margin-bottom: 0; }
+    .chart-field label {
+      display: block;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+    }
+    .chart-field input[type="text"],
+    .chart-field select,
+    .chart-field textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.5rem 0.625rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+    }
+    .chart-field textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.5;
+    }
+    .chart-field input[type="color"] {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: none;
+      cursor: pointer;
+      padding: 2px;
+    }
+    .chart-field .color-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .chart-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+    }
+    .chart-tab {
+      padding: 0.5rem 0.875rem;
+      font-family: var(--font-sans);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .chart-tab:hover { color: var(--text-secondary); }
+    .chart-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .chart-panel { display: none; }
+    .chart-panel.active { display: block; }
+
+    .chart-canvas-wrap {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      position: relative;
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chart-canvas-wrap canvas {
+      max-width: 100%;
+      max-height: 500px;
+    }
+    .chart-placeholder {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      text-align: center;
+    }
+    .chart-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .chart-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+    .chart-check input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
+
+    .data-table-wrap {
+      overflow-x: auto;
+      margin-bottom: 0.75rem;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+    }
+    .data-table th, .data-table td {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+    }
+    .data-table th {
+      background: var(--bg-primary);
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.6875rem;
+      letter-spacing: 0.05em;
+    }
+    .data-table input {
+      width: 100%;
+      box-sizing: border-box;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      padding: 0.125rem;
+    }
+    .data-table input:focus {
+      outline: 1px solid var(--accent);
+      border-radius: 2px;
+    }
+    .table-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Toolbox</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span class="nav-toggle-icon"><span></span></span></button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li><a href="base64.html" role="menuitem">Base64</a></li>
+        <li><a href="jwt-decoder.html" role="menuitem">JWT</a></li>
+        <li><a href="regex-tester.html" role="menuitem">Regex</a></li>
+        <li><a href="url-encoder.html" role="menuitem">URL</a></li>
+        <li><a href="hash-generator.html" role="menuitem">Hash</a></li>
+        <li><a href="color-picker.html" role="menuitem">Color</a></li>
+        <li><a href="timestamp.html" role="menuitem">Timestamp</a></li>
+        <li><a href="diff-checker.html" role="menuitem">Diff</a></li>
+        <li><a href="cron-builder.html" role="menuitem">Cron</a></li>
+        <li><a href="cron-parser.html" role="menuitem">Cron Parser</a></li>
+        <li><a href="markdown.html" role="menuitem">Markdown</a></li>
+        <li><a href="lorem-ipsum.html" role="menuitem">Lorem</a></li>
+        <li><a href="uuid-generator.html" role="menuitem">UUID</a></li>
+        <li><a href="css-minifier.html" role="menuitem">CSS</a></li>
+        <li><a href="js-minifier.html" role="menuitem">JS</a></li>
+        <li><a href="html-entity.html" role="menuitem">HTML</a></li>
+        <li><a href="password-generator.html" role="menuitem">Password</a></li>
+        <li><a href="sql-formatter.html" role="menuitem">SQL</a></li>
+        <li><a href="yaml-formatter.html" role="menuitem">YAML</a></li>
+        <li><a href="gradient-generator.html" role="menuitem">Gradient</a></li>
+        <li><a href="og-generator.html" role="menuitem">OG Meta</a></li>
+        <li><a href="csv-viewer.html" role="menuitem">CSV</a></li>
+        <li><a href="svg-optimizer.html" role="menuitem">SVG</a></li>
+        <li><a href="favicon-generator.html" role="menuitem">Favicon</a></li>
+        <li><a href="chart-generator.html" class="active" role="menuitem">Charts</a></li>
+        <li><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>Chart &amp; Graph Generator</h1>
+      <p>Create bar, line, pie, and doughnut charts from your data. Paste CSV or enter manually. Export as PNG or SVG.</p>
+    </div>
+
+    <div id="msgArea" class="msg"></div>
+
+    <div class="chart-layout">
+      <div class="chart-sidebar">
+
+        <div class="chart-section">
+          <h3>Data Input</h3>
+          <div class="chart-tabs">
+            <button class="chart-tab active" data-panel="csvPanel">CSV</button>
+            <button class="chart-tab" data-panel="tablePanel">Table</button>
+          </div>
+          <div id="csvPanel" class="chart-panel active">
+            <div class="chart-field">
+              <label for="csvInput">Paste CSV data (header row + value rows)</label>
+              <textarea id="csvInput" placeholder="Label,Series 1,Series 2&#10;Jan,12,8&#10;Feb,19,14&#10;Mar,3,10&#10;Apr,15,22&#10;May,9,17"></textarea>
+            </div>
+            <button class="btn btn-sm" id="loadExampleBtn">Load Example</button>
+          </div>
+          <div id="tablePanel" class="chart-panel">
+            <div class="table-actions">
+              <button class="btn btn-sm" id="addRowBtn">+ Row</button>
+              <button class="btn btn-sm" id="addColBtn">+ Column</button>
+              <button class="btn btn-sm" id="removeRowBtn">&minus; Row</button>
+              <button class="btn btn-sm" id="removeColBtn">&minus; Col</button>
+            </div>
+            <div class="data-table-wrap">
+              <table class="data-table" id="dataTable">
+                <thead>
+                  <tr>
+                    <th>Label</th>
+                    <th>Series 1</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><input type="text" value="Jan"></td><td><input type="text" value="12"></td></tr>
+                  <tr><td><input type="text" value="Feb"></td><td><input type="text" value="19"></td></tr>
+                  <tr><td><input type="text" value="Mar"></td><td><input type="text" value="3"></td></tr>
+                  <tr><td><input type="text" value="Apr"></td><td><input type="text" value="15"></td></tr>
+                  <tr><td><input type="text" value="May"></td><td><input type="text" value="9"></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-section">
+          <h3>Chart Type</h3>
+          <div class="chart-field">
+            <select id="chartType">
+              <option value="bar">Bar Chart</option>
+              <option value="line">Line Chart</option>
+              <option value="pie">Pie Chart</option>
+              <option value="doughnut">Doughnut Chart</option>
+              <option value="horizontalBar">Horizontal Bar</option>
+              <option value="radar">Radar Chart</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="chart-section">
+          <h3>Labels</h3>
+          <div class="chart-field">
+            <label for="chartTitle">Chart Title</label>
+            <input type="text" id="chartTitle" placeholder="My Chart">
+          </div>
+          <div class="chart-field" id="xAxisField">
+            <label for="xAxisLabel">X-Axis Label</label>
+            <input type="text" id="xAxisLabel" placeholder="Category">
+          </div>
+          <div class="chart-field" id="yAxisField">
+            <label for="yAxisLabel">Y-Axis Label</label>
+            <input type="text" id="yAxisLabel" placeholder="Value">
+          </div>
+        </div>
+
+        <div class="chart-section">
+          <h3>Options</h3>
+          <div class="chart-field">
+            <label class="chart-check">
+              <input type="checkbox" id="showLegend" checked> Show Legend
+            </label>
+          </div>
+          <div class="chart-field">
+            <label class="chart-check">
+              <input type="checkbox" id="showGrid" checked> Show Grid Lines
+            </label>
+          </div>
+          <div class="chart-field">
+            <label class="chart-check">
+              <input type="checkbox" id="fillArea"> Fill Area (Line chart)
+            </label>
+          </div>
+          <div class="chart-field">
+            <label class="chart-check">
+              <input type="checkbox" id="smoothCurves" checked> Smooth Curves (Line chart)
+            </label>
+          </div>
+          <div class="chart-field">
+            <label for="bgColor">Background Color</label>
+            <div class="color-row">
+              <input type="color" id="bgColor" value="#1e1e2e">
+              <label class="chart-check" style="margin:0">
+                <input type="checkbox" id="transparentBg"> Transparent
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-section">
+          <h3>Series Colors</h3>
+          <div id="colorPickers" class="chart-field">
+            <div class="color-row" style="margin-bottom:0.375rem">
+              <input type="color" value="#0ea5e9"> <span style="font-size:0.8125rem;color:var(--text-secondary)">Series 1</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="generateBtn" style="width:100%">Generate Chart</button>
+
+      </div>
+
+      <div>
+        <div class="chart-canvas-wrap" id="chartWrap">
+          <div class="chart-placeholder" id="chartPlaceholder">
+            Enter data and click <strong>Generate Chart</strong> to preview
+          </div>
+          <canvas id="chartCanvas" style="display:none"></canvas>
+        </div>
+        <div class="chart-actions">
+          <button class="btn btn-sm" id="exportPng" disabled>Export PNG</button>
+          <button class="btn btn-sm" id="exportSvg" disabled>Export SVG</button>
+          <button class="btn btn-sm" id="copyPng" disabled>Copy PNG</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://dannycranmer.github.io/parchment/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://dannycranmer.github.io/imagetoolkit/" target="_blank" rel="noopener">ImageToolkit (Image Tools)</a>
+    </div>
+    <div class="footer-github">
+      <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; margin-right: 4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub
+      </a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="js/common.js?v=4"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    const DEFAULT_COLORS = [
+      '#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#a855f7',
+      '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16',
+      '#06b6d4', '#e11d48'
+    ];
+
+    const csvInput = document.getElementById('csvInput');
+    const dataTable = document.getElementById('dataTable');
+    const chartType = document.getElementById('chartType');
+    const chartTitle = document.getElementById('chartTitle');
+    const xAxisLabel = document.getElementById('xAxisLabel');
+    const yAxisLabel = document.getElementById('yAxisLabel');
+    const showLegend = document.getElementById('showLegend');
+    const showGrid = document.getElementById('showGrid');
+    const fillArea = document.getElementById('fillArea');
+    const smoothCurves = document.getElementById('smoothCurves');
+    const bgColor = document.getElementById('bgColor');
+    const transparentBg = document.getElementById('transparentBg');
+    const colorPickers = document.getElementById('colorPickers');
+    const generateBtn = document.getElementById('generateBtn');
+    const chartCanvas = document.getElementById('chartCanvas');
+    const chartPlaceholder = document.getElementById('chartPlaceholder');
+    const exportPng = document.getElementById('exportPng');
+    const exportSvg = document.getElementById('exportSvg');
+    const copyPng = document.getElementById('copyPng');
+    const msgArea = document.getElementById('msgArea');
+    const xAxisField = document.getElementById('xAxisField');
+    const yAxisField = document.getElementById('yAxisField');
+
+    let currentChart = null;
+    let activeDataMode = 'csv';
+
+    // Tab switching
+    document.querySelectorAll('.chart-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.chart-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.panel).classList.add('active');
+        activeDataMode = tab.dataset.panel === 'csvPanel' ? 'csv' : 'table';
+      });
+    });
+
+    // Chart type change — hide axis labels for pie/doughnut
+    chartType.addEventListener('change', () => {
+      const isPolar = ['pie', 'doughnut'].includes(chartType.value);
+      xAxisField.style.display = isPolar ? 'none' : '';
+      yAxisField.style.display = isPolar ? 'none' : '';
+    });
+
+    // Load example
+    document.getElementById('loadExampleBtn').addEventListener('click', () => {
+      csvInput.value = 'Month,Revenue,Expenses,Profit\nJan,4200,3800,400\nFeb,5100,3900,1200\nMar,4800,4100,700\nApr,6200,4300,1900\nMay,7100,4600,2500\nJun,6800,4500,2300';
+      parseAndUpdateColors();
+    });
+
+    // Table row/col management
+    document.getElementById('addRowBtn').addEventListener('click', () => {
+      const cols = dataTable.rows[0].cells.length;
+      const row = dataTable.tBodies[0].insertRow();
+      for (let i = 0; i < cols; i++) {
+        const td = row.insertCell();
+        td.innerHTML = '<input type="text" value="">';
+      }
+    });
+
+    document.getElementById('addColBtn').addEventListener('click', () => {
+      const colIdx = dataTable.rows[0].cells.length;
+      const th = document.createElement('th');
+      th.textContent = 'Series ' + colIdx;
+      dataTable.tHead.rows[0].appendChild(th);
+      for (const row of dataTable.tBodies[0].rows) {
+        const td = row.insertCell();
+        td.innerHTML = '<input type="text" value="">';
+      }
+      updateColorPickers();
+    });
+
+    document.getElementById('removeRowBtn').addEventListener('click', () => {
+      const tbody = dataTable.tBodies[0];
+      if (tbody.rows.length > 1) tbody.deleteRow(tbody.rows.length - 1);
+    });
+
+    document.getElementById('removeColBtn').addEventListener('click', () => {
+      const headerRow = dataTable.tHead.rows[0];
+      if (headerRow.cells.length > 2) {
+        const idx = headerRow.cells.length - 1;
+        headerRow.deleteCell(idx);
+        for (const row of dataTable.tBodies[0].rows) {
+          row.deleteCell(idx);
+        }
+        updateColorPickers();
+      }
+    });
+
+    function parseCSV(text) {
+      const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l);
+      if (lines.length < 2) return null;
+      const headers = lines[0].split(',').map(h => h.trim());
+      const rows = lines.slice(1).map(l => l.split(',').map(c => c.trim()));
+      return { headers, rows };
+    }
+
+    function getDataFromCSV() {
+      const parsed = parseCSV(csvInput.value);
+      if (!parsed) return null;
+      return parsed;
+    }
+
+    function getDataFromTable() {
+      const headers = [];
+      for (const th of dataTable.tHead.rows[0].cells) {
+        headers.push(th.textContent.trim());
+      }
+      const rows = [];
+      for (const tr of dataTable.tBodies[0].rows) {
+        const row = [];
+        for (const td of tr.cells) {
+          const input = td.querySelector('input');
+          row.push(input ? input.value.trim() : td.textContent.trim());
+        }
+        rows.push(row);
+      }
+      return { headers, rows };
+    }
+
+    function parseAndUpdateColors() {
+      const data = activeDataMode === 'csv' ? getDataFromCSV() : getDataFromTable();
+      if (data && data.headers.length > 1) {
+        updateColorPickers(data.headers.length - 1, data.headers.slice(1));
+      }
+    }
+
+    csvInput.addEventListener('input', parseAndUpdateColors);
+
+    function updateColorPickers(count, names) {
+      if (!count) {
+        const data = activeDataMode === 'csv' ? getDataFromCSV() : getDataFromTable();
+        if (!data) return;
+        count = data.headers.length - 1;
+        names = data.headers.slice(1);
+      }
+      const existing = colorPickers.querySelectorAll('input[type="color"]');
+      const existingColors = Array.from(existing).map(i => i.value);
+      colorPickers.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const div = document.createElement('div');
+        div.className = 'color-row';
+        div.style.marginBottom = '0.375rem';
+        const inp = document.createElement('input');
+        inp.type = 'color';
+        inp.value = existingColors[i] || DEFAULT_COLORS[i % DEFAULT_COLORS.length];
+        const span = document.createElement('span');
+        span.style.cssText = 'font-size:0.8125rem;color:var(--text-secondary)';
+        span.textContent = (names && names[i]) || ('Series ' + (i + 1));
+        div.appendChild(inp);
+        div.appendChild(span);
+        colorPickers.appendChild(div);
+      }
+    }
+
+    function getSeriesColors() {
+      return Array.from(colorPickers.querySelectorAll('input[type="color"]')).map(i => i.value);
+    }
+
+    function generateChart() {
+      const data = activeDataMode === 'csv' ? getDataFromCSV() : getDataFromTable();
+      if (!data || data.rows.length === 0) {
+        showMsg(msgArea, 'error', 'Please enter at least a header row and one data row.');
+        return;
+      }
+
+      hideMsg(msgArea);
+      const labels = data.rows.map(r => r[0]);
+      const seriesCount = data.headers.length - 1;
+      if (seriesCount < 1) {
+        showMsg(msgArea, 'error', 'Need at least two columns: labels and one data series.');
+        return;
+      }
+
+      const colors = getSeriesColors();
+      while (colors.length < seriesCount) {
+        colors.push(DEFAULT_COLORS[colors.length % DEFAULT_COLORS.length]);
+      }
+
+      const type = chartType.value;
+      const isHBar = type === 'horizontalBar';
+      const chartJsType = isHBar ? 'bar' : type;
+      const isPolar = ['pie', 'doughnut'].includes(type);
+
+      const datasets = [];
+      for (let s = 0; s < seriesCount; s++) {
+        const values = data.rows.map(r => {
+          const v = parseFloat(r[s + 1]);
+          return isNaN(v) ? 0 : v;
+        });
+        const color = colors[s];
+        const ds = {
+          label: data.headers[s + 1],
+          data: values,
+        };
+
+        if (isPolar) {
+          ds.backgroundColor = labels.map((_, i) => colors[i % colors.length] + 'cc');
+          ds.borderColor = labels.map((_, i) => colors[i % colors.length]);
+          ds.borderWidth = 2;
+        } else {
+          ds.backgroundColor = color + '99';
+          ds.borderColor = color;
+          ds.borderWidth = 2;
+          if (type === 'line') {
+            ds.fill = fillArea.checked;
+            ds.tension = smoothCurves.checked ? 0.4 : 0;
+            ds.pointRadius = 4;
+            ds.pointHoverRadius = 6;
+          }
+        }
+        datasets.push(ds);
+      }
+
+      if (currentChart) {
+        currentChart.destroy();
+        currentChart = null;
+      }
+
+      chartPlaceholder.style.display = 'none';
+      chartCanvas.style.display = 'block';
+
+      const bg = transparentBg.checked ? 'transparent' : bgColor.value;
+
+      const config = {
+        type: chartJsType,
+        data: { labels, datasets },
+        options: {
+          indexAxis: isHBar ? 'y' : 'x',
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: showLegend.checked,
+              labels: { color: '#e2e8f0', font: { size: 13 } }
+            },
+            title: {
+              display: !!chartTitle.value,
+              text: chartTitle.value,
+              color: '#e2e8f0',
+              font: { size: 16, weight: '600' },
+              padding: { bottom: 16 }
+            }
+          },
+          scales: isPolar ? {} : {
+            x: {
+              display: true,
+              title: {
+                display: !!xAxisLabel.value,
+                text: xAxisLabel.value,
+                color: '#94a3b8',
+                font: { size: 13 }
+              },
+              grid: { display: showGrid.checked, color: 'rgba(148,163,184,0.15)' },
+              ticks: { color: '#94a3b8' }
+            },
+            y: {
+              display: true,
+              title: {
+                display: !!yAxisLabel.value,
+                text: yAxisLabel.value,
+                color: '#94a3b8',
+                font: { size: 13 }
+              },
+              grid: { display: showGrid.checked, color: 'rgba(148,163,184,0.15)' },
+              ticks: { color: '#94a3b8' },
+              beginAtZero: true
+            }
+          }
+        },
+        plugins: [{
+          id: 'customBg',
+          beforeDraw: (chart) => {
+            if (bg !== 'transparent') {
+              const ctx = chart.ctx;
+              ctx.save();
+              ctx.fillStyle = bg;
+              ctx.fillRect(0, 0, chart.width, chart.height);
+              ctx.restore();
+            }
+          }
+        }]
+      };
+
+      currentChart = new Chart(chartCanvas, config);
+      exportPng.disabled = false;
+      exportSvg.disabled = false;
+      copyPng.disabled = false;
+      showMsg(msgArea, 'success', 'Chart generated! Use the export buttons below.');
+    }
+
+    generateBtn.addEventListener('click', generateChart);
+    window.bindCtrlEnter(generateChart);
+
+    // Export PNG
+    exportPng.addEventListener('click', () => {
+      if (!currentChart) return;
+      const link = document.createElement('a');
+      link.download = 'chart.png';
+      link.href = chartCanvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // Copy PNG to clipboard
+    copyPng.addEventListener('click', () => {
+      if (!currentChart) return;
+      chartCanvas.toBlob(blob => {
+        if (blob && navigator.clipboard && navigator.clipboard.write) {
+          navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
+            showMsg(msgArea, 'success', 'Chart copied to clipboard!');
+          }).catch(() => {
+            showMsg(msgArea, 'error', 'Failed to copy — try Export PNG instead.');
+          });
+        } else {
+          showMsg(msgArea, 'error', 'Clipboard API not supported — use Export PNG.');
+        }
+      }, 'image/png');
+    });
+
+    // Export SVG — render chart data to an SVG manually
+    exportSvg.addEventListener('click', () => {
+      if (!currentChart) return;
+      // Use canvas-to-image embed in SVG as a practical approach
+      const dataUrl = chartCanvas.toDataURL('image/png');
+      const w = chartCanvas.width;
+      const h = chartCanvas.height;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+  <image href="${dataUrl}" width="${w}" height="${h}"/>
+</svg>`;
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const link = document.createElement('a');
+      link.download = 'chart.svg';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+
+    // Sync table <-> CSV
+    csvInput.addEventListener('blur', () => {
+      const data = getDataFromCSV();
+      if (data) syncTableFromData(data);
+    });
+
+    function syncTableFromData(data) {
+      const thead = dataTable.tHead.rows[0];
+      thead.innerHTML = '';
+      data.headers.forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        thead.appendChild(th);
+      });
+      const tbody = dataTable.tBodies[0];
+      tbody.innerHTML = '';
+      data.rows.forEach(r => {
+        const tr = tbody.insertRow();
+        r.forEach(val => {
+          const td = tr.insertCell();
+          td.innerHTML = `<input type="text" value="${val.replace(/"/g, '&quot;')}">`;
+        });
+      });
+      updateColorPickers(data.headers.length - 1, data.headers.slice(1));
+    }
+  })();
+  </script>
+  <script data-goatcounter="https://dairylea.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
