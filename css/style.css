@@ -278,103 +278,11 @@ body {
   margin: 0 auto;
 }
 
-/* === SEARCH BAR === */
-.search-bar {
-  position: relative;
-  max-width: 560px;
-  margin: 0 auto 1.25rem;
-}
-
-.search-bar input {
-  width: 100%;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  padding: 0.875rem 1rem 0.875rem 2.75rem;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-
-.search-bar input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-
-.search-bar input::placeholder {
-  color: var(--text-muted);
-}
-
-.search-icon {
-  position: absolute;
-  left: 0.875rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  pointer-events: none;
-}
-
-.search-count {
-  position: absolute;
-  right: 0.875rem;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  pointer-events: none;
-}
-
-/* === CATEGORY FILTERS === */
-.category-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-.cat-btn {
-  font-family: var(--font-sans);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 100px;
-  border: 1px solid var(--border);
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all var(--transition);
-  white-space: nowrap;
-}
-
-.cat-btn:hover {
-  border-color: var(--text-muted);
-  color: var(--text-primary);
-}
-
-.cat-btn.active {
-  background: var(--accent-dim);
-  border-color: var(--accent);
-  color: var(--accent);
-  font-weight: 600;
-}
-
-/* === NO RESULTS === */
-.no-results {
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 0.9375rem;
-  padding: 3rem 1rem;
-}
-
 .tool-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.25rem;
-  margin-top: 0;
+  margin-top: 2.5rem;
 }
 
 .tool-card {
@@ -1032,86 +940,248 @@ select:focus-visible {
 }
 
 /* === RESPONSIVE === */
+/* ===== MOBILE NAV — FULL-SCREEN TAKEOVER ===== */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.nav-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--bg-primary);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.97);
+  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0s 0.35s;
+  padding: 0 0 2rem;
+  display: none;
+  flex-direction: column;
+}
+.mobile-nav.open {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0s 0s;
+}
+
+/* Subtle glow accents */
+.mobile-nav::before,
+.mobile-nav::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+.mobile-nav::before {
+  width: 200px; height: 200px;
+  top: -40px; right: -40px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, transparent 70%);
+}
+.mobile-nav::after {
+  width: 160px; height: 160px;
+  bottom: 60px; left: -30px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.06) 0%, transparent 70%);
+}
+
+/* Header bar */
+.mobile-nav-header {
+  background: linear-gradient(135deg, #0c4a6e, #0369a1, #0ea5e9);
+  padding: 1rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.mobile-nav-header .mobile-nav-brand {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+.mobile-nav-header .mobile-nav-brand span { color: #7dd3fc; }
+.mobile-nav-close {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-close:hover { background: rgba(255,255,255,0.3); }
+.mobile-nav-close:active { transform: scale(0.9); }
+
+/* "All Tools" home link */
+.mobile-nav-home {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 1rem 1rem 0.4rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  background: linear-gradient(135deg, #0369a1, #0ea5e9);
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-home:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15); }
+
+/* Section headings */
+.mobile-nav-section {
+  padding: 0.8rem 1rem 0.2rem;
+}
+.mobile-nav-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+  padding-left: 0.3rem;
+}
+
+/* Grid — 1 col phones, 2 col on wider */
+.mobile-nav-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+}
+@media (min-width: 400px) {
+  .mobile-nav-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Nav items — pill buttons */
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 48px;
+  /* Staggered entrance */
+  opacity: 0;
+  transform: translateY(14px);
+}
+.mobile-nav.open .mobile-nav-item {
+  animation: mnavBounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.mobile-nav-item:nth-child(1) { animation-delay: 0.06s; }
+.mobile-nav-item:nth-child(2) { animation-delay: 0.09s; }
+.mobile-nav-item:nth-child(3) { animation-delay: 0.12s; }
+.mobile-nav-item:nth-child(4) { animation-delay: 0.15s; }
+.mobile-nav-item:nth-child(5) { animation-delay: 0.18s; }
+.mobile-nav-item:nth-child(6) { animation-delay: 0.21s; }
+.mobile-nav-item:nth-child(7) { animation-delay: 0.24s; }
+
+.mobile-nav-item:active {
+  transform: scale(0.96);
+  border-color: var(--accent);
+  box-shadow: 0 2px 12px rgba(14, 165, 233, 0.2);
+}
+.mobile-nav-item.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 2px 12px rgba(14, 165, 233, 0.12);
+}
+.mobile-nav-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 1.6rem;
+  text-align: center;
+}
+.mobile-nav-label { line-height: 1.2; }
+
+/* Privacy badge */
+.mobile-nav-privacy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 1.2rem 1rem 0;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.08);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1.5px solid rgba(14, 165, 233, 0.2);
+  flex-shrink: 0;
+}
+
+/* Buy Me a Coffee in mobile nav */
+.mobile-nav-coffee {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.8rem 1rem 0;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  background: #FFDD00;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-coffee:active { transform: scale(0.97); background: #ffe84d; }
+
+@keyframes mnavBounceIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @media (max-width: 1200px) {
   .nav-toggle {
     display: flex;
   }
 
+  /* Hide desktop nav links on mobile — mobile-nav takes over */
   .nav-links {
-    /* Use display:none for reliability — no invisible overlays */
     display: none !important;
-    /* Use absolute (not fixed) because backdrop-filter on .nav creates a
-       new containing block that breaks position:fixed in most browsers. */
-    position: absolute;
-    top: 56px;
-    left: 0;
-    right: 0;
-    height: calc(100vh - 56px);
-    background: var(--bg-primary);
-    border-bottom: 1px solid var(--border);
-    flex-direction: column;
-    padding: 0.5rem 0.75rem 1.5rem;
-    gap: 0.125rem;
-    z-index: 99;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .nav-links.open {
-    display: flex !important;
-  }
-
-  /* Flatten any "More" dropdown on mobile — show all items inline */
-  .nav-links .nav-more {
-    width: 100%;
-    list-style: none;
-  }
-  .nav-links .nav-more-btn {
-    display: none !important;
-  }
-  .nav-links .nav-more-dropdown {
-    display: flex !important;
-    flex-direction: column;
-    position: static !important;
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    min-width: 0 !important;
-    gap: 0.125rem;
-  }
-
-  .nav-links li {
-    width: 100%;
-    list-style: none;
-  }
-
-  .nav-links a {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    width: 100%;
-    font-size: 0.9375rem;
-    border-radius: var(--radius);
-    min-height: 44px;
-  }
-
-  .nav-links a:hover,
-  .nav-links a:active {
-    background: var(--bg-tertiary);
-  }
-
-  .nav-links a.active {
-    background: var(--accent-dim);
-  }
-
-  .nav-links a.nav-coffee {
-    justify-content: center;
-    margin-top: 0.5rem;
-    font-size: 0.9375rem;
-    padding: 0.75rem 1rem;
-    min-height: 44px;
   }
 }
 

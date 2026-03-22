@@ -59,56 +59,58 @@
     });
   }
 
-  /* --- Mobile menu open / close --- */
+  /* --- Mobile full-screen nav --- */
+  var mobileNav = document.querySelector('.mobile-nav');
+  var overlay = document.querySelector('.nav-overlay');
+  var mobileNavOpen = false;
+
   function openMobileMenu() {
-    if (!navLinks || !toggle) return;
-    navLinks.classList.add('open');
-    toggle.setAttribute('aria-expanded', 'true');
+    if (mobileNavOpen || !mobileNav) return;
+    mobileNavOpen = true;
+    if (toggle) toggle.setAttribute('aria-expanded', 'true');
+    mobileNav.classList.add('open');
+    if (overlay) overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
 
   function closeMobileMenu() {
-    if (!navLinks || !toggle) return;
-    navLinks.classList.remove('open');
-    toggle.setAttribute('aria-expanded', 'false');
+    if (!mobileNavOpen || !mobileNav) return;
+    mobileNavOpen = false;
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    mobileNav.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
     document.body.style.overflow = '';
   }
 
-  if (toggle && navLinks) {
-    // Hamburger toggle — use click (works on both desktop and mobile)
-    // The viewport meta tag ensures no 300ms click delay on mobile
+  if (toggle) {
     toggle.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
-      if (navLinks.classList.contains('open')) {
-        closeMobileMenu();
-      } else {
-        openMobileMenu();
-      }
-    });
-
-    // Close menu when a link is clicked
-    navLinks.addEventListener('click', function (e) {
-      if (e.target.closest('a')) {
-        closeMobileMenu();
-      }
-    });
-
-    // Close on Escape key
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && navLinks.classList.contains('open')) {
-        closeMobileMenu();
-        toggle.focus();
-      }
-    });
-
-    // Close when clicking outside nav on mobile
-    document.addEventListener('click', function (e) {
-      if (navLinks.classList.contains('open') && !nav.contains(e.target)) {
-        closeMobileMenu();
-      }
+      mobileNavOpen ? closeMobileMenu() : openMobileMenu();
     });
   }
+
+  // Close on overlay tap
+  if (overlay) overlay.addEventListener('click', closeMobileMenu);
+
+  // Close on X button
+  if (mobileNav) {
+    var closeBtn = mobileNav.querySelector('.mobile-nav-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeMobileMenu);
+
+    // Close on link click
+    mobileNav.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', closeMobileMenu);
+    });
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && mobileNavOpen) {
+      closeMobileMenu();
+      if (toggle) toggle.focus();
+    }
+  });
 
   // Build desktop More dropdown (only affects desktop via CSS)
   buildMoreDropdown();

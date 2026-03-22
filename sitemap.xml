@@ -1,163 +1,163 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://devbrew.org/</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/</loc>
     <lastmod>2026-03-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/json-formatter.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/json-formatter.html</loc>
     <lastmod>2026-03-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/base64.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/base64.html</loc>
     <lastmod>2026-03-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/jwt-decoder.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/jwt-decoder.html</loc>
     <lastmod>2026-03-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/regex-tester.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/regex-tester.html</loc>
     <lastmod>2026-03-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/url-encoder.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/url-encoder.html</loc>
     <lastmod>2026-03-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/hash-generator.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/hash-generator.html</loc>
     <lastmod>2026-03-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/color-picker.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/color-picker.html</loc>
     <lastmod>2026-03-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/timestamp.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/timestamp.html</loc>
     <lastmod>2026-03-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/markdown.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/markdown.html</loc>
     <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/lorem-ipsum.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/lorem-ipsum.html</loc>
     <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/uuid-generator.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/uuid-generator.html</loc>
     <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/css-minifier.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/css-minifier.html</loc>
     <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/js-minifier.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/js-minifier.html</loc>
     <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/html-entity.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/html-entity.html</loc>
     <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/password-generator.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/password-generator.html</loc>
     <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/cron-builder.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/cron-builder.html</loc>
     <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/cron-parser.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/cron-parser.html</loc>
     <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/diff-checker.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/diff-checker.html</loc>
     <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/sql-formatter.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/sql-formatter.html</loc>
     <lastmod>2026-03-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/yaml-formatter.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/yaml-formatter.html</loc>
     <lastmod>2026-03-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/gradient-generator.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/gradient-generator.html</loc>
     <lastmod>2026-03-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/og-generator.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/og-generator.html</loc>
     <lastmod>2026-03-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/csv-viewer.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/csv-viewer.html</loc>
     <lastmod>2026-03-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/svg-optimizer.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/svg-optimizer.html</loc>
     <lastmod>2026-03-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/favicon-generator.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/favicon-generator.html</loc>
     <lastmod>2026-03-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devbrew.org/chart-generator.html</loc>
+    <loc>https://dannycranmer.github.io/devtoolbox/chart-generator.html</loc>
     <lastmod>2026-03-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
