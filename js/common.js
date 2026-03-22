@@ -9,42 +9,12 @@
   var MOBILE_BP = 1200;
   var VISIBLE_DESKTOP = 8;
 
-  /* --- Detect mobile vs desktop --- */
-  function isMobile() {
-    return window.innerWidth <= MOBILE_BP;
-  }
-
-  /* --- Build / tear down the "More" dropdown (desktop only) --- */
-  var moreLi = null;
-  var moreDropdown = null;
-  var moreBtn = null;
-  var overflowItems = [];
-  var originalOrder = []; // cache original <li> order
-
-  function cacheOriginalOrder() {
-    if (originalOrder.length) return;
-    originalOrder = Array.from(navLinks.children).slice();
-  }
-
-  function restoreOriginalOrder() {
-    // Put all items back into navLinks in original order
-    originalOrder.forEach(function (li) {
-      navLinks.appendChild(li);
-    });
-    // Remove the "More" <li> if it exists
-    if (moreLi && moreLi.parentNode) {
-      moreLi.parentNode.removeChild(moreLi);
-    }
-    moreLi = null;
-    moreDropdown = null;
-    moreBtn = null;
-    overflowItems = [];
-  }
-
+  /* --- Desktop "More" dropdown --- */
   function buildMoreDropdown() {
-    if (moreLi) return; // already built
+    if (document.querySelector('.nav-more')) return;
+    if (!navLinks) return;
 
-    var items = Array.from(navLinks.children);
+    var items = Array.from(navLinks.querySelectorAll(':scope > li'));
     var coffeeItem = null;
     var toolItems = [];
     items.forEach(function (li) {
@@ -54,20 +24,19 @@
 
     if (toolItems.length <= VISIBLE_DESKTOP) return;
 
-    overflowItems = toolItems.slice(VISIBLE_DESKTOP);
-    moreLi = document.createElement('li');
+    var overflowItems = toolItems.slice(VISIBLE_DESKTOP);
+    var moreLi = document.createElement('li');
     moreLi.className = 'nav-more';
-    moreBtn = document.createElement('button');
+    var moreBtn = document.createElement('button');
     moreBtn.className = 'nav-more-btn';
     moreBtn.textContent = 'More \u25BE';
     moreBtn.setAttribute('aria-expanded', 'false');
     moreLi.appendChild(moreBtn);
 
-    moreDropdown = document.createElement('ul');
+    var moreDropdown = document.createElement('ul');
     moreDropdown.className = 'nav-more-dropdown';
     var hasActive = false;
     overflowItems.forEach(function (li) {
-      navLinks.removeChild(li);
       if (li.querySelector('.active')) hasActive = true;
       moreDropdown.appendChild(li);
     });
@@ -80,57 +49,36 @@
     moreBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       var isOpen = moreLi.classList.toggle('open');
-      moreBtn.setAttribute('aria-expanded', isOpen);
+      moreBtn.setAttribute('aria-expanded', String(isOpen));
     });
-  }
 
-  /* --- Close "More" on outside click --- */
-  document.addEventListener('click', function () {
-    if (moreLi) {
+    // Close More on outside click
+    document.addEventListener('click', function () {
       moreLi.classList.remove('open');
-      if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
-    }
-  });
-
-  /* --- Handle layout changes --- */
-  var currentMode = null;
-
-  function applyLayout() {
-    var mobile = isMobile();
-    var mode = mobile ? 'mobile' : 'desktop';
-    if (mode === currentMode) return;
-    currentMode = mode;
-
-    if (mobile) {
-      // Restore all items flat for mobile
-      restoreOriginalOrder();
-    } else {
-      // Restore first (in case switching from mobile), then build More
-      restoreOriginalOrder();
-      buildMoreDropdown();
-      // Close mobile menu if it was open
-      closeMobileMenu();
-    }
+      moreBtn.setAttribute('aria-expanded', 'false');
+    });
   }
 
   /* --- Mobile menu open / close --- */
   function openMobileMenu() {
+    if (!navLinks || !toggle) return;
     navLinks.classList.add('open');
     toggle.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
   }
 
   function closeMobileMenu() {
+    if (!navLinks || !toggle) return;
     navLinks.classList.remove('open');
     toggle.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
   }
 
   if (toggle && navLinks) {
-    // Cache original order before any DOM manipulation
-    cacheOriginalOrder();
-
+    // Hamburger toggle — use click (works on both desktop and mobile)
+    // The viewport meta tag ensures no 300ms click delay on mobile
     toggle.addEventListener('click', function (e) {
+      e.preventDefault();
       e.stopPropagation();
       if (navLinks.classList.contains('open')) {
         closeMobileMenu();
@@ -141,7 +89,7 @@
 
     // Close menu when a link is clicked
     navLinks.addEventListener('click', function (e) {
-      if (e.target.tagName === 'A') {
+      if (e.target.closest('a')) {
         closeMobileMenu();
       }
     });
@@ -160,11 +108,10 @@
         closeMobileMenu();
       }
     });
-
-    // Apply correct layout on load and resize
-    applyLayout();
-    window.addEventListener('resize', applyLayout);
   }
+
+  // Build desktop More dropdown (only affects desktop via CSS)
+  buildMoreDropdown();
 
   /* --- Copy to clipboard --- */
   window.copyToClipboard = function (text, btn) {
