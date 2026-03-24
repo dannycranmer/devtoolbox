@@ -269,4 +269,47 @@
     return parseFloat((bytes / Math.pow(1024, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
+  /* --- Post-action donation CTA --- */
+  window.showPostActionCTA = function () {
+    // Only show once per session
+    if (sessionStorage.getItem('devbrew_cta_shown')) return;
+    sessionStorage.setItem('devbrew_cta_shown', '1');
+
+    setTimeout(function () {
+      // Inject CSS
+      var style = document.createElement('style');
+      style.textContent =
+        '@keyframes devbrew-slide-up{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}' +
+        '@keyframes devbrew-slide-down{from{transform:translateY(0);opacity:1}to{transform:translateY(100%);opacity:0}}' +
+        '.devbrew-cta{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);' +
+        'background:rgba(30,30,30,0.92);color:#e0e0e0;padding:12px 24px;border-radius:12px;' +
+        'font-size:14px;z-index:9999;cursor:pointer;backdrop-filter:blur(8px);' +
+        'border:1px solid rgba(255,255,255,0.1);box-shadow:0 4px 20px rgba(0,0,0,0.4);' +
+        'animation:devbrew-slide-up 0.4s ease-out;white-space:nowrap;font-family:inherit}' +
+        '.devbrew-cta.hide{animation:devbrew-slide-down 0.3s ease-in forwards}' +
+        '.devbrew-cta a{color:#f5a623;text-decoration:none;font-weight:600}' +
+        '.devbrew-cta a:hover{text-decoration:underline}';
+      document.head.appendChild(style);
+
+      // Create toast
+      var toast = document.createElement('div');
+      toast.className = 'devbrew-cta';
+      toast.innerHTML = 'Glad this helped? \u2615 <a href="https://buymeacoffee.com/dairylea" target="_blank" rel="noopener">Buy us a coffee</a>';
+
+      function dismiss() {
+        toast.classList.add('hide');
+        setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+      }
+
+      toast.addEventListener('click', function (e) {
+        if (e.target.tagName !== 'A') dismiss();
+      });
+
+      document.body.appendChild(toast);
+
+      // Auto-dismiss after 10 seconds
+      setTimeout(dismiss, 10000);
+    }, 1000);
+  };
+
 })();

@@ -197,8 +197,6 @@
       <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
       <span class="footer-sep">&bull;</span>
       <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
-      <span class="footer-sep">&bull;</span>
-      <a href="https://dannycranmer.github.io/eduplay/" target="_blank" rel="noopener">EduPlay (Kids Games)</a>
     </div>
     <div class="footer-github">
       <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
@@ -783,7 +781,7 @@
         var parsed = parseYAML(input);
         outputEl.value = input;
         statsEl.innerHTML = '<span class="valid">&#10003; Valid YAML</span>';
-        showMsg(msgEl, 'success', 'YAML is valid!');
+        showMsg(msgEl, 'success', 'YAML is valid!'); showPostActionCTA();
       } catch (e) {
         statsEl.innerHTML = '<span class="invalid">&#10007; Invalid YAML</span>';
         var errHtml = '<div class="error-line">';

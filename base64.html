@@ -131,8 +131,6 @@
       <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
       <span class="footer-sep">&bull;</span>
       <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
-      <span class="footer-sep">&bull;</span>
-      <a href="https://dannycranmer.github.io/eduplay/" target="_blank" rel="noopener">EduPlay (Kids Games)</a>
     </div>
     <div class="footer-github">
       <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
@@ -204,12 +202,12 @@
           // Text to Base64
           var encoded = btoa(unescape(encodeURIComponent(raw)));
           result = urlSafe.checked ? toUrlSafe(encoded) : encoded;
-          showMsg(msg, 'success', 'Encoded successfully');
+          showMsg(msg, 'success', 'Encoded successfully'); showPostActionCTA();
         } else {
           // Base64 to text
           var b64 = urlSafe.checked ? fromUrlSafe(raw.trim()) : raw.trim();
           result = decodeURIComponent(escape(atob(b64)));
-          showMsg(msg, 'success', 'Decoded successfully');
+          showMsg(msg, 'success', 'Decoded successfully'); showPostActionCTA();
         }
         output.value = result;
         statusEl.textContent = 'Input: ' + raw.length + ' chars \u00B7 Output: ' + result.length + ' chars';
@@ -289,7 +287,7 @@
         output.value = urlSafe.checked ? toUrlSafe(b64) : b64;
         setMode('encode');
         input.value = '[File: ' + file.name + ' (' + formatBytes(file.size) + ')]';
-        showMsg(msg, 'success', 'File encoded: ' + file.name);
+        showMsg(msg, 'success', 'File encoded: ' + file.name); showPostActionCTA();
         statusEl.textContent = 'File: ' + formatBytes(file.size) + ' \u00B7 Base64: ' + output.value.length + ' chars';
       };
       reader.onerror = function () {

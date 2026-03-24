@@ -111,8 +111,6 @@
       <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
       <span class="footer-sep">&bull;</span>
       <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
-      <span class="footer-sep">&bull;</span>
-      <a href="https://dannycranmer.github.io/eduplay/" target="_blank" rel="noopener">EduPlay (Kids Games)</a>
     </div>
     <div class="footer-github">
       <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
@@ -284,7 +282,7 @@
       }
       var result = minifyCSS(input);
       outputEl.value = result;
-      updateStats(input, result, 'minify');
+      updateStats(input, result, 'minify'); showPostActionCTA();
     }
 
     function doBeautify() {
@@ -296,7 +294,7 @@
       }
       var result = beautifyCSS(input);
       outputEl.value = result;
-      updateStats(input, result, 'beautify');
+      updateStats(input, result, 'beautify'); showPostActionCTA();
     }
 
     // Buttons

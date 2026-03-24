@@ -396,6 +396,7 @@
         downloadBtn.style.display = 'inline-flex';
         var modules = qr.getModuleCount();
         qrInfo.textContent = modules + '\u00d7' + modules + ' modules \u2014 EC Level H (30% recovery)';
+        showPostActionCTA();
       } catch (e) {
         showErr(e.message || 'Failed to generate QR code. Text may be too long.');
       }

@@ -219,8 +219,6 @@
       <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
       <span class="footer-sep">&bull;</span>
       <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
-      <span class="footer-sep">&bull;</span>
-      <a href="https://dannycranmer.github.io/eduplay/" target="_blank" rel="noopener">EduPlay (Kids Games)</a>
     </div>
     <div class="footer-github">
       <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
@@ -850,6 +848,7 @@
       outputEl.value = result;
       updateHighlight();
       updateStats(input, result, 'format');
+      showPostActionCTA();
     }
 
     function doMinify() {
@@ -863,6 +862,7 @@
       outputEl.value = result;
       updateHighlight();
       updateStats(input, result, 'minify');
+      showPostActionCTA();
     }
 
     // Sync scroll between output and highlight layer

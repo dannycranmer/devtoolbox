@@ -142,8 +142,6 @@
       <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
       <span class="footer-sep">&bull;</span>
       <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
-      <span class="footer-sep">&bull;</span>
-      <a href="https://dannycranmer.github.io/eduplay/" target="_blank" rel="noopener">EduPlay (Kids Games)</a>
     </div>
     <div class="footer-github">
       <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
@@ -376,7 +374,7 @@
       var text = input.value;
       if (!text) { hideMsg(msg); return; }
       hashText(text).then(function () {
-        showMsg(msg, 'success', 'Hashes generated for ' + formatBytes(new Blob([text]).size) + ' of text');
+        showMsg(msg, 'success', 'Hashes generated for ' + formatBytes(new Blob([text]).size) + ' of text'); showPostActionCTA();
       });
     });
 
@@ -423,7 +421,7 @@
       fileInfo.textContent = file.name + ' (' + formatBytes(file.size) + ')';
       showMsg(msg, 'warning', 'Hashing...');
       hashFile(file).then(function () {
-        showMsg(msg, 'success', 'Hashes generated for ' + file.name + ' (' + formatBytes(file.size) + ')');
+        showMsg(msg, 'success', 'Hashes generated for ' + file.name + ' (' + formatBytes(file.size) + ')'); showPostActionCTA();
       }).catch(function (e) {
         showMsg(msg, 'error', 'Error: ' + e.message);
       });

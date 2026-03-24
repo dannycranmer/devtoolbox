@@ -129,8 +129,6 @@
       <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
       <span class="footer-sep">&bull;</span>
       <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
-      <span class="footer-sep">&bull;</span>
-      <a href="https://dannycranmer.github.io/eduplay/" target="_blank" rel="noopener">EduPlay (Kids Games)</a>
     </div>
     <div class="footer-github">
       <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
@@ -226,7 +224,7 @@
         } else {
           output.innerHTML = syntaxHighlight(lastFormatted);
         }
-        showMsg(msg, 'success', 'Valid JSON');
+        showMsg(msg, 'success', 'Valid JSON'); showPostActionCTA();
         var bytes = new Blob([lastFormatted]).size;
         status.textContent = lastFormatted.length + ' chars \u00B7 ' + formatBytes(bytes);
       } catch (e) {
@@ -253,7 +251,7 @@
         var parsed = JSON.parse(raw);
         lastFormatted = JSON.stringify(parsed);
         output.textContent = lastFormatted;
-        showMsg(msg, 'success', 'Minified');
+        showMsg(msg, 'success', 'Minified'); showPostActionCTA();
         var bytes = new Blob([lastFormatted]).size;
         status.textContent = lastFormatted.length + ' chars \u00B7 ' + formatBytes(bytes);
       } catch (e) {
