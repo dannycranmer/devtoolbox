@@ -269,47 +269,75 @@
     return parseFloat((bytes / Math.pow(1024, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
+  /* --- Usage tracking --- */
+  window.trackDevBrewUse = function () {
+    var count = parseInt(localStorage.getItem('devbrew_uses') || '0', 10) + 1;
+    localStorage.setItem('devbrew_uses', count);
+    return count;
+  };
+
   /* --- Post-action donation CTA --- */
   window.showPostActionCTA = function () {
-    // Only show once per session
-    if (sessionStorage.getItem('devbrew_cta_shown')) return;
-    sessionStorage.setItem('devbrew_cta_shown', '1');
+    var uses = window.trackDevBrewUse();
 
-    setTimeout(function () {
-      // Inject CSS
-      var style = document.createElement('style');
-      style.textContent =
-        '@keyframes devbrew-slide-up{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}' +
-        '@keyframes devbrew-slide-down{from{transform:translateY(0);opacity:1}to{transform:translateY(100%);opacity:0}}' +
-        '.devbrew-cta{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);' +
-        'background:rgba(30,30,30,0.92);color:#e0e0e0;padding:12px 24px;border-radius:12px;' +
-        'font-size:14px;z-index:9999;cursor:pointer;backdrop-filter:blur(8px);' +
-        'border:1px solid rgba(255,255,255,0.1);box-shadow:0 4px 20px rgba(0,0,0,0.4);' +
-        'animation:devbrew-slide-up 0.4s ease-out;white-space:nowrap;font-family:inherit}' +
-        '.devbrew-cta.hide{animation:devbrew-slide-down 0.3s ease-in forwards}' +
-        '.devbrew-cta a{color:#f5a623;text-decoration:none;font-weight:600}' +
-        '.devbrew-cta a:hover{text-decoration:underline}';
-      document.head.appendChild(style);
+    // Only show toast once per session
+    if (!sessionStorage.getItem('devbrew_cta_shown')) {
+      sessionStorage.setItem('devbrew_cta_shown', '1');
 
-      // Create toast
-      var toast = document.createElement('div');
-      toast.className = 'devbrew-cta';
-      toast.innerHTML = 'Glad this helped? \u2615 <a href="https://buymeacoffee.com/dairylea" target="_blank" rel="noopener">Buy us a coffee</a>';
+      // Only show toast at 5+ uses
+      if (uses >= 5) {
+        setTimeout(function () {
+          var style = document.createElement('style');
+          style.textContent =
+            '@keyframes devbrew-slide-up{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}' +
+            '@keyframes devbrew-slide-down{from{transform:translateY(0);opacity:1}to{transform:translateY(100%);opacity:0}}' +
+            '.devbrew-cta{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);' +
+            'background:rgba(30,30,30,0.92);color:#e0e0e0;padding:12px 24px;border-radius:12px;' +
+            'font-size:14px;z-index:9999;cursor:pointer;backdrop-filter:blur(8px);' +
+            'border:1px solid rgba(255,255,255,0.1);box-shadow:0 4px 20px rgba(0,0,0,0.4);' +
+            'animation:devbrew-slide-up 0.4s ease-out;white-space:nowrap;font-family:inherit}' +
+            '.devbrew-cta.hide{animation:devbrew-slide-down 0.3s ease-in forwards}' +
+            '.devbrew-cta a{color:#f5a623;text-decoration:none;font-weight:600}' +
+            '.devbrew-cta a:hover{text-decoration:underline}';
+          document.head.appendChild(style);
 
-      function dismiss() {
-        toast.classList.add('hide');
-        setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+          var toast = document.createElement('div');
+          toast.className = 'devbrew-cta';
+          toast.innerHTML = 'You\u2019ve used ' + uses + ' tools for free \u2014 consider supporting DevBrew \u2615 <a href="https://buymeacoffee.com/dairylea" target="_blank" rel="noopener">Buy us a coffee</a>';
+
+          function dismiss() {
+            toast.classList.add('hide');
+            setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+          }
+
+          toast.addEventListener('click', function (e) {
+            if (e.target.tagName !== 'A') dismiss();
+          });
+
+          document.body.appendChild(toast);
+          setTimeout(dismiss, 10000);
+        }, 1000);
       }
+    }
 
-      toast.addEventListener('click', function (e) {
-        if (e.target.tagName !== 'A') dismiss();
+    // Show persistent banner at 10+ uses (once per session, dismissible)
+    if (uses >= 10 && !sessionStorage.getItem('devbrew_banner_dismissed') && !document.querySelector('.devbrew-banner')) {
+      var banner = document.createElement('div');
+      banner.className = 'devbrew-banner';
+      banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9998;background:rgba(20,20,20,0.95);' +
+        'backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,0.1);padding:12px 20px;' +
+        'display:flex;align-items:center;justify-content:center;gap:12px;font-size:14px;color:#e0e0e0;font-family:inherit';
+      banner.innerHTML = '<span>You\u2019re a power user! You\u2019ve used ' + uses + ' tools for free.</span>' +
+        '<a href="https://buymeacoffee.com/dairylea" target="_blank" rel="noopener" ' +
+        'style="background:#f5a623;color:#1a1a1a;padding:6px 16px;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap">' +
+        '\u2615 Support DevBrew</a>' +
+        '<button class="devbrew-banner-close" style="background:none;border:none;color:#888;font-size:18px;cursor:pointer;padding:4px 8px;line-height:1" aria-label="Dismiss">\u2715</button>';
+      document.body.appendChild(banner);
+      banner.querySelector('.devbrew-banner-close').addEventListener('click', function () {
+        sessionStorage.setItem('devbrew_banner_dismissed', '1');
+        banner.remove();
       });
-
-      document.body.appendChild(toast);
-
-      // Auto-dismiss after 10 seconds
-      setTimeout(dismiss, 10000);
-    }, 1000);
+    }
   };
 
 })();
