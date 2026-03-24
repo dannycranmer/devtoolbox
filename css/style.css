@@ -59,6 +59,7 @@ body {
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   padding: 0 1.5rem;
+  overflow: visible;
 }
 
 .nav-inner {
@@ -506,6 +507,8 @@ body {
   width: 100%;
   margin: 0 auto;
   padding: 2rem 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 /* === LANDING PAGE === */
