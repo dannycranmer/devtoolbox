@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Code Explainer — DevBrew</title>
+  <meta name="description" content="Paste code and get a plain-English explanation instantly. Auto-detects language, analyzes functions, imports, loops, and patterns. 100% private, no API needed.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="canonical" href="https://devbrew.org/ai-code-explainer.html">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://devbrew.org/ai-code-explainer.html">
+  <meta property="og:title" content="AI Code Explainer — DevBrew">
+  <meta property="og:description" content="Paste code and get a plain-English explanation instantly. Auto-detects language, analyzes functions, imports, loops, and patterns. 100% private, no API needed.">
+  <meta property="og:image" content="https://devbrew.org/og-image.png">
+  <meta property="og:site_name" content="DevBrew">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI Code Explainer — DevBrew">
+  <meta name="twitter:description" content="Paste code and get a plain-English explanation instantly. Auto-detects language, analyzes functions, imports, loops, and patterns. 100% private.">
+  <meta name="twitter:image" content="https://devbrew.org/og-image.png">
+  <link rel="stylesheet" href="css/style.css?v=16">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AI Code Explainer",
+  "description": "Paste code and get a plain-English explanation instantly. Auto-detects language, analyzes functions, imports, loops, and patterns. 100% private, no API needed.",
+  "url": "https://devbrew.org/ai-code-explainer.html",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "DevBrew",
+    "url": "https://devbrew.org"
+  }
+}
+  </script>
+  <style>
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(14,165,233,0.12));
+      border: 1px solid rgba(124,58,237,0.35);
+      border-radius: 999px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #a78bfa;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    #code-input {
+      min-height: 200px;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+    }
+    .explanation-panel {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(14,165,233,0.3);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .explanation-header {
+      background: linear-gradient(135deg, rgba(14,165,233,0.12), rgba(124,58,237,0.08));
+      border-bottom: 1px solid var(--border);
+      padding: 0.875rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .explanation-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .lang-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--accent-dim);
+      border: 1px solid rgba(14,165,233,0.35);
+      border-radius: 999px;
+      padding: 0.2rem 0.7rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .confidence-pill {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .explanation-body {
+      padding: 1.25rem;
+    }
+    .exp-section {
+      margin-bottom: 1.25rem;
+    }
+    .exp-section:last-child {
+      margin-bottom: 0;
+    }
+    .exp-section-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .exp-summary {
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+      line-height: 1.65;
+    }
+    .exp-key-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .exp-key-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .exp-key-list li::before {
+      content: '\2022';
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 0.05em;
+    }
+    .exp-key-list code {
+      font-family: var(--font-mono);
+      background: var(--bg-input);
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      color: #86efac;
+      font-size: 0.8rem;
+    }
+    .complexity-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .complexity-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.25rem 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+    .complexity-chip strong {
+      color: #fbbf24;
+    }
+    .exp-walkthrough {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: walk-counter;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .exp-walkthrough li {
+      counter-increment: walk-counter;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .exp-walkthrough li::before {
+      content: counter(walk-counter);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      min-width: 1.5rem;
+      background: var(--accent-dim);
+      border: 1px solid rgba(14,165,233,0.3);
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      margin-top: 0.1em;
+    }
+    .patterns-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .pattern-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(124,58,237,0.1);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 999px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #a78bfa;
+    }
+    .error-msg {
+      background: var(--error-bg);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      color: var(--error);
+      font-size: 0.875rem;
+    }
+    .controls-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .controls-row label {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Brew</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"></button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="ai-regex.html" role="menuitem">AI Regex</a></li>
+        <li><a href="ai-code-explainer.html" class="active" role="menuitem">AI Code</a></li>
+        <li><a href="ai-json-schema.html" role="menuitem">AI Schema</a></li>
+        <li><a href="ai-sql-builder.html" role="menuitem">AI SQL</a></li>
+        <li><a href="ai-color-palette.html" role="menuitem">AI Colors</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li class="nav-bmc"><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>AI Code Explainer</h1>
+      <p>Paste any code snippet and get a clear, plain-English explanation instantly. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to explain</span></p>
+    </div>
+
+    <div style="max-width:960px;">
+      <div class="ai-badge">&#129302; AI-Powered &middot; Instant &middot; 100% Private</div>
+
+      <div class="controls-row">
+        <label for="lang-select">Language:</label>
+        <select id="lang-select" aria-label="Programming language">
+          <option value="auto">Auto-detect</option>
+          <option value="javascript">JavaScript</option>
+          <option value="typescript">TypeScript</option>
+          <option value="python">Python</option>
+          <option value="sql">SQL</option>
+          <option value="java">Java</option>
+          <option value="go">Go</option>
+          <option value="rust">Rust</option>
+          <option value="css">CSS</option>
+          <option value="html">HTML</option>
+          <option value="bash">Bash</option>
+        </select>
+      </div>
+
+      <span class="panel-label" style="display:block;margin-bottom:0.5rem;">Paste your code here</span>
+      <textarea id="code-input" placeholder="Paste any code here to get an instant explanation..." aria-label="Code input" spellcheck="false"></textarea>
+
+      <div class="btn-row" style="margin-top:0.75rem;">
+        <button class="btn btn-primary" id="btn-explain" type="button">Explain Code</button>
+        <button class="btn" id="btn-example" type="button">Load Example</button>
+        <button class="btn" id="btn-clear" type="button">Clear</button>
+      </div>
+
+      <div id="explanation-output" style="margin-top:1.5rem;"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
+    </div>
+    <div class="footer-github">
+      <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; margin-right: 4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub
+      </a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js?v=16"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    /* =====================================================================
+       LANGUAGE DETECTION
+    ===================================================================== */
+
+    var LANG_RULES = [
+      {
+        id: 'html',
+        name: 'HTML',
+        icon: '&#128196;',
+        tests: [
+          { re: /<!DOCTYPE\s+html/i, score: 15 },
+          { re: /<html[\s>]/i, score: 12 },
+          { re: /<(?:head|body|div|span|p|a|script|link|meta|title)[\s>\/]/i, score: 5 },
+          { re: /<!--/, score: 3 }
+        ]
+      },
+      {
+        id: 'css',
+        name: 'CSS',
+        icon: '&#127912;',
+        tests: [
+          { re: /@(?:media|keyframes|import|charset|supports)\b/, score: 12 },
+          { re: /:(?:hover|focus|active|before|after|root|nth-child)\b/, score: 10 },
+          { re: /\{[^}]*:[^}]+;[^}]*\}/, score: 8 },
+          { re: /\b(?:margin|padding|color|font-size|display|position|background)\s*:/, score: 6 }
+        ]
+      },
+      {
+        id: 'sql',
+        name: 'SQL',
+        icon: '&#128451;&#65039;',
+        tests: [
+          { re: /\bSELECT\b/i, score: 10 },
+          { re: /\bFROM\b/i, score: 8 },
+          { re: /\bWHERE\b/i, score: 6 },
+          { re: /\b(?:INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b/i, score: 8 },
+          { re: /\b(?:JOIN|LEFT JOIN|INNER JOIN|OUTER JOIN)\b/i, score: 7 },
+          { re: /\bGROUP BY\b/i, score: 8 }
+        ]
+      },
+      {
+        id: 'python',
+        name: 'Python',
+        icon: '&#129027;',
+        tests: [
+          { re: /\bdef\s+\w+\s*\(/, score: 12 },
+          { re: /\bimport\s+\w+/, score: 8 },
+          { re: /\bfrom\s+\w+\s+import\b/, score: 10 },
+          { re: /\bif\s+__name__\s*==\s*['"]__main__['"]/, score: 15 },
+          { re: /\bprint\s*\(/, score: 5 },
+          { re: /:\s*$|^\s+(?:return|pass|raise|yield)\b/m, score: 4 },
+          { re: /\bclass\s+\w+\s*(?:\([^)]*\))?:/, score: 8 },
+          { re: /\bself\s*[.,)]/, score: 8 },
+          { re: /#\s*.+$|"""[\s\S]*?"""/m, score: 3 }
+        ]
+      },
+      {
+        id: 'typescript',
+        name: 'TypeScript',
+        icon: '&#128230;',
+        tests: [
+          { re: /\binterface\s+\w+/, score: 15 },
+          { re: /:\s*(?:string|number|boolean|void|any|never|unknown)\b/, score: 12 },
+          { re: /<[A-Z]\w*>/, score: 8 },
+          { re: /\btype\s+\w+\s*=/, score: 10 },
+          { re: /\bas\s+\w+/, score: 6 },
+          { re: /\benum\s+\w+/, score: 10 }
+        ]
+      },
+      {
+        id: 'javascript',
+        name: 'JavaScript',
+        icon: '&#9889;',
+        tests: [
+          { re: /\bfunction\s+\w+\s*\(/, score: 8 },
+          { re: /\b(?:const|let|var)\s+\w+/, score: 7 },
+          { re: /=>\s*[{(]/, score: 8 },
+          { re: /\bconsole\.(?:log|error|warn|info)\b/, score: 10 },
+          { re: /\b(?:require|import)\s*\(/, score: 7 },
+          { re: /\.then\s*\(|\.catch\s*\(|async\s+function|await\s+\w/, score: 8 },
+          { re: /document\.|window\.|addEventListener/, score: 9 }
+        ]
+      },
+      {
+        id: 'java',
+        name: 'Java',
+        icon: '&#9749;',
+        tests: [
+          { re: /\bpublic\s+class\s+\w+/, score: 15 },
+          { re: /\bSystem\.out\.(?:print|println)\b/, score: 12 },
+          { re: /\b(?:private|protected|public)\s+(?:static\s+)?(?:void|int|String|boolean)\b/, score: 10 },
+          { re: /\bnew\s+[A-Z]\w+\s*\(/, score: 6 },
+          { re: /@Override\b/, score: 10 },
+          { re: /\bimport\s+java\./, score: 12 }
+        ]
+      },
+      {
+        id: 'go',
+        name: 'Go',
+        icon: '&#128640;',
+        tests: [
+          { re: /\bpackage\s+\w+/, score: 15 },
+          { re: /\bfunc\s+\w+\s*\(/, score: 12 },
+          { re: /\bimport\s*\(/, score: 8 },
+          { re: /:=\s*/, score: 8 },
+          { re: /\bfmt\.(?:Println|Printf|Sprintf)\b/, score: 12 },
+          { re: /\bchan\b|\bgo\s+func/, score: 10 },
+          { re: /\bdefer\b/, score: 8 }
+        ]
+      },
+      {
+        id: 'rust',
+        name: 'Rust',
+        icon: '&#9881;&#65039;',
+        tests: [
+          { re: /\bfn\s+\w+\s*\(/, score: 12 },
+          { re: /\blet\s+mut\s+\w+/, score: 12 },
+          { re: /\bimpl\s+\w+/, score: 10 },
+          { re: /\bstruct\s+\w+/, score: 10 },
+          { re: /\benum\s+\w+/, score: 8 },
+          { re: /\bmatch\s+\w+\s*\{/, score: 10 },
+          { re: /&str\b|&mut\b|Vec<|Option<|Result</, score: 10 },
+          { re: /println!\s*\(/, score: 8 }
+        ]
+      },
+      {
+        id: 'bash',
+        name: 'Bash',
+        icon: '&#129297;',
+        tests: [
+          { re: /^#!\/(?:bin|usr\/bin)\/(ba)?sh/, score: 20 },
+          { re: /\becho\s+/, score: 7 },
+          { re: /\bif\s*\[/, score: 8 },
+          { re: /\bfor\s+\w+\s+in\b/, score: 8 },
+          { re: /\$\{?\w+\}?/, score: 5 },
+          { re: /\bfi\b|\bdone\b|\besac\b/, score: 8 },
+          { re: /\|\s*grep\b|\|\s*awk\b|\|\s*sed\b/, score: 6 }
+        ]
+      }
+    ];
+
+    function detectLanguage(code) {
+      var scores = {};
+      LANG_RULES.forEach(function (lang) {
+        var score = 0;
+        lang.tests.forEach(function (test) {
+          if (test.re.test(code)) score += test.score;
+        });
+        scores[lang.id] = score;
+      });
+
+      var best = null;
+      var bestScore = 0;
+      Object.keys(scores).forEach(function (id) {
+        if (scores[id] > bestScore) {
+          bestScore = scores[id];
+          best = id;
+        }
+      });
+
+      // TypeScript supersedes JavaScript if both score high
+      if (best === 'javascript' && scores['typescript'] > 0) best = 'typescript';
+
+      var confidence;
+      if (bestScore >= 20) confidence = 'High';
+      else if (bestScore >= 10) confidence = 'Medium';
+      else confidence = 'Low';
+
+      return { id: best || 'unknown', score: bestScore, confidence: confidence };
+    }
+
+    function getLangById(id) {
+      for (var i = 0; i < LANG_RULES.length; i++) {
+        if (LANG_RULES[i].id === id) return LANG_RULES[i];
+      }
+      return { id: 'unknown', name: 'Unknown', icon: '&#128196;' };
+    }
+
+    /* =====================================================================
+       CODE ANALYSIS
+    ===================================================================== */
+
+    function analyzeCode(code, langId) {
+      var lines = code.split('\n');
+      var nonEmpty = lines.filter(function (l) { return l.trim().length > 0; });
+      var lineCount = nonEmpty.length;
+
+      // --- Function names ---
+      var functionNames = [];
+      var fnPatterns = [
+        /\bfunction\s+([a-zA-Z_$][\w$]*)\s*\(/g,
+        /\bdef\s+([a-zA-Z_][\w]*)\s*\(/g,
+        /\bfunc\s+([a-zA-Z_][\w]*)\s*\(/g,
+        /\bfn\s+([a-zA-Z_][\w]*)\s*\(/g,
+        /\b(?:const|let|var)\s+([a-zA-Z_$][\w$]*)\s*=\s*(?:async\s+)?(?:function|\([^)]*\)\s*=>)/g
+      ];
+      fnPatterns.forEach(function (re) {
+        var m;
+        re.lastIndex = 0;
+        while ((m = re.exec(code)) !== null) {
+          if (m[1] && functionNames.indexOf(m[1]) === -1) {
+            functionNames.push(m[1]);
+          }
+        }
+      });
+
+      // --- Class names ---
+      var classNames = [];
+      var classRe = /\bclass\s+([A-Z][a-zA-Z_$][\w$]*)/g;
+      var cm;
+      while ((cm = classRe.exec(code)) !== null) {
+        if (classNames.indexOf(cm[1]) === -1) classNames.push(cm[1]);
+      }
+
+      // --- Imports ---
+      var imports = [];
+      var importPatterns = [
+        /\bimport\s+.*?from\s+['"]([^'"]+)['"]/g,
+        /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+        /\bimport\s+['"]([^'"]+)['"]/g,
+        /\bfrom\s+([a-zA-Z_][\w.]*)\s+import\b/g,
+        /\bimport\s+([a-zA-Z_.]+);/g
+      ];
+      importPatterns.forEach(function (re) {
+        var m;
+        re.lastIndex = 0;
+        while ((m = re.exec(code)) !== null) {
+          if (m[1] && imports.indexOf(m[1]) === -1) imports.push(m[1]);
+        }
+      });
+
+      // --- Loop detection ---
+      var loops = [];
+      if (/\bfor\s*\(/.test(code) || /\bfor\s+\w+\s+in\b/.test(code)) loops.push('for loop');
+      if (/\bwhile\s*\(/.test(code)) loops.push('while loop');
+      if (/\.forEach\s*\(/.test(code)) loops.push('forEach');
+      if (/\.map\s*\(/.test(code)) loops.push('map()');
+      if (/\.filter\s*\(/.test(code)) loops.push('filter()');
+      if (/\.reduce\s*\(/.test(code)) loops.push('reduce()');
+
+      // --- Conditional detection ---
+      var conditionals = [];
+      if (/\bif\s*\(/.test(code) || /\bif\s*[^\n]*:/.test(code)) conditionals.push('if/else');
+      if (/\bswitch\s*\(/.test(code) || /\bmatch\s+\w/.test(code)) conditionals.push('switch/match');
+      if (/\?[^:]+:/.test(code)) conditionals.push('ternary');
+
+      // --- Async patterns ---
+      var asyncPatterns = [];
+      if (/\basync\b/.test(code)) asyncPatterns.push('async/await');
+      if (/\bawait\b/.test(code) && asyncPatterns.indexOf('async/await') === -1) asyncPatterns.push('await');
+      if (/\.then\s*\(/.test(code)) asyncPatterns.push('Promises (.then)');
+      if (/\bnew\s+Promise\s*\(/.test(code)) asyncPatterns.push('new Promise()');
+      if (/\bsetTimeout\b|\bsetInterval\b/.test(code)) asyncPatterns.push('timers');
+      if (/\bfetch\s*\(/.test(code)) asyncPatterns.push('fetch API');
+      if (/\bxmlhttprequest\b/i.test(code)) asyncPatterns.push('XMLHttpRequest');
+
+      // --- Error handling ---
+      var errorHandling = [];
+      if (/\btry\s*\{/.test(code)) errorHandling.push('try/catch');
+      if (/\.catch\s*\(/.test(code)) errorHandling.push('.catch()');
+      if (/\bthrow\s+/.test(code)) errorHandling.push('throw');
+      if (/\bpanic!\s*\(/.test(code)) errorHandling.push('panic!');
+
+      // --- Nesting depth estimate ---
+      var maxDepth = 0;
+      var depth = 0;
+      for (var i = 0; i < code.length; i++) {
+        if (code[i] === '{') { depth++; if (depth > maxDepth) maxDepth = depth; }
+        else if (code[i] === '}') { depth = Math.max(0, depth - 1); }
+      }
+
+      return {
+        lineCount: lineCount,
+        functionNames: functionNames,
+        classNames: classNames,
+        imports: imports,
+        loops: loops,
+        conditionals: conditionals,
+        asyncPatterns: asyncPatterns,
+        errorHandling: errorHandling,
+        nestingDepth: maxDepth
+      };
+    }
+
+    /* =====================================================================
+       EXPLANATION GENERATION
+    ===================================================================== */
+
+    function summarizePurpose(langId, analysis) {
+      var parts = [];
+
+      if (analysis.asyncPatterns.indexOf('fetch API') !== -1) {
+        parts.push('makes an asynchronous HTTP request');
+      }
+      if (analysis.asyncPatterns.indexOf('async/await') !== -1 && parts.length === 0) {
+        parts.push('performs asynchronous operations');
+      }
+      if (analysis.asyncPatterns.indexOf('Promises (.then)') !== -1 && parts.length === 0) {
+        parts.push('works with Promises');
+      }
+
+      if (analysis.classNames.length > 0) {
+        parts.push('defines ' + (analysis.classNames.length === 1 ? 'a class' : 'classes') +
+          ' (' + analysis.classNames.slice(0, 3).join(', ') + ')');
+      }
+
+      if (analysis.functionNames.length > 0 && analysis.classNames.length === 0) {
+        var shown = analysis.functionNames.slice(0, 3).join(', ');
+        parts.push('defines ' + analysis.functionNames.length + ' function' +
+          (analysis.functionNames.length > 1 ? 's' : '') + ' including ' + shown);
+      }
+
+      if (analysis.imports.length > 0) {
+        parts.push('imports ' + analysis.imports.length + ' module' +
+          (analysis.imports.length > 1 ? 's' : '') +
+          ' (' + analysis.imports.slice(0, 3).join(', ') + ')');
+      }
+
+      if (analysis.errorHandling.length > 0) {
+        parts.push('includes error handling via ' + analysis.errorHandling.join(' and '));
+      }
+
+      if (parts.length === 0) {
+        if (langId === 'sql') {
+          var ops = [];
+          // will be filled by SQL-specific logic below
+          parts.push('queries or manipulates database data');
+        } else if (langId === 'css') {
+          parts.push('defines styling rules');
+        } else if (langId === 'html') {
+          parts.push('defines HTML markup structure');
+        } else if (langId === 'bash') {
+          parts.push('executes shell commands');
+        } else {
+          parts.push('performs a set of operations');
+        }
+      }
+
+      return parts.join(', and ');
+    }
+
+    function buildWalkthrough(langId, analysis, code) {
+      var steps = [];
+
+      // Step 1: Imports
+      if (analysis.imports.length > 0) {
+        steps.push('The code begins by importing ' + analysis.imports.length +
+          ' external module' + (analysis.imports.length > 1 ? 's' : '') +
+          ': ' + analysis.imports.slice(0, 4).map(function (m) { return '<code>' + escapeHtml(m) + '</code>'; }).join(', ') + '.');
+      }
+
+      // Step 2: Class definitions
+      if (analysis.classNames.length > 0) {
+        steps.push('It defines ' + analysis.classNames.length + ' class' +
+          (analysis.classNames.length > 1 ? 'es' : '') + ': ' +
+          analysis.classNames.slice(0, 3).map(function (c) { return '<code>' + escapeHtml(c) + '</code>'; }).join(', ') + '.');
+      }
+
+      // Step 3: Function definitions
+      if (analysis.functionNames.length > 0) {
+        var asyncNote = analysis.asyncPatterns.length > 0 ? ' (using ' + analysis.asyncPatterns[0] + ')' : '';
+        steps.push('It declares ' + analysis.functionNames.length + ' function' +
+          (analysis.functionNames.length > 1 ? 's' : '') + asyncNote + ': ' +
+          analysis.functionNames.slice(0, 4).map(function (f) { return '<code>' + escapeHtml(f) + '()</code>'; }).join(', ') + '.');
+      }
+
+      // Step 4: Fetch / HTTP
+      if (analysis.asyncPatterns.indexOf('fetch API') !== -1) {
+        steps.push('It sends an HTTP request using the <code>fetch()</code> API and awaits the response.');
+      }
+
+      // Step 5: Loops
+      if (analysis.loops.length > 0) {
+        steps.push('The code iterates over data using ' + analysis.loops.join(' and ') + '.');
+      }
+
+      // Step 6: Conditionals
+      if (analysis.conditionals.length > 0) {
+        steps.push('Branching logic is handled with ' + analysis.conditionals.join(' and ') + ' to control the flow based on conditions.');
+      }
+
+      // Step 7: Error handling
+      if (analysis.errorHandling.length > 0) {
+        steps.push('Errors are caught and handled gracefully using ' + analysis.errorHandling.join(' and ') + ' to prevent crashes.');
+      }
+
+      // Step 8: Return / output
+      if (/\breturn\b/.test(code)) {
+        steps.push('The function(s) return a value to the caller once processing is complete.');
+      } else if (/\bconsole\.(?:log|error|warn)\b/.test(code)) {
+        steps.push('Results or debug information are logged to the console using <code>console.log()</code> or similar.');
+      } else if (/\bprint\s*\(/.test(code) || /\bprintln!\s*\(/.test(code)) {
+        steps.push('Output is printed to the terminal/stdout.');
+      }
+
+      // Default fallback step
+      if (steps.length === 0) {
+        steps.push('The code runs top-to-bottom, executing each statement in sequence.');
+        if (analysis.lineCount > 1) {
+          steps.push('It processes ' + analysis.lineCount + ' lines of logic to achieve its goal.');
+        }
+      }
+
+      return steps;
+    }
+
+    function buildKeyElements(langId, analysis) {
+      var items = [];
+
+      if (analysis.imports.length > 0) {
+        items.push('Imports: ' + analysis.imports.slice(0, 5).map(function (m) { return '<code>' + escapeHtml(m) + '</code>'; }).join(', '));
+      }
+      if (analysis.classNames.length > 0) {
+        items.push('Class' + (analysis.classNames.length > 1 ? 'es' : '') + ': ' +
+          analysis.classNames.slice(0, 5).map(function (c) { return '<code>' + escapeHtml(c) + '</code>'; }).join(', '));
+      }
+      if (analysis.functionNames.length > 0) {
+        items.push('Function' + (analysis.functionNames.length > 1 ? 's' : '') + ': ' +
+          analysis.functionNames.slice(0, 5).map(function (f) { return '<code>' + escapeHtml(f) + '()</code>'; }).join(', '));
+      }
+      if (analysis.loops.length > 0) {
+        items.push('Loops: ' + analysis.loops.join(', '));
+      }
+      if (analysis.conditionals.length > 0) {
+        items.push('Conditionals: ' + analysis.conditionals.join(', '));
+      }
+      if (analysis.asyncPatterns.length > 0) {
+        items.push('Async patterns: ' + analysis.asyncPatterns.join(', '));
+      }
+      if (analysis.errorHandling.length > 0) {
+        items.push('Error handling: ' + analysis.errorHandling.join(', '));
+      }
+      if (items.length === 0) {
+        items.push('Simple sequential code with no complex structures detected.');
+      }
+      return items;
+    }
+
+    /* =====================================================================
+       RENDER EXPLANATION
+    ===================================================================== */
+
+    function renderExplanation(langInfo, analysis, purpose, keyElements, walkthrough, allPatterns) {
+      var lang = getLangById(langInfo.id);
+
+      var complexityLevel;
+      var complexityColor;
+      if (analysis.functionNames.length > 5 || analysis.nestingDepth > 5 || analysis.lineCount > 60) {
+        complexityLevel = 'High';
+        complexityColor = 'var(--error)';
+      } else if (analysis.functionNames.length > 2 || analysis.nestingDepth > 3 || analysis.lineCount > 25) {
+        complexityLevel = 'Medium';
+        complexityColor = 'var(--warning)';
+      } else {
+        complexityLevel = 'Low';
+        complexityColor = 'var(--success)';
+      }
+
+      var patternsHtml = '';
+      if (allPatterns.length > 0) {
+        patternsHtml = '<div class="exp-section">' +
+          '<div class="exp-section-title">Detected Patterns</div>' +
+          '<div class="patterns-row">' +
+          allPatterns.map(function (p) {
+            return '<span class="pattern-tag">' + escapeHtml(p) + '</span>';
+          }).join('') +
+          '</div></div>';
+      }
+
+      var keyHtml = keyElements.map(function (item) {
+        return '<li>' + item + '</li>';
+      }).join('');
+
+      var walkHtml = walkthrough.map(function (step) {
+        return '<li>' + step + '</li>';
+      }).join('');
+
+      var plainText = [
+        'Language: ' + lang.name + ' (' + langInfo.confidence + ' confidence)',
+        '',
+        'Summary: This is ' + lang.name + ' code that ' + purpose + '.',
+        '',
+        'Key Elements:',
+        keyElements.map(function (e) { return '  - ' + e.replace(/<[^>]+>/g, ''); }).join('\n'),
+        '',
+        'Complexity: ' + complexityLevel + ' | Lines: ' + analysis.lineCount + ' | Functions: ' + analysis.functionNames.length + ' | Max nesting: ' + analysis.nestingDepth,
+        '',
+        'Step-by-step:',
+        walkthrough.map(function (s, i) { return (i + 1) + '. ' + s.replace(/<[^>]+>/g, ''); }).join('\n')
+      ].join('\n');
+
+      var html = '<div class="explanation-panel">';
+
+      // Header
+      html += '<div class="explanation-header">';
+      html += '<div class="explanation-header-left">';
+      html += '<span style="font-size:1.25rem;">' + lang.icon + '</span>';
+      html += '<span class="lang-badge">' + escapeHtml(lang.name) + '</span>';
+      html += '<span class="confidence-pill">Confidence: ' + escapeHtml(langInfo.confidence) + '</span>';
+      html += '</div>';
+      html += '<button class="btn btn-sm" id="btn-copy-explanation" type="button">Copy Explanation</button>';
+      html += '</div>';
+
+      // Body
+      html += '<div class="explanation-body">';
+
+      // Summary
+      html += '<div class="exp-section">';
+      html += '<div class="exp-section-title">Summary</div>';
+      html += '<p class="exp-summary">This is <strong>' + escapeHtml(lang.name) + '</strong> code that ' + escapeHtml(purpose) + '.</p>';
+      html += '</div>';
+
+      // Key Elements
+      html += '<div class="exp-section">';
+      html += '<div class="exp-section-title">Key Elements</div>';
+      html += '<ul class="exp-key-list">' + keyHtml + '</ul>';
+      html += '</div>';
+
+      // Complexity
+      html += '<div class="exp-section">';
+      html += '<div class="exp-section-title">Complexity Indicators</div>';
+      html += '<div class="complexity-row">';
+      html += '<span class="complexity-chip">Lines <strong>' + analysis.lineCount + '</strong></span>';
+      html += '<span class="complexity-chip">Functions <strong>' + analysis.functionNames.length + '</strong></span>';
+      html += '<span class="complexity-chip">Max Nesting <strong>' + analysis.nestingDepth + '</strong></span>';
+      html += '<span class="complexity-chip">Classes <strong>' + analysis.classNames.length + '</strong></span>';
+      html += '<span class="complexity-chip">Complexity <strong style="color:' + complexityColor + '">' + complexityLevel + '</strong></span>';
+      html += '</div></div>';
+
+      // Patterns
+      html += patternsHtml;
+
+      // Walkthrough
+      html += '<div class="exp-section">';
+      html += '<div class="exp-section-title">Plain-English Walkthrough</div>';
+      html += '<ol class="exp-walkthrough">' + walkHtml + '</ol>';
+      html += '</div>';
+
+      html += '</div>'; // body
+      html += '</div>'; // panel
+
+      document.getElementById('explanation-output').innerHTML = html;
+
+      // Copy explanation button
+      document.getElementById('btn-copy-explanation').addEventListener('click', function () {
+        copyToClipboard(plainText, this);
+      });
+    }
+
+    /* =====================================================================
+       MAIN EXPLAIN FUNCTION
+    ===================================================================== */
+
+    var codeInput = document.getElementById('code-input');
+    var langSelect = document.getElementById('lang-select');
+    var outputDiv = document.getElementById('explanation-output');
+
+    function explain() {
+      var code = codeInput.value.trim();
+      if (code.length < 5) {
+        outputDiv.innerHTML = '<div class="error-msg">Please paste some code (at least a few characters) to explain.</div>';
+        return;
+      }
+
+      // Detect or use manual language selection
+      var selectedLang = langSelect.value;
+      var langInfo;
+      if (selectedLang === 'auto') {
+        langInfo = detectLanguage(code);
+      } else {
+        var manualScore = detectLanguage(code).score;
+        langInfo = { id: selectedLang, score: manualScore, confidence: 'Manual' };
+      }
+
+      var analysis = analyzeCode(code, langInfo.id);
+      var purpose = summarizePurpose(langInfo.id, analysis);
+      var keyElements = buildKeyElements(langInfo.id, analysis);
+      var walkthrough = buildWalkthrough(langInfo.id, analysis, code);
+
+      // Collect all detected patterns for the tags section
+      var allPatterns = [];
+      analysis.asyncPatterns.forEach(function (p) { allPatterns.push(p); });
+      analysis.errorHandling.forEach(function (p) { allPatterns.push(p); });
+      analysis.loops.forEach(function (p) { allPatterns.push(p); });
+      if (analysis.imports.length > 0) allPatterns.push('Module imports');
+      if (analysis.classNames.length > 0) allPatterns.push('OOP / Classes');
+      if (analysis.conditionals.indexOf('if/else') !== -1) allPatterns.push('Conditionals');
+      if (analysis.conditionals.indexOf('switch/match') !== -1) allPatterns.push('Switch/Match');
+      if (analysis.conditionals.indexOf('ternary') !== -1) allPatterns.push('Ternary operator');
+
+      renderExplanation(langInfo, analysis, purpose, keyElements, walkthrough, allPatterns);
+      showPostActionCTA();
+    }
+
+    document.getElementById('btn-explain').addEventListener('click', explain);
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      codeInput.value = '';
+      outputDiv.innerHTML = '';
+      codeInput.focus();
+    });
+
+    document.getElementById('btn-example').addEventListener('click', function () {
+      codeInput.value = 'async function fetchUserData(userId) {\n  try {\n    const response = await fetch(`https://api.example.com/users/${userId}`);\n    if (!response.ok) {\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n    const data = await response.json();\n    return {\n      id: data.id,\n      name: data.name,\n      email: data.email,\n      createdAt: new Date(data.created_at)\n    };\n  } catch (error) {\n    console.error(\'Failed to fetch user:\', error);\n    return null;\n  }\n}';
+      langSelect.value = 'auto';
+      explain();
+    });
+
+    bindCtrlEnter(explain);
+
+  })();
+  </script>
+  <script data-goatcounter="https://devbrew.goatcounter.com/count" async src="https://gc.zgo.at/count.js" integrity="sha384-DGiREytotlUiLflu8vLo0vvfxKWn36pKPT1ZBhh3R+3vhewrS/4p3H9eys9Zr2bPQ" crossorigin="anonymous"></script>
+</body>
+</html>

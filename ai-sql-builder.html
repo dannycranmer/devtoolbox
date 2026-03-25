@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI SQL Builder — DevBrew</title>
+  <meta name="description" content="Describe a SQL query in plain English and get instant, formatted SQL. Supports MySQL, PostgreSQL, SQLite, and SQL Server — 100% client-side.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="canonical" href="https://devbrew.org/ai-sql-builder.html">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://devbrew.org/ai-sql-builder.html">
+  <meta property="og:title" content="AI SQL Builder — DevBrew">
+  <meta property="og:description" content="Describe a SQL query in plain English and get instant, formatted SQL. 100% client-side, no API.">
+  <meta property="og:image" content="https://devbrew.org/og-image.png">
+  <meta property="og:site_name" content="DevBrew">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI SQL Builder — DevBrew">
+  <meta name="twitter:description" content="Describe a SQL query in plain English and get instant, formatted SQL. 100% client-side.">
+  <meta name="twitter:image" content="https://devbrew.org/og-image.png">
+  <link rel="stylesheet" href="css/style.css?v=16">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AI SQL Builder",
+  "description": "Describe a SQL query in plain English and get instant, formatted SQL. Supports MySQL, PostgreSQL, SQLite, and SQL Server.",
+  "url": "https://devbrew.org/ai-sql-builder.html",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "creator": { "@type": "Organization", "name": "DevBrew", "url": "https://devbrew.org" }
+}
+  </script>
+  <style>
+    .main {
+      flex: 1;
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .tool-header { margin-bottom: 1.25rem; }
+    .tool-header h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.4rem;
+    }
+    .tool-header p { color: var(--text-secondary); font-size: 0.9375rem; }
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: linear-gradient(135deg, rgba(14,165,233,0.15), rgba(139,92,246,0.15));
+      border: 1px solid rgba(14,165,233,0.3);
+      border-radius: 20px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .tool-layout-single { display: flex; flex-direction: column; gap: 1.25rem; }
+    .tool-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .panel-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .control-group label {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    select {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.35rem 0.5rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      font-family: var(--font-sans);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color var(--transition);
+      outline: none;
+    }
+    textarea:focus { border-color: var(--border-focus); }
+    textarea::placeholder { color: var(--text-muted); }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.875rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition);
+      font-family: inherit;
+    }
+    .btn:hover { background: #222; border-color: var(--text-muted); }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .msg { font-size: 0.8125rem; padding: 0; display: none; }
+    .msg.show { display: block; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); }
+    .msg-success { background: var(--success-bg); color: var(--success); }
+    .msg-error   { background: var(--error-bg); color: var(--error); }
+    .msg-warning { background: var(--warning-bg); color: var(--warning); }
+    /* SQL syntax highlight */
+    .sql-output {
+      min-height: 180px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.875rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      line-height: 1.7;
+      overflow: auto;
+      white-space: pre;
+      color: var(--text-primary);
+      tab-size: 2;
+    }
+    .sql-output:empty::before {
+      content: 'Generated SQL will appear here...';
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .sql-kw   { color: #38bdf8; font-weight: 600; }
+    .sql-str  { color: #86efac; }
+    .sql-num  { color: #fbbf24; }
+    .sql-cmt  { color: #6b7280; font-style: italic; }
+    .sql-fn   { color: #f0abfc; }
+    /* Templates */
+    .templates-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .tpl-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .tpl-btn:hover {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    /* Explanation block */
+    .sql-explanation {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      display: none;
+    }
+    .sql-explanation.show { display: block; }
+    .sql-explanation strong { color: var(--text-primary); }
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-wrap input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+    }
+    .shortcut-hint { font-size: 0.8rem; color: var(--text-muted); }
+    .kbd {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+      font-size: 0.75em;
+      font-family: var(--font-mono);
+    }
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .footer-sister { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+    .footer-sister a, .footer-github a { color: var(--text-secondary); text-decoration: none; }
+    .footer-sister a:hover, .footer-github a:hover { color: var(--accent); }
+    .footer-sep { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Brew</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"></button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="ai-regex.html" role="menuitem">AI Regex</a></li>
+        <li><a href="ai-code-explainer.html" role="menuitem">AI Code</a></li>
+        <li><a href="ai-json-schema.html" role="menuitem">AI Schema</a></li>
+        <li><a href="ai-sql-builder.html" class="active" role="menuitem">AI SQL</a></li>
+        <li><a href="ai-color-palette.html" role="menuitem">AI Colors</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li class="nav-bmc"><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <div class="ai-badge">&#129302; AI-Powered &bull; 100% Client-Side</div>
+      <h1>AI SQL Builder</h1>
+      <p>Describe your query in plain English &mdash; get instant, formatted SQL. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to build</span></p>
+    </div>
+
+    <div class="tool-layout-single">
+
+      <!-- Input panel -->
+      <div class="tool-panel">
+        <span class="panel-label">Describe Your Query</span>
+        <div class="controls-row">
+          <div class="control-group">
+            <label for="db-type">Database:</label>
+            <select id="db-type" aria-label="Database dialect">
+              <option value="mysql" selected>MySQL</option>
+              <option value="postgresql">PostgreSQL</option>
+              <option value="sqlite">SQLite</option>
+              <option value="sqlserver">SQL Server</option>
+            </select>
+          </div>
+          <label class="toggle-wrap">
+            <input type="checkbox" id="opt-explain" checked> Show explanation
+          </label>
+        </div>
+        <textarea id="sql-input" placeholder="e.g. Get all active users who joined in the last 30 days, ordered by name" aria-label="SQL query description" spellcheck="true"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-build" type="button">Build SQL</button>
+          <button class="btn" id="btn-clear" type="button">Clear</button>
+        </div>
+        <div id="input-msg" class="msg" role="alert" aria-live="polite"></div>
+      </div>
+
+      <!-- Quick Templates -->
+      <div class="tool-panel">
+        <span class="panel-label">Quick Templates</span>
+        <div class="templates-grid" id="templates-grid"></div>
+      </div>
+
+      <!-- Output panel -->
+      <div class="tool-panel">
+        <span class="panel-label">Generated SQL</span>
+        <div id="sql-output" class="sql-output" aria-label="Generated SQL" tabindex="0" role="region"></div>
+        <div class="btn-row">
+          <button class="btn" id="btn-copy" type="button">Copy SQL</button>
+        </div>
+        <div id="sql-explanation" class="sql-explanation" role="region" aria-label="Query explanation"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
+    </div>
+    <div class="footer-github">
+      <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; margin-right: 4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub
+      </a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js?v=16"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var sqlInput     = document.getElementById('sql-input');
+    var sqlOutput    = document.getElementById('sql-output');
+    var inputMsg     = document.getElementById('input-msg');
+    var explanationEl = document.getElementById('sql-explanation');
+    var dbType       = document.getElementById('db-type');
+    var optExplain   = document.getElementById('opt-explain');
+    var lastSQL      = '';
+
+    /* ---- Quick templates ---- */
+    var templates = [
+      "Get all users from the users table",
+      "Find products where price is less than 100",
+      "Count orders by customer",
+      "Get top 10 most expensive products",
+      "Join orders with customers on customer_id",
+      "Insert a new user record",
+      "Update user email where id matches",
+      "Delete records older than 30 days",
+      "Get average salary by department",
+      "Find duplicate emails in users table"
+    ];
+
+    var grid = document.getElementById('templates-grid');
+    templates.forEach(function (tpl) {
+      var btn = document.createElement('button');
+      btn.className = 'tpl-btn';
+      btn.textContent = tpl;
+      btn.addEventListener('click', function () {
+        sqlInput.value = tpl;
+        doBuild();
+        sqlInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+      grid.appendChild(btn);
+    });
+
+    /* ---- DB-dialect helpers ---- */
+    function dateSub30(db) {
+      switch (db) {
+        case 'postgresql': return "NOW() - INTERVAL '30 days'";
+        case 'sqlite':     return "datetime('now', '-30 days')";
+        case 'sqlserver':  return 'DATEADD(DAY, -30, GETDATE())';
+        default:           return 'DATE_SUB(NOW(), INTERVAL 30 DAY)';
+      }
+    }
+    function limitClause(db, n) {
+      if (db === 'sqlserver') return { prefix: 'TOP ' + n + ' ', suffix: '' };
+      return { prefix: '', suffix: '\nLIMIT ' + n };
+    }
+    function quoteIdent(db, name) {
+      if (db === 'sqlserver') return '[' + name + ']';
+      if (db === 'postgresql') return '"' + name + '"';
+      return '`' + name + '`';
+    }
+    function autoIncrement(db) {
+      switch (db) {
+        case 'postgresql': return 'SERIAL';
+        case 'sqlite':     return 'INTEGER';
+        case 'sqlserver':  return 'INT IDENTITY(1,1)';
+        default:           return 'INT AUTO_INCREMENT';
+      }
+    }
+
+    /* ---- Pattern matching engine ---- */
+
+    // Extract table name: look for "from/in/of X" or plurals
+    function extractTable(text) {
+      var m;
+      m = text.match(/\b(?:from|in|into|of|on)\s+(?:the\s+)?(\w+)\s+table/i);
+      if (m) return m[1].toLowerCase();
+      m = text.match(/\b(?:from|in|into|of|on)\s+(?:the\s+)?(\w+)/i);
+      if (m) return m[1].toLowerCase();
+      // Last resort: find likely plural noun
+      var words = text.match(/\b([a-z]{3,}s)\b/gi);
+      if (words && words.length > 0) return words[0].toLowerCase();
+      return 'records';
+    }
+
+    function extractTable2(text, skip) {
+      var words = text.replace(/[^a-z0-9\s]/gi, ' ').split(/\s+/);
+      var found = [];
+      words.forEach(function (w) {
+        if (w.length > 2 && w !== skip && /s$/.test(w)) found.push(w.toLowerCase());
+      });
+      if (found.length >= 2) return found[1];
+      return skip === 'orders' ? 'customers' : 'orders';
+    }
+
+    function extractLimit(text) {
+      var m = text.match(/\btop\s+(\d+)\b|\bfirst\s+(\d+)\b|\blimit\s+(\d+)\b/i);
+      if (m) return parseInt(m[1] || m[2] || m[3], 10);
+      return null;
+    }
+
+    function extractField(text, fallback) {
+      var m = text.match(/\bby\s+(\w+)|\bon\s+(\w+)|\bwhere\s+(\w+)/i);
+      if (m) return (m[1] || m[2] || m[3]).toLowerCase();
+      return fallback;
+    }
+
+    function extractOrderField(text) {
+      var m = text.match(/\b(?:order(?:ed)?\s+by|sort(?:ed)?\s+by|sorted\s+by)\s+(\w+)/i);
+      if (m) return m[1].toLowerCase();
+      return null;
+    }
+
+    function extractOrderDir(text) {
+      if (/\b(?:desc(?:ending)?|highest|latest|newest|most recent)\b/i.test(text)) return 'DESC';
+      return 'ASC';
+    }
+
+    function extractCondition(text) {
+      // e.g. "where status is active", "where price < 100", "where id matches"
+      var m = text.match(/where\s+(.+?)(?:\s*,|\s+order|\s+limit|\s+group|$)/i);
+      if (m) return m[1].trim();
+      return null;
+    }
+
+    function extractGroupField(text) {
+      var m = text.match(/\b(?:by|per|grouped\s+by)\s+(\w+)/i);
+      if (m) return m[1].toLowerCase();
+      return 'category';
+    }
+
+    function extractAggField(text) {
+      var m = text.match(/\b(?:sum|total|average|avg|max|min|count)\s+(?:of\s+)?(\w+)/i);
+      if (m) return m[1].toLowerCase();
+      // "highest/lowest X"
+      m = text.match(/\b(?:highest|lowest|most|least)\s+(\w+)/i);
+      if (m) return m[1].toLowerCase();
+      return 'amount';
+    }
+
+    function extractSetField(text) {
+      var m = text.match(/\bset\s+(\w+)\s+(?:to|=)\s*([^\s,]+)/i);
+      if (m) return { field: m[1].toLowerCase(), value: m[2] };
+      m = text.match(/\bchange\s+(\w+)\s+(?:to|=)\s*([^\s,]+)/i);
+      if (m) return { field: m[1].toLowerCase(), value: m[2] };
+      return { field: 'email', value: "'new@example.com'" };
+    }
+
+    function extractWhereId(text) {
+      var m = text.match(/where\s+(?:the\s+)?(?:id|user_?id|record_?id)\s+(?:matches?|=|is)\s*(?:a\s+given\s+value)?/i);
+      return m ? 'id = :id' : 'id = :id';
+    }
+
+    /* ---- Build explanation ---- */
+    function buildExplanation(type, table, extra) {
+      var parts = [];
+      switch (type) {
+        case 'select-all':
+          parts.push('<strong>SELECT *</strong> retrieves all columns from the <strong>' + table + '</strong> table.');
+          break;
+        case 'select-where':
+          parts.push('<strong>SELECT *</strong> retrieves matching rows. The <strong>WHERE</strong> clause filters results to only include rows meeting the condition.');
+          break;
+        case 'count':
+          parts.push('<strong>COUNT(*)</strong> returns the number of matching rows. Great for analytics and reporting.');
+          if (extra && extra.group) parts.push('The <strong>GROUP BY</strong> clause aggregates the count for each distinct value of <strong>' + extra.group + '</strong>.');
+          break;
+        case 'group':
+          parts.push('The <strong>GROUP BY</strong> clause splits rows into groups. An aggregate function (<strong>' + (extra && extra.agg || 'COUNT') + '</strong>) is applied to each group.');
+          break;
+        case 'join':
+          parts.push('The <strong>JOIN</strong> clause combines rows from two tables based on a matching column. Only rows with matching values in both tables are returned (INNER JOIN).');
+          break;
+        case 'insert':
+          parts.push('<strong>INSERT INTO</strong> adds a new row to the <strong>' + table + '</strong> table. Replace the placeholder values with actual data.');
+          break;
+        case 'update':
+          parts.push('<strong>UPDATE</strong> modifies existing rows. <em>Always include a WHERE clause</em> to avoid updating every row in the table.');
+          break;
+        case 'delete':
+          parts.push('<strong>DELETE FROM</strong> removes matching rows. <em>Always include a WHERE clause</em> unless you intentionally want to delete all rows.');
+          break;
+        case 'aggregate':
+          parts.push('Aggregate functions like <strong>' + (extra && extra.agg || 'AVG') + '</strong> compute a single result across multiple rows. Use <strong>GROUP BY</strong> to aggregate per category.');
+          break;
+        case 'distinct':
+          parts.push('<strong>SELECT DISTINCT</strong> eliminates duplicate rows from the result set. Useful for finding unique values.');
+          break;
+        case 'top-n':
+          parts.push('The <strong>LIMIT</strong> clause restricts results to the first N rows. Combined with <strong>ORDER BY</strong>, this retrieves the top N records by a specific measure.');
+          break;
+        default:
+          parts.push('This query retrieves data from the <strong>' + table + '</strong> table based on your description.');
+      }
+      return parts.join(' ');
+    }
+
+    /* ---- Main SQL generator ---- */
+    function generateSQL(description, db) {
+      var d = description.trim();
+      if (!d) return null;
+
+      var dLow = d.toLowerCase();
+      var table = extractTable(d);
+      var lim = limitClause(db, extractLimit(d) || 10);
+      var orderField = extractOrderField(d) || 'name';
+      var orderDir = extractOrderDir(d);
+
+      // --- INSERT ---
+      if (/\b(?:insert|add|create)\s+(?:a\s+)?(?:new\s+)?(\w+)?\s*(?:record|row|entry|item)?/i.test(dLow)) {
+        var sql, explanation;
+        var ai = autoIncrement(db);
+        if (db === 'postgresql') {
+          sql = 'INSERT INTO ' + table + ' (name, email, status, created_at)\nVALUES (\'Jane Doe\', \'jane@example.com\', \'active\', NOW())\nRETURNING id;';
+        } else if (db === 'sqlserver') {
+          sql = 'INSERT INTO ' + table + ' (name, email, status, created_at)\nVALUES (\'Jane Doe\', \'jane@example.com\', \'active\', GETDATE());';
+        } else {
+          sql = 'INSERT INTO ' + table + ' (name, email, status, created_at)\nVALUES (\'Jane Doe\', \'jane@example.com\', \'active\', NOW());';
+        }
+        explanation = buildExplanation('insert', table);
+        return { sql: sql, explanation: explanation };
+      }
+
+      // --- UPDATE ---
+      if (/\b(?:update|change|modify|set)\b/i.test(dLow)) {
+        var setInfo = extractSetField(d);
+        var whereClause = extractWhereId(d);
+        var val = /^[0-9]/.test(setInfo.value) ? setInfo.value : "'" + setInfo.value.replace(/^'|'$/g, '') + "'";
+        var sql = 'UPDATE ' + table + '\nSET ' + setInfo.field + ' = ' + val;
+        if (db === 'sqlserver') {
+          sql += ',\n    updated_at = GETDATE()';
+        } else {
+          sql += ',\n    updated_at = NOW()';
+        }
+        sql += '\nWHERE ' + whereClause + ';';
+        return { sql: sql, explanation: buildExplanation('update', table) };
+      }
+
+      // --- DELETE ---
+      if (/\b(?:delete|remove|drop)\b/i.test(dLow)) {
+        var sql;
+        if (/older\s+than\s+(\d+)\s+day/i.test(dLow)) {
+          var days = d.match(/(\d+)\s+day/i);
+          var n = days ? days[1] : '30';
+          var dField = 'created_at';
+          if (/\b(?:updated|modified)\b/i.test(dLow)) dField = 'updated_at';
+          if (db === 'postgresql') {
+            sql = 'DELETE FROM ' + table + '\nWHERE ' + dField + ' < NOW() - INTERVAL \'' + n + ' days\';';
+          } else if (db === 'sqlite') {
+            sql = 'DELETE FROM ' + table + '\nWHERE ' + dField + ' < datetime(\'now\', \'-' + n + ' days\');';
+          } else if (db === 'sqlserver') {
+            sql = 'DELETE FROM ' + table + '\nWHERE ' + dField + ' < DATEADD(DAY, -' + n + ', GETDATE());';
+          } else {
+            sql = 'DELETE FROM ' + table + '\nWHERE ' + dField + ' < DATE_SUB(NOW(), INTERVAL ' + n + ' DAY);';
+          }
+        } else {
+          sql = 'DELETE FROM ' + table + '\nWHERE id = :id;';
+        }
+        return { sql: sql, explanation: buildExplanation('delete', table) };
+      }
+
+      // --- DUPLICATE detection ---
+      if (/\bduplicat(?:e|es)\b/i.test(dLow)) {
+        var field = /\b(?:email|name|phone|username)\b/i.exec(dLow);
+        var f = field ? field[0].toLowerCase() : 'email';
+        var sql = 'SELECT ' + f + ', COUNT(*) AS duplicate_count\nFROM ' + table + '\nGROUP BY ' + f + '\nHAVING COUNT(*) > 1\nORDER BY duplicate_count DESC;';
+        return { sql: sql, explanation: 'This query finds duplicate <strong>' + f + '</strong> values by grouping and counting. The <strong>HAVING</strong> clause filters to only groups with more than one row.' };
+      }
+
+      // --- JOIN ---
+      if (/\b(?:join|with their|and their)\b/i.test(dLow)) {
+        var t1 = table;
+        var t2 = extractTable2(d, t1);
+        var joinField = extractField(d, 'customer_id');
+        // Try to extract "on X" explicitly
+        var onMatch = d.match(/\bon\s+(\w+)\b/i);
+        if (onMatch) joinField = onMatch[1].toLowerCase();
+        var sql = 'SELECT ' + t1 + '.*, ' + t2 + '.*\nFROM ' + t1 + '\nINNER JOIN ' + t2 + '\n  ON ' + t1 + '.' + joinField + ' = ' + t2 + '.id;';
+        return { sql: sql, explanation: buildExplanation('join', t1) };
+      }
+
+      // --- AVG / SUM / MAX / MIN ---
+      var aggMatch = dLow.match(/\b(average|avg|sum|total|maximum|max|minimum|min|highest|lowest)\b/);
+      if (aggMatch) {
+        var aggMap = { average: 'AVG', avg: 'AVG', sum: 'SUM', total: 'SUM', maximum: 'MAX', max: 'MAX', minimum: 'MIN', min: 'MIN', highest: 'MAX', lowest: 'MIN' };
+        var aggFn = aggMap[aggMatch[1]] || 'AVG';
+        var aggField = extractAggField(d);
+        var groupMatch = dLow.match(/\b(?:by|per|grouped by|for each)\s+(\w+)/i);
+        var groupField = groupMatch ? groupMatch[1].toLowerCase() : extractGroupField(d);
+        var sql = 'SELECT ' + groupField + ',\n       ' + aggFn + '(' + aggField + ') AS ' + aggFn.toLowerCase() + '_' + aggField + '\nFROM ' + table + '\nGROUP BY ' + groupField + '\nORDER BY ' + aggFn.toLowerCase() + '_' + aggField + ' DESC;';
+        return { sql: sql, explanation: buildExplanation('aggregate', table, { agg: aggFn }) };
+      }
+
+      // --- COUNT (grouped) ---
+      if (/\b(?:count|how many)\b/i.test(dLow)) {
+        var groupField = extractGroupField(d);
+        var byMatch = dLow.match(/\b(?:by|per|for each|grouped by)\s+(\w+)/i);
+        if (byMatch) groupField = byMatch[1].toLowerCase();
+        if (/\b(?:by|per|for each|grouped by)\b/i.test(dLow)) {
+          var sql = 'SELECT ' + groupField + ', COUNT(*) AS total_count\nFROM ' + table + '\nGROUP BY ' + groupField + '\nORDER BY total_count DESC;';
+          return { sql: sql, explanation: buildExplanation('count', table, { group: groupField }) };
+        } else {
+          var sql = 'SELECT COUNT(*) AS total_count\nFROM ' + table + ';';
+          return { sql: sql, explanation: buildExplanation('count', table) };
+        }
+      }
+
+      // --- DISTINCT ---
+      if (/\b(?:unique|distinct)\b/i.test(dLow)) {
+        var field = extractAggField(d);
+        if (!/amount/.test(field)) field = field;
+        else field = 'status';
+        var sql = 'SELECT DISTINCT ' + field + '\nFROM ' + table + '\nORDER BY ' + field + ';';
+        return { sql: sql, explanation: buildExplanation('distinct', table) };
+      }
+
+      // --- SELECT with WHERE + ORDER + LIMIT (general) ---
+      var hasWhere = /\b(?:where|with|having|who|that|which|when|while)\b/i.test(dLow);
+      var hasOrder = /\b(?:order(?:ed)?\s+by|sort(?:ed)?\s+by|sorted)\b/i.test(dLow);
+      var hasLimit = extractLimit(d) !== null;
+
+      if (hasWhere || hasOrder || hasLimit) {
+        var conditions = [];
+        var whereExpl = [];
+
+        // Active/inactive state
+        if (/\b(?:active|enabled|live)\b/i.test(dLow)) {
+          conditions.push("status = 'active'");
+          whereExpl.push('status is active');
+        } else if (/\b(?:inactive|disabled|deleted)\b/i.test(dLow)) {
+          conditions.push("status = 'inactive'");
+          whereExpl.push('status is inactive');
+        }
+
+        // Date ranges
+        if (/\b(?:last|past|recent)\s+(\d+)\s+day/i.test(dLow)) {
+          var daysMatch = dLow.match(/(?:last|past|recent)\s+(\d+)\s+day/i);
+          var nd = daysMatch ? daysMatch[1] : '30';
+          var dfield = /\b(?:updated|modified)\b/i.test(dLow) ? 'updated_at' : 'created_at';
+          conditions.push(dfield + ' >= ' + dateSub30(db).replace('30', nd));
+          whereExpl.push('joined/created in the last ' + nd + ' days');
+        } else if (/\btoday\b/i.test(dLow)) {
+          if (db === 'postgresql') conditions.push('created_at::date = CURRENT_DATE');
+          else if (db === 'sqlite') conditions.push("date(created_at) = date('now')");
+          else if (db === 'sqlserver') conditions.push('CAST(created_at AS DATE) = CAST(GETDATE() AS DATE)');
+          else conditions.push('DATE(created_at) = CURDATE()');
+          whereExpl.push('created today');
+        }
+
+        // Price/amount comparisons
+        var priceMatch = dLow.match(/(?:price|cost|amount|salary)\s+(?:is\s+)?(?:less than|<|under|below)\s+(\d+)/i);
+        if (priceMatch) {
+          var priceField = dLow.match(/\b(salary|cost|amount)\b/i);
+          var pf = priceField ? priceField[1].toLowerCase() : 'price';
+          conditions.push(pf + ' < ' + priceMatch[1]);
+          whereExpl.push(pf + ' < ' + priceMatch[1]);
+        }
+        var priceMatch2 = dLow.match(/(?:price|cost|amount|salary)\s+(?:is\s+)?(?:greater than|>|more than|above|over)\s+(\d+)/i);
+        if (priceMatch2) {
+          var priceField2 = dLow.match(/\b(salary|cost|amount)\b/i);
+          var pf2 = priceField2 ? priceField2[1].toLowerCase() : 'price';
+          conditions.push(pf2 + ' > ' + priceMatch2[1]);
+          whereExpl.push(pf2 + ' > ' + priceMatch2[1]);
+        }
+
+        // BETWEEN
+        var betweenMatch = dLow.match(/between\s+(\d+)\s+and\s+(\d+)/i);
+        if (betweenMatch) {
+          var bField = dLow.match(/\b(price|age|salary|cost|amount|score)\b/i);
+          var bf = bField ? bField[1].toLowerCase() : 'value';
+          conditions.push(bf + ' BETWEEN ' + betweenMatch[1] + ' AND ' + betweenMatch[2]);
+        }
+
+        // LIKE patterns
+        var containsMatch = dLow.match(/\bcontains?\s+['""]?(\w+)['""]?/i);
+        if (containsMatch) {
+          var likeField = 'name';
+          conditions.push(likeField + " LIKE '%" + containsMatch[1] + "%'");
+        }
+        var startsMatch = dLow.match(/\bstarts?\s+with\s+['""]?(\w+)['""]?/i);
+        if (startsMatch) conditions.push("name LIKE '" + startsMatch[1] + "%'");
+        var endsMatch = dLow.match(/\bends?\s+with\s+['""]?(\w+)['""]?/i);
+        if (endsMatch) conditions.push("name LIKE '%" + endsMatch[1] + "'");
+
+        var selectPart;
+        var n = extractLimit(d);
+        if (n && db === 'sqlserver') {
+          selectPart = 'SELECT TOP ' + n + ' *';
+        } else {
+          selectPart = 'SELECT *';
+        }
+
+        var sql = selectPart + '\nFROM ' + table;
+        if (conditions.length > 0) {
+          sql += '\nWHERE ' + conditions.join('\n  AND ');
+        }
+        if (hasOrder) {
+          sql += '\nORDER BY ' + orderField + ' ' + orderDir;
+        } else if (hasLimit && !hasOrder) {
+          sql += '\nORDER BY id DESC';
+        }
+        if (n && db !== 'sqlserver') sql += '\nLIMIT ' + n;
+        sql += ';';
+
+        return {
+          sql: sql,
+          explanation: buildExplanation(conditions.length > 0 ? 'select-where' : 'select-all', table)
+        };
+      }
+
+      // --- TOP N (no other conditions) ---
+      if (hasLimit) {
+        var n = extractLimit(d);
+        var orderF = /\b(?:expensive|costly|highest price|price desc)\b/i.test(dLow) ? 'price' : 'id';
+        var odir = /\b(?:expensive|costly|highest|newest|latest|most)\b/i.test(dLow) ? 'DESC' : 'ASC';
+        var sql;
+        if (db === 'sqlserver') {
+          sql = 'SELECT TOP ' + n + ' *\nFROM ' + table + '\nORDER BY ' + orderF + ' ' + odir + ';';
+        } else {
+          sql = 'SELECT *\nFROM ' + table + '\nORDER BY ' + orderF + ' ' + odir + '\nLIMIT ' + n + ';';
+        }
+        return { sql: sql, explanation: buildExplanation('top-n', table) };
+      }
+
+      // --- Default: SELECT ALL ---
+      return {
+        sql: 'SELECT *\nFROM ' + table + ';',
+        explanation: buildExplanation('select-all', table)
+      };
+    }
+
+    /* ---- Syntax highlighter ---- */
+    var SQL_KEYWORDS = /\b(SELECT|FROM|WHERE|JOIN|INNER\s+JOIN|LEFT\s+JOIN|RIGHT\s+JOIN|FULL\s+OUTER\s+JOIN|OUTER\s+JOIN|CROSS\s+JOIN|ON|AND|OR|NOT|IN|IS|NULL|AS|DISTINCT|ORDER\s+BY|GROUP\s+BY|HAVING|LIMIT|OFFSET|INSERT\s+INTO|INTO|VALUES|UPDATE|SET|DELETE\s+FROM|DELETE|CREATE\s+TABLE|ALTER\s+TABLE|DROP\s+TABLE|TOP|BETWEEN|LIKE|UNION|ALL|EXISTS|CASE\s+WHEN|WHEN|THEN|ELSE|END|RETURNING|GETDATE|NOW|CURDATE|DATE_SUB|DATEADD|DATE|INTERVAL|CAST|CONVERT)\b/gi;
+    var SQL_FUNCTIONS = /\b(COUNT|SUM|AVG|MAX|MIN|COALESCE|NULLIF|IFNULL|ISNULL|ROUND|FLOOR|CEIL|LENGTH|UPPER|LOWER|TRIM|SUBSTRING|REPLACE|CONCAT|STR_TO_DATE|TO_DATE|EXTRACT|YEAR|MONTH|DAY|DATEDIFF|TIMESTAMPDIFF)\s*\(/gi;
+
+    function highlightSQL(sql) {
+      var result = escapeHtml(sql);
+      // Comments first
+      result = result.replace(/(--[^\n]*)/g, '<span class="sql-cmt">$1</span>');
+      // String literals
+      result = result.replace(/('[^']*')/g, '<span class="sql-str">$1</span>');
+      // Numbers
+      result = result.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="sql-num">$1</span>');
+      // Functions (before keywords to avoid double-wrap)
+      result = result.replace(/\b(COUNT|SUM|AVG|MAX|MIN|COALESCE|NULLIF|IFNULL|ISNULL|ROUND|FLOOR|CEIL|LENGTH|UPPER|LOWER|TRIM|SUBSTRING|REPLACE|CONCAT|STR_TO_DATE|TO_DATE|EXTRACT|YEAR|MONTH|DAY|DATEDIFF|TIMESTAMPDIFF)\b(?=\s*\()/g, '<span class="sql-fn">$1</span>');
+      // Keywords (multi-word first)
+      var multiKw = ['INSERT INTO', 'DELETE FROM', 'ORDER BY', 'GROUP BY', 'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'LEFT OUTER JOIN', 'RIGHT OUTER JOIN', 'FULL OUTER JOIN', 'CROSS JOIN', 'CASE WHEN', 'CREATE TABLE', 'ALTER TABLE', 'DROP TABLE'];
+      multiKw.forEach(function (kw) {
+        var re = new RegExp('\\b' + kw + '\\b', 'gi');
+        result = result.replace(re, '<span class="sql-kw">$&</span>');
+      });
+      var singleKw = ['SELECT', 'FROM', 'WHERE', 'JOIN', 'ON', 'AND', 'OR', 'NOT', 'IN', 'IS', 'NULL', 'AS', 'DISTINCT', 'HAVING', 'LIMIT', 'OFFSET', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'TOP', 'BETWEEN', 'LIKE', 'UNION', 'ALL', 'EXISTS', 'WHEN', 'THEN', 'ELSE', 'END', 'RETURNING', 'GETDATE', 'NOW', 'CURDATE', 'DATE_SUB', 'DATEADD', 'DATE', 'INTERVAL', 'CAST', 'CONVERT'];
+      singleKw.forEach(function (kw) {
+        var re = new RegExp('\\b(' + kw + ')\\b', 'g');
+        result = result.replace(re, function (m) {
+          if (m.indexOf('<span') !== -1) return m;
+          return '<span class="sql-kw">' + m + '</span>';
+        });
+      });
+      return result;
+    }
+
+    /* ---- Main action ---- */
+    function doBuild() {
+      var raw = sqlInput.value.trim();
+      if (!raw) {
+        hideMsg(inputMsg);
+        sqlOutput.innerHTML = '';
+        explanationEl.className = 'sql-explanation';
+        explanationEl.innerHTML = '';
+        lastSQL = '';
+        return;
+      }
+
+      var db = dbType.value;
+      var result = generateSQL(raw, db);
+
+      if (!result) {
+        showMsg(inputMsg, 'warning', 'Could not parse your description. Try a template below for inspiration.');
+        return;
+      }
+
+      hideMsg(inputMsg);
+      lastSQL = result.sql;
+      sqlOutput.innerHTML = highlightSQL(result.sql);
+
+      if (optExplain.checked && result.explanation) {
+        explanationEl.innerHTML = '<strong>What this does:</strong> ' + result.explanation;
+        explanationEl.className = 'sql-explanation show';
+      } else {
+        explanationEl.className = 'sql-explanation';
+        explanationEl.innerHTML = '';
+      }
+
+      showPostActionCTA();
+    }
+
+    /* ---- Events ---- */
+    document.getElementById('btn-build').addEventListener('click', doBuild);
+
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      sqlInput.value = '';
+      sqlOutput.innerHTML = '';
+      explanationEl.className = 'sql-explanation';
+      explanationEl.innerHTML = '';
+      hideMsg(inputMsg);
+      lastSQL = '';
+      sqlInput.focus();
+    });
+
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (lastSQL) copyToClipboard(lastSQL, this);
+    });
+
+    optExplain.addEventListener('change', function () {
+      if (lastSQL) doBuild();
+    });
+
+    dbType.addEventListener('change', function () {
+      if (sqlInput.value.trim()) doBuild();
+    });
+
+    // Preload example
+    sqlInput.value = 'Get all active users who joined in the last 30 days, ordered by name';
+
+    bindCtrlEnter(doBuild);
+  })();
+  </script>
+  <script data-goatcounter="https://devbrew.goatcounter.com/count" async src="https://gc.zgo.at/count.js" integrity="sha384-DGiREytotlUiLflu8vLo0vvfxKWn36pKPT1ZBhh3R+3vhewrS/4p3H9eys9Zr2bPQ" crossorigin="anonymous"></script>
+</body>
+</html>

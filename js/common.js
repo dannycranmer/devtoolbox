@@ -8,7 +8,13 @@
   var currentPage = location.pathname.split('/').pop() || 'index.html';
 
   var categories = [
-    { title: '\uD83E\uDD16 AI Tools', items: [] },
+    { title: '\uD83E\uDD16 AI Tools', items: [
+      { href: 'ai-regex.html', icon: '\uD83D\uDD2E', label: 'AI Regex' },
+      { href: 'ai-code-explainer.html', icon: '\uD83E\uDDE0', label: 'AI Code' },
+      { href: 'ai-json-schema.html', icon: '\uD83D\uDCCF', label: 'AI Schema' },
+      { href: 'ai-sql-builder.html', icon: '\uD83D\uDDC4\uFE0F', label: 'AI SQL' },
+      { href: 'ai-color-palette.html', icon: '\uD83C\uDFA8', label: 'AI Colors' }
+    ]},
     { title: '\uD83D\uDD27 Formatters', items: [
       { href: 'json-formatter.html', icon: '{ }', label: 'JSON' },
       { href: 'sql-formatter.html', icon: '\uD83D\uDDC3\uFE0F', label: 'SQL' },

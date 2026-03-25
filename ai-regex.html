@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Regex Generator — DevBrew</title>
+  <meta name="description" content="Generate regex patterns from plain English descriptions. Instant, 100% private, no API needed. 60+ patterns for email, URL, phone, date, code, and more.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="canonical" href="https://devbrew.org/ai-regex.html">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://devbrew.org/ai-regex.html">
+  <meta property="og:title" content="AI Regex Generator — DevBrew">
+  <meta property="og:description" content="Generate regex patterns from plain English descriptions. Instant, 100% private, no API needed.">
+  <meta property="og:image" content="https://devbrew.org/og-image.png">
+  <meta property="og:site_name" content="DevBrew">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI Regex Generator — DevBrew">
+  <meta name="twitter:description" content="Generate regex patterns from plain English descriptions. Instant, 100% private, no API needed.">
+  <meta name="twitter:image" content="https://devbrew.org/og-image.png">
+  <link rel="stylesheet" href="css/style.css?v=16">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AI Regex Generator",
+  "description": "Generate regex patterns from plain English descriptions. Instant, 100% private, no API needed.",
+  "url": "https://devbrew.org/ai-regex.html",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "DevBrew",
+    "url": "https://devbrew.org"
+  }
+}
+  </script>
+  <style>
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(14,165,233,0.12));
+      border: 1px solid rgba(124,58,237,0.35);
+      border-radius: 999px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #a78bfa;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+    }
+    .badge-success {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+    .badge-accent {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(14,165,233,0.3);
+    }
+    .result-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      transition: border-color var(--transition);
+    }
+    .result-card:first-child {
+      border-color: rgba(34,197,94,0.3);
+    }
+    .result-card:hover {
+      border-color: var(--text-muted);
+    }
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .result-pattern-row {
+      font-family: var(--font-mono);
+      background: var(--bg-input);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      border: 1px solid var(--border);
+      word-break: break-all;
+    }
+    .result-pattern-text {
+      color: #86efac;
+      font-size: 0.875rem;
+      flex: 1;
+      min-width: 0;
+    }
+    .result-desc {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.35rem;
+      line-height: 1.5;
+    }
+    .result-example {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 0.6rem;
+    }
+    .result-example code {
+      font-family: var(--font-mono);
+      background: var(--bg-input);
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      color: #fbbf24;
+      font-size: 0.8rem;
+    }
+    .no-results-msg {
+      background: var(--warning-bg);
+      border: 1px solid rgba(234,179,8,0.25);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      color: var(--warning);
+      font-size: 0.875rem;
+    }
+    .custom-builder {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-top: 2rem;
+    }
+    .custom-builder h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+    .custom-pattern-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .custom-pattern-input {
+      flex: 1;
+      min-width: 200px;
+      font-family: var(--font-mono);
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      transition: border-color var(--transition);
+    }
+    .custom-pattern-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 1px var(--border-focus);
+    }
+    .flags-input {
+      width: 80px;
+      font-family: var(--font-mono);
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      transition: border-color var(--transition);
+    }
+    .flags-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+    }
+    .custom-output {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: #86efac;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      word-break: break-all;
+    }
+    #desc-input {
+      min-height: 80px;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      resize: vertical;
+    }
+    .error-msg {
+      background: var(--error-bg);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      color: var(--error);
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Brew</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"></button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="ai-regex.html" class="active" role="menuitem">AI Regex</a></li>
+        <li><a href="ai-code-explainer.html" role="menuitem">AI Code</a></li>
+        <li><a href="ai-json-schema.html" role="menuitem">AI Schema</a></li>
+        <li><a href="ai-sql-builder.html" role="menuitem">AI SQL</a></li>
+        <li><a href="ai-color-palette.html" role="menuitem">AI Colors</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li class="nav-bmc"><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <h1>AI Regex Generator</h1>
+      <p>Describe what you want to match in plain English &mdash; get instant, production-ready patterns. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to generate</span></p>
+    </div>
+
+    <div style="max-width:900px;">
+      <div class="ai-badge">&#129302; AI-Powered &middot; Instant &middot; 100% Private</div>
+
+      <span class="panel-label">Describe what you want to match</span>
+      <textarea id="desc-input" placeholder="e.g. email address, phone number, US zip code, credit card number, ISO date, hex color code..."></textarea>
+
+      <div style="margin:0.75rem 0 1rem;">
+        <span class="panel-label" style="display:block;margin-bottom:0.5rem;">Quick examples:</span>
+        <div class="pattern-lib">
+          <button class="pattern-btn" data-desc="email address">Email</button>
+          <button class="pattern-btn" data-desc="url or web link http https">URL</button>
+          <button class="pattern-btn" data-desc="us phone number">Phone</button>
+          <button class="pattern-btn" data-desc="date iso format yyyy-mm-dd">ISO Date</button>
+          <button class="pattern-btn" data-desc="ip address ipv4">IP Address</button>
+          <button class="pattern-btn" data-desc="uuid guid">UUID</button>
+          <button class="pattern-btn" data-desc="credit card number">Credit Card</button>
+          <button class="pattern-btn" data-desc="strong password validation">Password</button>
+          <button class="pattern-btn" data-desc="username alphanumeric">Username</button>
+          <button class="pattern-btn" data-desc="hashtag social media">Hashtag</button>
+          <button class="pattern-btn" data-desc="hex color code css">Hex Color</button>
+          <button class="pattern-btn" data-desc="social security number ssn">SSN</button>
+          <button class="pattern-btn" data-desc="semver version number">Semver</button>
+          <button class="pattern-btn" data-desc="jwt json web token">JWT</button>
+          <button class="pattern-btn" data-desc="mention at user twitter">Mention</button>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-generate" type="button">Generate Regex</button>
+        <button class="btn" id="btn-clear" type="button">Clear</button>
+      </div>
+
+      <div id="results" style="margin-top:1.5rem;"></div>
+
+      <!-- Custom Pattern Builder -->
+      <div class="custom-builder">
+        <h3>&#128295; Custom Pattern Builder</h3>
+        <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:1rem;">Manually enter a regex pattern and flags to preview the formatted output.</p>
+        <div class="custom-pattern-row">
+          <input type="text" class="custom-pattern-input" id="custom-pattern" placeholder="[a-z0-9]+@[a-z0-9]+\.[a-z]{2,}" aria-label="Regex pattern" spellcheck="false">
+          <input type="text" class="flags-input" id="custom-flags" value="gi" placeholder="flags" aria-label="Regex flags" spellcheck="false" maxlength="10">
+        </div>
+        <div class="custom-output" id="custom-output">
+          <span id="custom-output-text" style="color:var(--text-muted);">Pattern will appear here&hellip;</span>
+          <button class="btn btn-sm" id="btn-copy-custom" type="button" style="flex-shrink:0;">Copy</button>
+        </div>
+        <div id="custom-error" style="margin-top:0.5rem;font-size:0.8rem;color:var(--error);display:none;"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
+    </div>
+    <div class="footer-github">
+      <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; margin-right: 4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub
+      </a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js?v=16"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    /* =====================================================================
+       PATTERN KNOWLEDGE BASE — 65+ patterns
+    ===================================================================== */
+    var PATTERNS = [
+      // ---- INTERNET ----
+      {
+        name: 'Email Address',
+        pattern: '[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}',
+        flags: 'gi',
+        description: 'Matches standard email addresses. Does not validate domain existence but covers most real-world formats including subdomains and plus-addressing.',
+        example: 'user@example.com',
+        keywords: ['email', 'e-mail', 'mail', 'address', 'smtp', 'inbox', '@']
+      },
+      {
+        name: 'URL / Web Link',
+        pattern: 'https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)',
+        flags: 'gi',
+        description: 'Matches http and https URLs including paths, query strings, and fragments. Requires a protocol prefix.',
+        example: 'https://www.example.com/path?q=1#top',
+        keywords: ['url', 'link', 'http', 'https', 'web', 'website', 'href', 'hyperlink', 'site', 'domain link']
+      },
+      {
+        name: 'Domain Name',
+        pattern: '(?:[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}',
+        flags: 'gi',
+        description: 'Matches domain names such as example.com or sub.domain.co.uk. Does not require a protocol.',
+        example: 'sub.example.co.uk',
+        keywords: ['domain', 'hostname', 'subdomain', 'host', 'tld', 'dns']
+      },
+      {
+        name: 'IPv4 Address',
+        pattern: '\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b',
+        flags: 'g',
+        description: 'Matches valid IPv4 addresses (0.0.0.0 – 255.255.255.255). Each octet is constrained to 0–255.',
+        example: '192.168.1.1',
+        keywords: ['ip', 'ipv4', 'ip address', 'network', 'cidr', 'subnet', 'internet protocol', 'ip4']
+      },
+      {
+        name: 'IPv6 Address',
+        pattern: '(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|::(?:[fF]{4}(?::0{1,4})?:)?(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}',
+        flags: 'gi',
+        description: 'Matches IPv6 addresses in full, compressed, and mixed notation.',
+        example: '2001:0db8:85a3:0000:0000:8a2e:0370:7334',
+        keywords: ['ipv6', 'ip6', 'ip address v6', 'internet protocol 6', 'ipv6 address']
+      },
+      {
+        name: 'MAC Address',
+        pattern: '([0-9a-fA-F]{2}[:\\-]){5}[0-9a-fA-F]{2}',
+        flags: 'gi',
+        description: 'Matches MAC (hardware) addresses separated by colons or hyphens.',
+        example: 'AA:BB:CC:DD:EE:FF',
+        keywords: ['mac', 'mac address', 'hardware address', 'network card', 'ethernet', 'nic', 'physical address']
+      },
+
+      // ---- TEXT FORMATS ----
+      {
+        name: 'US Phone Number',
+        pattern: '(?:\\+1[\\s\\-.]?)?(?:\\(?[2-9][0-9]{2}\\)?[\\s\\-.]?)[2-9][0-9]{2}[\\s\\-.]?[0-9]{4}',
+        flags: 'g',
+        description: 'Matches US phone numbers in various formats including optional country code, parentheses, dashes, spaces, and dots.',
+        example: '(555) 867-5309',
+        keywords: ['phone', 'telephone', 'us phone', 'us number', 'cell', 'mobile', 'call', 'number', 'area code', 'us']
+      },
+      {
+        name: 'International Phone',
+        pattern: '\\+[1-9]\\d{1,14}',
+        flags: 'g',
+        description: 'Matches international E.164 format phone numbers starting with + followed by 2–15 digits.',
+        example: '+447911123456',
+        keywords: ['international phone', 'phone international', 'e164', '+country', 'global phone', 'worldwide phone']
+      },
+      {
+        name: 'US Zip Code / Postal Code',
+        pattern: '\\b[0-9]{5}(?:-[0-9]{4})?\\b',
+        flags: 'g',
+        description: 'Matches US ZIP codes in 5-digit or ZIP+4 format (e.g. 12345 or 12345-6789).',
+        example: '90210-1234',
+        keywords: ['zip', 'zip code', 'postal', 'postal code', 'us zip', 'postcode', '5 digit', 'zip4']
+      },
+      {
+        name: 'SSN (Social Security Number)',
+        pattern: '\\b(?!000|666|9[0-9]{2})[0-9]{3}[-\\s]?(?!00)[0-9]{2}[-\\s]?(?!0000)[0-9]{4}\\b',
+        flags: 'g',
+        description: 'Matches US Social Security Numbers in AAA-BB-CCCC format. Excludes known invalid prefixes.',
+        example: '123-45-6789',
+        keywords: ['ssn', 'social security', 'social security number', 'tax id', 'tin', 'itin']
+      },
+      {
+        name: 'Credit Card Number',
+        pattern: '\\b(?:4[0-9]{12}(?:[0-9]{3})?|(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|6(?:011|5[0-9]{2})[0-9]{12}|(?:2131|1800|35\\d{3})\\d{11})\\b',
+        flags: 'g',
+        description: 'Matches Visa, Mastercard, Amex, Discover, Diners Club, and JCB card numbers (no spaces or dashes).',
+        example: '4111111111111111',
+        keywords: ['credit card', 'credit', 'card', 'visa', 'mastercard', 'amex', 'discover', 'payment', 'debit', 'card number']
+      },
+      {
+        name: 'IBAN',
+        pattern: '[A-Z]{2}[0-9]{2}[A-Z0-9]{4}[0-9]{7}(?:[A-Z0-9]?){0,16}',
+        flags: 'g',
+        description: 'Matches IBAN (International Bank Account Number) format used for international transfers.',
+        example: 'GB82WEST12345698765432',
+        keywords: ['iban', 'bank account', 'international bank', 'bic', 'swift', 'wire transfer']
+      },
+
+      // ---- DATE / TIME ----
+      {
+        name: 'ISO Date (YYYY-MM-DD)',
+        pattern: '\\b[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])\\b',
+        flags: 'g',
+        description: 'Matches ISO 8601 date format YYYY-MM-DD with basic month/day validation.',
+        example: '2024-03-25',
+        keywords: ['iso date', 'date', 'iso', 'yyyy-mm-dd', 'iso8601', 'date format', 'sql date']
+      },
+      {
+        name: 'US Date (MM/DD/YYYY)',
+        pattern: '\\b(0?[1-9]|1[0-2])\\/(0?[1-9]|[12][0-9]|3[01])\\/(19|20)[0-9]{2}\\b',
+        flags: 'g',
+        description: 'Matches US-style dates in MM/DD/YYYY format.',
+        example: '03/25/2024',
+        keywords: ['us date', 'date us', 'mm/dd/yyyy', 'american date', 'date slash']
+      },
+      {
+        name: 'Date (DD/MM/YYYY)',
+        pattern: '\\b(0?[1-9]|[12][0-9]|3[01])\\/(0?[1-9]|1[0-2])\\/(19|20)[0-9]{2}\\b',
+        flags: 'g',
+        description: 'Matches European-style dates in DD/MM/YYYY format.',
+        example: '25/03/2024',
+        keywords: ['european date', 'dd/mm/yyyy', 'date european', 'british date', 'date uk']
+      },
+      {
+        name: 'Time (24-hour)',
+        pattern: '\\b([01]?[0-9]|2[0-3]):([0-5][0-9])(?::([0-5][0-9]))?\\b',
+        flags: 'g',
+        description: 'Matches 24-hour time in HH:MM or HH:MM:SS format.',
+        example: '23:59:59',
+        keywords: ['time', '24 hour', '24h', 'military time', 'hh:mm', 'clock', 'hours minutes']
+      },
+      {
+        name: 'Time (12-hour AM/PM)',
+        pattern: '\\b(0?[1-9]|1[0-2]):([0-5][0-9])(?::([0-5][0-9]))?\\s?(?:AM|PM|am|pm)\\b',
+        flags: 'gi',
+        description: 'Matches 12-hour time with AM/PM suffix.',
+        example: '11:59:30 PM',
+        keywords: ['12 hour time', 'am pm', 'ampm', '12h', 'time 12', 'morning', 'afternoon']
+      },
+      {
+        name: 'ISO DateTime',
+        pattern: '[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]+)?(?:Z|[+\\-][0-9]{2}:[0-9]{2})?',
+        flags: 'g',
+        description: 'Matches ISO 8601 datetime strings including optional timezone offset.',
+        example: '2024-03-25T14:30:00Z',
+        keywords: ['datetime', 'timestamp', 'iso datetime', 'date time', 'utc', 'timezone', 'iso timestamp']
+      },
+      {
+        name: 'Year (4-digit)',
+        pattern: '\\b(19|20)[0-9]{2}\\b',
+        flags: 'g',
+        description: 'Matches 4-digit years from 1900 to 2099.',
+        example: '2024',
+        keywords: ['year', '4 digit year', 'four digit year', 'yyyy', 'calendar year']
+      },
+
+      // ---- NUMBERS ----
+      {
+        name: 'Integer',
+        pattern: '-?[0-9]+',
+        flags: 'g',
+        description: 'Matches whole integers, positive or negative.',
+        example: '-42',
+        keywords: ['integer', 'whole number', 'int', 'number', 'digit', 'counting number']
+      },
+      {
+        name: 'Float / Decimal',
+        pattern: '-?[0-9]+\\.[0-9]+',
+        flags: 'g',
+        description: 'Matches decimal numbers with a required decimal point.',
+        example: '3.14159',
+        keywords: ['float', 'decimal', 'decimal number', 'floating point', 'double', 'real number']
+      },
+      {
+        name: 'Negative Number',
+        pattern: '-[0-9]+(?:\\.[0-9]+)?',
+        flags: 'g',
+        description: 'Matches negative integers and decimals.',
+        example: '-99.5',
+        keywords: ['negative', 'negative number', 'minus', 'below zero']
+      },
+      {
+        name: 'Hexadecimal Number',
+        pattern: '\\b0[xX][0-9a-fA-F]+\\b',
+        flags: 'g',
+        description: 'Matches hexadecimal literals prefixed with 0x or 0X.',
+        example: '0xFF4E',
+        keywords: ['hex', 'hexadecimal', 'hex number', '0x', 'hex literal', 'base 16']
+      },
+      {
+        name: 'Hex Color Code',
+        pattern: '#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?\\b',
+        flags: 'gi',
+        description: 'Matches CSS hex color codes in 3-digit (#fff) or 6-digit (#ffffff) format.',
+        example: '#FF5733',
+        keywords: ['hex color', 'color code', 'css color', 'hex colour', 'colour code', '#color', 'rgb hex']
+      },
+      {
+        name: 'Binary Number',
+        pattern: '\\b0[bB][01]+\\b',
+        flags: 'g',
+        description: 'Matches binary number literals prefixed with 0b or 0B.',
+        example: '0b10110110',
+        keywords: ['binary', 'binary number', '0b', 'base 2', 'bit', 'bits']
+      },
+      {
+        name: 'Scientific Notation',
+        pattern: '-?[0-9]+(?:\\.[0-9]+)?[eE][+\\-]?[0-9]+',
+        flags: 'g',
+        description: 'Matches numbers in scientific / exponential notation.',
+        example: '6.022e+23',
+        keywords: ['scientific', 'scientific notation', 'exponential', 'exponent', 'e notation', 'power of 10']
+      },
+      {
+        name: 'Currency (Dollar)',
+        pattern: '\\$[0-9]{1,3}(?:,[0-9]{3})*(?:\\.[0-9]{2})?',
+        flags: 'g',
+        description: 'Matches USD dollar amounts with optional thousands separators and cents.',
+        example: '$1,234.99',
+        keywords: ['dollar', 'currency', 'usd', 'price', 'money', 'cost', '$', 'amount']
+      },
+      {
+        name: 'Percentage',
+        pattern: '[0-9]+(?:\\.[0-9]+)?\\s?%',
+        flags: 'g',
+        description: 'Matches percentage values with optional decimal places.',
+        example: '99.5%',
+        keywords: ['percent', 'percentage', '%', 'ratio', 'proportion']
+      },
+
+      // ---- CODE ----
+      {
+        name: 'HTML Tag',
+        pattern: '<\\/?[a-z][a-z0-9]*(?:\\s[^>]*)?>',
+        flags: 'gi',
+        description: 'Matches opening and closing HTML tags, including attributes.',
+        example: '<div class="container">',
+        keywords: ['html tag', 'html', 'tag', 'element', 'markup', 'opening tag', 'closing tag', 'xml tag']
+      },
+      {
+        name: 'HTML Comment',
+        pattern: '<!--[\\s\\S]*?-->',
+        flags: 'g',
+        description: 'Matches HTML/XML comments including multiline ones.',
+        example: '<!-- This is a comment -->',
+        keywords: ['html comment', 'comment', 'xml comment', '<!-- -->', 'remark']
+      },
+      {
+        name: 'CSS Class Selector',
+        pattern: '\\.[a-zA-Z_\\-][a-zA-Z0-9_\\-]*',
+        flags: 'g',
+        description: 'Matches CSS class selectors starting with a dot.',
+        example: '.container-fluid',
+        keywords: ['css class', 'class selector', 'css selector', '.class', 'stylesheet class']
+      },
+      {
+        name: 'CSS ID Selector',
+        pattern: '#[a-zA-Z_\\-][a-zA-Z0-9_\\-]*',
+        flags: 'g',
+        description: 'Matches CSS ID selectors starting with a hash.',
+        example: '#main-content',
+        keywords: ['css id', 'id selector', '#id', 'css id selector', 'element id']
+      },
+      {
+        name: 'JS Variable Declaration',
+        pattern: '\\b(?:const|let|var)\\s+[a-zA-Z_$][a-zA-Z0-9_$]*',
+        flags: 'g',
+        description: 'Matches JavaScript variable declarations using const, let, or var.',
+        example: 'const myVariable',
+        keywords: ['javascript variable', 'js variable', 'const', 'let', 'var', 'variable declaration']
+      },
+      {
+        name: 'JS Function',
+        pattern: '(?:function\\s+[a-zA-Z_$][a-zA-Z0-9_$]*|(?:const|let|var)\\s+[a-zA-Z_$][a-zA-Z0-9_$]*\\s*=\\s*(?:async\\s+)?(?:function|\\([^)]*\\)\\s*=>))',
+        flags: 'g',
+        description: 'Matches JavaScript function declarations and arrow function expressions.',
+        example: 'function myFunc()',
+        keywords: ['function', 'js function', 'arrow function', 'javascript function', 'method', 'callback']
+      },
+      {
+        name: 'Import Statement',
+        pattern: 'import\\s+(?:[\\w*{}\\s,]+from\\s+)?[\'"][^\'"]+[\'"]',
+        flags: 'g',
+        description: 'Matches ES6 import statements including named, default, and namespace imports.',
+        example: 'import { useState } from \'react\'',
+        keywords: ['import', 'import statement', 'es6 import', 'module import', 'require', 'from']
+      },
+      {
+        name: 'JSON Key-Value Pair',
+        pattern: '"([^"]+)"\\s*:\\s*(?:"([^"]*)"|-?[0-9]+(?:\\.[0-9]+)?|true|false|null)',
+        flags: 'g',
+        description: 'Matches simple JSON key-value pairs with string, number, or boolean values.',
+        example: '"name": "DevBrew"',
+        keywords: ['json', 'json key', 'json value', 'key value', 'json pair', 'json object']
+      },
+
+      // ---- VALIDATION ----
+      {
+        name: 'Username',
+        pattern: '^[a-zA-Z0-9_\\-]{3,20}$',
+        flags: '',
+        description: 'Validates usernames: 3–20 characters, letters, numbers, underscores, and hyphens only.',
+        example: 'dev_user-99',
+        keywords: ['username', 'user name', 'login', 'handle', 'screen name', 'account name', 'alphanumeric']
+      },
+      {
+        name: 'Slug (URL-friendly)',
+        pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+        flags: '',
+        description: 'Validates URL slugs: lowercase letters, digits, and hyphens (no consecutive or leading/trailing hyphens).',
+        example: 'my-blog-post-2024',
+        keywords: ['slug', 'url slug', 'seo slug', 'permalink', 'url friendly', 'kebab case']
+      },
+      {
+        name: 'Strong Password',
+        pattern: '(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};\':"\\\\|,.<>\\/?]).{8,}',
+        flags: '',
+        description: 'Validates passwords with minimum 8 characters, requiring uppercase, lowercase, digit, and special character.',
+        example: 'P@ssw0rd!23',
+        keywords: ['password', 'strong password', 'password validation', 'secure password', 'password strength', 'passphrase']
+      },
+      {
+        name: 'Alphanumeric',
+        pattern: '^[a-zA-Z0-9]+$',
+        flags: '',
+        description: 'Matches strings containing only letters and digits.',
+        example: 'Hello123',
+        keywords: ['alphanumeric', 'letters and numbers', 'no special chars', 'letters digits']
+      },
+      {
+        name: 'Letters Only',
+        pattern: '^[a-zA-Z]+$',
+        flags: '',
+        description: 'Matches strings containing only alphabetic characters (no digits or symbols).',
+        example: 'HelloWorld',
+        keywords: ['letters only', 'alphabetic', 'alpha only', 'no numbers', 'no digits', 'text only']
+      },
+      {
+        name: 'Digits Only',
+        pattern: '^[0-9]+$',
+        flags: '',
+        description: 'Matches strings containing only numeric digits.',
+        example: '1234567890',
+        keywords: ['digits only', 'numbers only', 'numeric', 'all digits', 'no letters']
+      },
+
+      // ---- FILES ----
+      {
+        name: 'File Extension',
+        pattern: '\\.[a-zA-Z0-9]{1,8}$',
+        flags: 'i',
+        description: 'Matches file extensions at the end of a string.',
+        example: '.pdf',
+        keywords: ['file extension', 'extension', 'file type', '.ext', 'suffix']
+      },
+      {
+        name: 'File Path (Unix)',
+        pattern: '(?:\\/[a-zA-Z0-9._\\-]+)+\\/?',
+        flags: 'g',
+        description: 'Matches Unix/Linux/macOS file system paths.',
+        example: '/home/user/documents/file.txt',
+        keywords: ['file path', 'unix path', 'linux path', 'directory', 'folder path', 'absolute path', 'posix']
+      },
+      {
+        name: 'File Path (Windows)',
+        pattern: '[A-Za-z]:\\\\(?:[^\\\\/:*?"<>|\\r\\n]+\\\\)*[^\\\\/:*?"<>|\\r\\n]*',
+        flags: 'g',
+        description: 'Matches Windows file system paths starting with a drive letter.',
+        example: 'C:\\Users\\user\\Documents\\file.txt',
+        keywords: ['windows path', 'windows file path', 'drive letter', 'backslash path', 'win path', 'c:\\\\']
+      },
+      {
+        name: 'Image File',
+        pattern: '[^\\s]+\\.(?:jpg|jpeg|png|gif|bmp|webp|svg|ico|tiff|heic)',
+        flags: 'gi',
+        description: 'Matches common image file names by extension.',
+        example: 'photo.jpg',
+        keywords: ['image', 'image file', 'photo', 'picture', 'jpg', 'png', 'gif', 'svg', 'webp']
+      },
+      {
+        name: 'Video File',
+        pattern: '[^\\s]+\\.(?:mp4|avi|mov|mkv|wmv|flv|webm|m4v|3gp)',
+        flags: 'gi',
+        description: 'Matches common video file names by extension.',
+        example: 'video.mp4',
+        keywords: ['video', 'video file', 'movie', 'mp4', 'avi', 'mkv', 'mov', 'media']
+      },
+
+      // ---- WEB ----
+      {
+        name: 'Query String Parameter',
+        pattern: '[?&]([^=&#]+)=([^&#]*)',
+        flags: 'g',
+        description: 'Matches individual URL query string parameters (key=value pairs).',
+        example: '?page=2&limit=10',
+        keywords: ['query string', 'query param', 'url parameter', 'get param', 'search param', 'url query', '?param=']
+      },
+      {
+        name: 'URL Anchor / Hash',
+        pattern: '#[a-zA-Z0-9_\\-]+',
+        flags: 'g',
+        description: 'Matches URL hash fragments / anchors.',
+        example: '#section-1',
+        keywords: ['anchor', 'hash', 'fragment', 'url hash', 'url anchor', '#section']
+      },
+      {
+        name: 'JWT Token',
+        pattern: 'eyJ[a-zA-Z0-9_\\-]+\\.eyJ[a-zA-Z0-9_\\-]+\\.[a-zA-Z0-9_\\-]+',
+        flags: 'g',
+        description: 'Matches JSON Web Tokens in their typical three-part base64url-encoded format.',
+        example: 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIn0.abc123',
+        keywords: ['jwt', 'json web token', 'bearer token', 'auth token', 'token', 'authorization header']
+      },
+      {
+        name: 'Base64 String',
+        pattern: '(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{4})',
+        flags: 'g',
+        description: 'Matches properly padded Base64-encoded strings.',
+        example: 'SGVsbG8gV29ybGQ=',
+        keywords: ['base64', 'base 64', 'encoded', 'encoding', 'b64', 'base64 string', 'decode']
+      },
+      {
+        name: 'Semantic Version (SemVer)',
+        pattern: '\\bv?(?:0|[1-9][0-9]*)\\. (?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)(?:-[0-9a-zA-Z\\-]+(?:\\.[0-9a-zA-Z\\-]+)*)?(?:\\+[0-9a-zA-Z\\-]+(?:\\.[0-9a-zA-Z\\-]+)*)?\\b'.replace(' ', ''),
+        flags: 'g',
+        description: 'Matches semantic version strings (MAJOR.MINOR.PATCH) with optional pre-release and build metadata.',
+        example: '1.4.2-beta.1+build.123',
+        keywords: ['semver', 'semantic version', 'version', 'version number', 'release', 'package version', 'v1.2.3']
+      },
+
+      // ---- TEXT ----
+      {
+        name: 'Word',
+        pattern: '\\b[a-zA-Z]+\\b',
+        flags: 'g',
+        description: 'Matches individual words consisting of alphabetic characters.',
+        example: 'Hello',
+        keywords: ['word', 'words', 'text word', 'alphabetic word']
+      },
+      {
+        name: 'Sentence',
+        pattern: '[A-Z][^.!?]*[.!?]',
+        flags: 'g',
+        description: 'Matches sentences starting with a capital letter and ending with punctuation.',
+        example: 'This is a sentence.',
+        keywords: ['sentence', 'text sentence', 'paragraph sentence', 'full sentence']
+      },
+      {
+        name: 'Hashtag',
+        pattern: '#[a-zA-Z][a-zA-Z0-9_]*',
+        flags: 'g',
+        description: 'Matches hashtags used on social media platforms.',
+        example: '#devbrew',
+        keywords: ['hashtag', '#tag', 'hash tag', 'twitter hashtag', 'social media tag', 'instagram hashtag']
+      },
+      {
+        name: 'Mention (@user)',
+        pattern: '@[a-zA-Z][a-zA-Z0-9_.\\-]*',
+        flags: 'g',
+        description: 'Matches @mentions used on social platforms.',
+        example: '@devbrew',
+        keywords: ['mention', '@user', 'at mention', 'twitter mention', 'social mention', '@handle', 'tag user']
+      },
+      {
+        name: 'Markdown Bold',
+        pattern: '\\*\\*([^*]+)\\*\\*|__([^_]+)__',
+        flags: 'g',
+        description: 'Matches Markdown bold text wrapped in ** or __.',
+        example: '**bold text**',
+        keywords: ['markdown bold', 'bold', 'markdown', '**bold**', '__bold__']
+      },
+      {
+        name: 'Markdown Inline Code',
+        pattern: '`[^`]+`',
+        flags: 'g',
+        description: 'Matches Markdown inline code blocks wrapped in backticks.',
+        example: '`console.log()`',
+        keywords: ['markdown code', 'inline code', 'backtick', 'code block', 'code markdown', '`code`']
+      },
+      {
+        name: 'UUID / GUID',
+        pattern: '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
+        flags: 'gi',
+        description: 'Matches UUID/GUID identifiers in the standard 8-4-4-4-12 hexadecimal format.',
+        example: '550e8400-e29b-41d4-a716-446655440000',
+        keywords: ['uuid', 'guid', 'unique id', 'identifier', 'id format', 'universally unique', 'urn uuid']
+      }
+    ];
+
+    /* =====================================================================
+       SCORING ALGORITHM
+    ===================================================================== */
+    function tokenize(str) {
+      return str.toLowerCase().replace(/[^\w\s-]/g, ' ').split(/\s+/).filter(Boolean);
+    }
+
+    function scorePattern(pattern, tokens) {
+      var score = 0;
+      var lowerKeywords = pattern.keywords.map(function (k) { return k.toLowerCase(); });
+      var nameLower = pattern.name.toLowerCase();
+      var descLower = pattern.description.toLowerCase();
+
+      tokens.forEach(function (token) {
+        // Exact keyword match
+        lowerKeywords.forEach(function (kw) {
+          if (kw === token) score += 10;
+          else if (kw.indexOf(token) !== -1 || token.indexOf(kw) !== -1) score += 4;
+        });
+        // Name match
+        if (nameLower.indexOf(token) !== -1) score += 6;
+        // Description match
+        if (descLower.indexOf(token) !== -1) score += 1;
+      });
+
+      // Multi-word keyword phrase match
+      var desc = tokens.join(' ');
+      lowerKeywords.forEach(function (kw) {
+        if (kw.indexOf(' ') !== -1 && desc.indexOf(kw) !== -1) score += 8;
+      });
+
+      return score;
+    }
+
+    function findMatches(description) {
+      var tokens = tokenize(description);
+      if (tokens.length === 0) return [];
+
+      var scored = PATTERNS.map(function (p) {
+        return { pattern: p, score: scorePattern(p, tokens) };
+      }).filter(function (item) {
+        return item.score > 0;
+      }).sort(function (a, b) {
+        return b.score - a.score;
+      });
+
+      return scored.slice(0, 3).map(function (item) { return item.pattern; });
+    }
+
+    /* =====================================================================
+       RENDER RESULTS
+    ===================================================================== */
+    function escapeForUrl(str) {
+      return encodeURIComponent(str);
+    }
+
+    function renderResults(matches) {
+      var results = document.getElementById('results');
+
+      if (matches.length === 0) {
+        results.innerHTML = '<div class="no-results-msg">' +
+          '<strong>No patterns found.</strong> Your description might be too vague or use unfamiliar terms. ' +
+          'Try using specific words like: <em>email, url, phone, date, ip address, uuid, credit card, password, username, hex, slug, hashtag, jwt, base64, semver</em>.' +
+          '</div>';
+        return;
+      }
+
+      var html = '';
+      matches.forEach(function (p, i) {
+        var formatted = '/' + p.pattern + '/' + p.flags;
+        var testerUrl = 'regex-tester.html#pattern=' + escapeForUrl(p.pattern) + '&flags=' + escapeForUrl(p.flags);
+        var badge = i === 0
+          ? '<span class="badge badge-success">Best Match</span>'
+          : (i === 1 ? '<span class="badge badge-accent">Alt Match</span>' : '');
+
+        html += '<div class="result-card">';
+        html += '<div class="result-header">';
+        html += '<strong>' + escapeHtml(p.name) + '</strong>' + badge;
+        html += '</div>';
+        html += '<div class="result-pattern-row">';
+        html += '<span class="result-pattern-text">' + escapeHtml(formatted) + '</span>';
+        html += '<button class="btn btn-sm" onclick="copyToClipboard(' + JSON.stringify(formatted) + ', this)" type="button">Copy</button>';
+        html += '</div>';
+        html += '<p class="result-desc">' + escapeHtml(p.description) + '</p>';
+        html += '<p class="result-example">Example: <code>' + escapeHtml(p.example) + '</code></p>';
+        html += '<a href="' + testerUrl + '" class="btn" style="font-size:0.8rem;" target="_blank">Test in Regex Tester &#8594;</a>';
+        html += '</div>';
+      });
+
+      results.innerHTML = html;
+    }
+
+    /* =====================================================================
+       GENERATE
+    ===================================================================== */
+    var descInput = document.getElementById('desc-input');
+    var btnGenerate = document.getElementById('btn-generate');
+    var btnClear = document.getElementById('btn-clear');
+    var resultsDiv = document.getElementById('results');
+
+    function generate() {
+      var desc = descInput.value.trim();
+      if (desc.length < 2) {
+        resultsDiv.innerHTML = '<div class="error-msg">Please enter a description of at least 2 characters. Try something like "email address" or "phone number".</div>';
+        return;
+      }
+      var matches = findMatches(desc);
+      renderResults(matches);
+      if (matches.length > 0) {
+        showPostActionCTA();
+      }
+    }
+
+    btnGenerate.addEventListener('click', generate);
+    btnClear.addEventListener('click', function () {
+      descInput.value = '';
+      resultsDiv.innerHTML = '';
+      descInput.focus();
+    });
+
+    // Quick example buttons
+    document.querySelectorAll('.pattern-btn[data-desc]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        descInput.value = btn.getAttribute('data-desc');
+        generate();
+        descInput.focus();
+      });
+    });
+
+    // Ctrl+Enter shortcut
+    bindCtrlEnter(generate);
+
+    /* =====================================================================
+       CUSTOM PATTERN BUILDER
+    ===================================================================== */
+    var customPattern = document.getElementById('custom-pattern');
+    var customFlags = document.getElementById('custom-flags');
+    var customOutputText = document.getElementById('custom-output-text');
+    var customError = document.getElementById('custom-error');
+    var btnCopyCustom = document.getElementById('btn-copy-custom');
+
+    function updateCustomOutput() {
+      var pat = customPattern.value.trim();
+      var flags = customFlags.value.replace(/[^gimsuy]/g, '').split('').filter(function (c, i, arr) {
+        return arr.indexOf(c) === i;
+      }).join('');
+
+      if (!pat) {
+        customOutputText.textContent = 'Pattern will appear here\u2026';
+        customOutputText.style.color = 'var(--text-muted)';
+        customError.style.display = 'none';
+        return;
+      }
+
+      try {
+        new RegExp(pat, flags);
+        var formatted = '/' + pat + '/' + flags;
+        customOutputText.textContent = formatted;
+        customOutputText.style.color = '#86efac';
+        customError.style.display = 'none';
+      } catch (e) {
+        customOutputText.textContent = pat.length ? '/' + pat + '/' + flags : 'Pattern will appear here\u2026';
+        customOutputText.style.color = 'var(--text-muted)';
+        customError.textContent = 'Invalid regex: ' + e.message;
+        customError.style.display = 'block';
+      }
+    }
+
+    customPattern.addEventListener('input', updateCustomOutput);
+    customFlags.addEventListener('input', updateCustomOutput);
+
+    btnCopyCustom.addEventListener('click', function () {
+      var text = customOutputText.textContent;
+      if (text && text !== 'Pattern will appear here\u2026') {
+        copyToClipboard(text, btnCopyCustom);
+      }
+    });
+
+  })();
+  </script>
+  <script data-goatcounter="https://devbrew.goatcounter.com/count" async src="https://gc.zgo.at/count.js" integrity="sha384-DGiREytotlUiLflu8vLo0vvfxKWn36pKPT1ZBhh3R+3vhewrS/4p3H9eys9Zr2bPQ" crossorigin="anonymous"></script>
+</body>
+</html>

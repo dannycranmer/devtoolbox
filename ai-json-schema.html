@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI JSON Schema Generator — DevBrew</title>
+  <meta name="description" content="Instantly generate a valid JSON Schema from any JSON sample. Detects types, formats, enums, and nesting depth — 100% client-side, no API needed.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="canonical" href="https://devbrew.org/ai-json-schema.html">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://devbrew.org/ai-json-schema.html">
+  <meta property="og:title" content="AI JSON Schema Generator — DevBrew">
+  <meta property="og:description" content="Instantly generate a valid JSON Schema from any JSON sample. Detects types, formats, enums, and nesting — 100% client-side.">
+  <meta property="og:image" content="https://devbrew.org/og-image.png">
+  <meta property="og:site_name" content="DevBrew">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI JSON Schema Generator — DevBrew">
+  <meta name="twitter:description" content="Instantly generate a valid JSON Schema from any JSON sample. 100% client-side, no API.">
+  <meta name="twitter:image" content="https://devbrew.org/og-image.png">
+  <link rel="stylesheet" href="css/style.css?v=16">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AI JSON Schema Generator",
+  "description": "Instantly generate a valid JSON Schema from any JSON sample. Detects types, formats, enums, and nesting depth — 100% client-side.",
+  "url": "https://devbrew.org/ai-json-schema.html",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "creator": { "@type": "Organization", "name": "DevBrew", "url": "https://devbrew.org" }
+}
+  </script>
+  <style>
+    .tool-layout-single {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .schema-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.875rem 1rem;
+    }
+    .schema-options .control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .schema-options label {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .schema-options select {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.3rem 0.5rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+    }
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-wrap input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+    }
+    .tool-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .panel-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    textarea {
+      width: 100%;
+      min-height: 260px;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color var(--transition);
+      outline: none;
+    }
+    textarea:focus {
+      border-color: var(--border-focus);
+    }
+    textarea::placeholder {
+      color: var(--text-muted);
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.875rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+      font-family: inherit;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #222;
+      border-color: var(--text-muted);
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+    .output-area {
+      min-height: 260px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      overflow: auto;
+      white-space: pre;
+      color: var(--text-primary);
+      tab-size: 2;
+    }
+    .output-area:empty::before {
+      content: 'Generated schema will appear here...';
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .msg {
+      font-size: 0.8125rem;
+      padding: 0;
+      display: none;
+    }
+    .msg.show {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+    }
+    .msg-success { background: var(--success-bg); color: var(--success); }
+    .msg-error   { background: var(--error-bg);   color: var(--error);   }
+    .msg-warning { background: var(--warning-bg); color: var(--warning); }
+    .schema-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .stat-chip {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .stat-chip strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    /* Syntax colors */
+    .syn-key  { color: #38bdf8; }
+    .syn-str  { color: #86efac; }
+    .syn-num  { color: #fbbf24; }
+    .syn-bool { color: #a78bfa; }
+    .syn-null { color: #f87171; }
+    .shortcut-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .kbd {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+      font-size: 0.75em;
+      font-family: var(--font-mono);
+    }
+    .tool-header {
+      margin-bottom: 1.25rem;
+    }
+    .tool-header h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.4rem;
+    }
+    .tool-header p {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+    }
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: linear-gradient(135deg, rgba(14,165,233,0.15), rgba(139,92,246,0.15));
+      border: 1px solid rgba(14,165,233,0.3);
+      border-radius: 20px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .main {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .footer-sister { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+    .footer-sister a, .footer-github a { color: var(--text-secondary); text-decoration: none; }
+    .footer-sister a:hover, .footer-github a:hover { color: var(--accent); }
+    .footer-sep { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Brew</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"></button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="ai-regex.html" role="menuitem">AI Regex</a></li>
+        <li><a href="ai-code-explainer.html" role="menuitem">AI Code</a></li>
+        <li><a href="ai-json-schema.html" class="active" role="menuitem">AI Schema</a></li>
+        <li><a href="ai-sql-builder.html" role="menuitem">AI SQL</a></li>
+        <li><a href="ai-color-palette.html" role="menuitem">AI Colors</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li class="nav-bmc"><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <div class="ai-badge">&#129302; AI-Powered &bull; 100% Client-Side</div>
+      <h1>AI JSON Schema Generator</h1>
+      <p>Paste any JSON and get an instant, valid JSON Schema. Detects formats, enums, and nesting &mdash; <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to generate</span></p>
+    </div>
+
+    <div class="tool-layout-single">
+
+      <div class="schema-options">
+        <div class="control-group">
+          <label for="schema-version">Draft:</label>
+          <select id="schema-version" aria-label="JSON Schema draft version">
+            <option value="draft-07" selected>Draft 7</option>
+            <option value="draft-2019-09">Draft 2019-09</option>
+            <option value="draft-2020-12">Draft 2020-12</option>
+          </select>
+        </div>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="opt-examples"> Include examples
+        </label>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="opt-enums" checked> Detect enums
+        </label>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="opt-descriptions" checked> Add descriptions
+        </label>
+      </div>
+
+      <div class="tool-panel">
+        <span class="panel-label">JSON Input</span>
+        <textarea id="json-input" placeholder="Paste your JSON here..." aria-label="JSON input" spellcheck="false"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-generate" type="button">Generate Schema</button>
+          <button class="btn" id="btn-example" type="button">Load Example</button>
+          <button class="btn" id="btn-clear" type="button">Clear</button>
+        </div>
+        <div id="input-msg" class="msg" role="alert" aria-live="polite"></div>
+      </div>
+
+      <div class="tool-panel">
+        <span class="panel-label">JSON Schema Output</span>
+        <div id="schema-output" class="output-area" aria-label="Generated JSON Schema" tabindex="0" role="region"></div>
+        <div class="btn-row">
+          <button class="btn" id="btn-copy" type="button">Copy Schema</button>
+        </div>
+        <div id="schema-stats" class="schema-stats"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
+    </div>
+    <div class="footer-github">
+      <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; margin-right: 4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub
+      </a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js?v=16"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var input       = document.getElementById('json-input');
+    var output      = document.getElementById('schema-output');
+    var inputMsg    = document.getElementById('input-msg');
+    var statsEl     = document.getElementById('schema-stats');
+    var versionSel  = document.getElementById('schema-version');
+    var optExamples = document.getElementById('opt-examples');
+    var optEnums    = document.getElementById('opt-enums');
+    var optDescs    = document.getElementById('opt-descriptions');
+    var lastSchema  = '';
+
+    var SCHEMA_URLS = {
+      'draft-07':      'http://json-schema.org/draft-07/schema#',
+      'draft-2019-09': 'https://json-schema.org/draft/2019-09/schema',
+      'draft-2020-12': 'https://json-schema.org/draft/2020-12/schema'
+    };
+
+    /* ---- Smart field descriptions ---- */
+    var descPatterns = [
+      { pattern: /^(user_?id|userId|uid)$/i,              desc: 'Unique identifier for the user' },
+      { pattern: /^(id|_id|uuid|guid)$/i,                 desc: 'Unique identifier for this record' },
+      { pattern: /^(created_?at|createdAt|created_?date|createdDate)$/i, desc: 'ISO timestamp when the record was created' },
+      { pattern: /^(updated_?at|updatedAt|modified_?at|modifiedAt)$/i,   desc: 'ISO timestamp when the record was last updated' },
+      { pattern: /^(deleted_?at|deletedAt)$/i,            desc: 'ISO timestamp when the record was deleted' },
+      { pattern: /^(email|email_?address|emailAddress)$/i, desc: 'Email address of the user' },
+      { pattern: /^(first_?name|firstName)$/i,             desc: 'First name of the person' },
+      { pattern: /^(last_?name|lastName|surname)$/i,       desc: 'Last name (surname) of the person' },
+      { pattern: /^(full_?name|fullName|display_?name|displayName|name)$/i, desc: 'Display name of the entity' },
+      { pattern: /^(status|state)$/i,                      desc: 'Current status of the record' },
+      { pattern: /^(count|total|amount|qty|quantity|num|number)$/i, desc: 'Numeric count or amount' },
+      { pattern: /^(price|cost|fee|rate|salary|wage)$/i,   desc: 'Monetary value' },
+      { pattern: /^(url|uri|link|href|endpoint)$/i,        desc: 'URL or URI string' },
+      { pattern: /^(phone|phone_?number|phoneNumber|mobile|tel)$/i, desc: 'Phone number' },
+      { pattern: /^(address|addr)$/i,                      desc: 'Physical address' },
+      { pattern: /^(city|town|municipality)$/i,            desc: 'City or town name' },
+      { pattern: /^(country|nation)$/i,                    desc: 'Country name or code' },
+      { pattern: /^(zip|postal|postal_?code|postalCode|zipCode)$/i, desc: 'Postal or ZIP code' },
+      { pattern: /^(is_?active|isActive|active|enabled)$/i, desc: 'Whether the record is active' },
+      { pattern: /^(description|desc|summary|bio|about|notes?)$/i, desc: 'Human-readable description' },
+      { pattern: /^(tags?|labels?|categories|keywords?)$/i, desc: 'List of associated tags or labels' },
+      { pattern: /^(role|roles?|permission|permissions?)$/i, desc: 'User role or permission level' },
+      { pattern: /^(type|kind|category|class)$/i,           desc: 'Type or category classification' },
+      { pattern: /^(score|rating|rank|points?)$/i,          desc: 'Numeric score or rating' },
+      { pattern: /^(language|lang|locale)$/i,               desc: 'Language code or locale' },
+      { pattern: /^(theme|skin|mode)$/i,                    desc: 'UI theme or display mode' },
+      { pattern: /^(notifications?|alerts?)$/i,             desc: 'Notification settings flag' },
+      { pattern: /^(preferences?|settings?|config|options?)$/i, desc: 'User preferences or configuration' },
+    ];
+
+    function getDescription(key) {
+      for (var i = 0; i < descPatterns.length; i++) {
+        if (descPatterns[i].pattern.test(key)) return descPatterns[i].desc;
+      }
+      return null;
+    }
+
+    /* ---- Enum detection: all same primitive type, <= 8 distinct values ---- */
+    function tryEnum(arr) {
+      if (!optEnums.checked) return null;
+      if (arr.length === 0) return null;
+      var primitiveTypes = ['string', 'number', 'boolean'];
+      var first = typeof arr[0];
+      if (primitiveTypes.indexOf(first) === -1) return null;
+      for (var i = 1; i < arr.length; i++) {
+        if (typeof arr[i] !== first) return null;
+      }
+      var distinct = [];
+      arr.forEach(function (v) {
+        if (distinct.indexOf(v) === -1) distinct.push(v);
+      });
+      if (distinct.length <= 8) return distinct;
+      return null;
+    }
+
+    /* ---- Depth calculation ---- */
+    function calcDepth(value) {
+      if (value === null || typeof value !== 'object') return 0;
+      if (Array.isArray(value)) {
+        var maxD = 0;
+        value.forEach(function (v) { maxD = Math.max(maxD, calcDepth(v)); });
+        return 1 + maxD;
+      }
+      var maxD = 0;
+      Object.keys(value).forEach(function (k) { maxD = Math.max(maxD, calcDepth(value[k])); });
+      return 1 + maxD;
+    }
+
+    /* ---- Count total fields ---- */
+    function countFields(schema) {
+      if (!schema || !schema.properties) return 0;
+      var count = Object.keys(schema.properties).length;
+      Object.keys(schema.properties).forEach(function (k) {
+        count += countFields(schema.properties[k]);
+      });
+      return count;
+    }
+
+    /* ---- Collect all types used ---- */
+    function collectTypes(schema, set) {
+      set = set || {};
+      if (schema.type) set[schema.type] = true;
+      if (schema.properties) {
+        Object.keys(schema.properties).forEach(function (k) {
+          collectTypes(schema.properties[k], set);
+        });
+      }
+      if (schema.items) collectTypes(schema.items, set);
+      return set;
+    }
+
+    /* ---- Core inference ---- */
+    function inferSchema(value, key, depth) {
+      depth = depth || 0;
+      var schema;
+
+      if (value === null) {
+        return { type: 'null' };
+      }
+
+      if (typeof value === 'boolean') {
+        schema = { type: 'boolean' };
+        if (optExamples.checked) schema.examples = [value];
+        return schema;
+      }
+
+      if (typeof value === 'number') {
+        if (Number.isInteger(value)) {
+          schema = { type: 'integer', minimum: 0 };
+        } else {
+          schema = { type: 'number' };
+        }
+        if (optExamples.checked) schema.examples = [value];
+        return schema;
+      }
+
+      if (typeof value === 'string') {
+        if (/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?/.test(value)) {
+          schema = { type: 'string', format: 'date-time' };
+        } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          schema = { type: 'string', format: 'email' };
+        } else if (/^https?:\/\//.test(value)) {
+          schema = { type: 'string', format: 'uri' };
+        } else if (/^[0-9a-f]{8}-[0-9a-f]{4}/i.test(value)) {
+          schema = { type: 'string', format: 'uuid' };
+        } else {
+          schema = { type: 'string', minLength: 0 };
+        }
+        if (optExamples.checked && !schema.format) schema.examples = [value];
+        return schema;
+      }
+
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          return { type: 'array', items: {} };
+        }
+        var enumVals = tryEnum(value);
+        if (enumVals) {
+          schema = { type: 'array', items: { type: typeof value[0], enum: enumVals }, minItems: 0 };
+        } else {
+          schema = { type: 'array', items: inferSchema(value[0], key, depth + 1), minItems: 0 };
+        }
+        return schema;
+      }
+
+      if (typeof value === 'object') {
+        var properties = {};
+        var required = [];
+        Object.keys(value).forEach(function (k) {
+          var propSchema = inferSchema(value[k], k, depth + 1);
+          if (optDescs.checked) {
+            var desc = getDescription(k);
+            if (desc) propSchema.description = desc;
+          }
+          properties[k] = propSchema;
+          required.push(k);
+        });
+        schema = {
+          type: 'object',
+          properties: properties,
+          required: required,
+          additionalProperties: false
+        };
+        return schema;
+      }
+
+      return {};
+    }
+
+    /* ---- Syntax highlight JSON ---- */
+    function syntaxHighlight(json) {
+      var escaped = escapeHtml(json);
+      return escaped.replace(
+        /("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+        function (match) {
+          var cls = 'syn-num';
+          if (/^"/.test(match)) {
+            cls = /:$/.test(match) ? 'syn-key' : 'syn-str';
+          } else if (/true|false/.test(match)) {
+            cls = 'syn-bool';
+          } else if (/null/.test(match)) {
+            cls = 'syn-null';
+          }
+          return '<span class="' + cls + '">' + match + '</span>';
+        }
+      );
+    }
+
+    /* ---- Main generation ---- */
+    function doGenerate() {
+      var raw = input.value.trim();
+      if (!raw) {
+        hideMsg(inputMsg);
+        output.innerHTML = '';
+        statsEl.innerHTML = '';
+        return;
+      }
+
+      var parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (e) {
+        var errMsg = e.message;
+        var posMatch = errMsg.match(/position\s+(\d+)/i);
+        if (posMatch) {
+          var pos = parseInt(posMatch[1], 10);
+          var upToPos = raw.substring(0, pos);
+          var line = (upToPos.match(/\n/g) || []).length + 1;
+          errMsg += ' (line ' + line + ')';
+        }
+        showMsg(inputMsg, 'error', 'Invalid JSON: ' + errMsg);
+        output.innerHTML = '';
+        statsEl.innerHTML = '';
+        return;
+      }
+
+      hideMsg(inputMsg);
+
+      var innerSchema = inferSchema(parsed);
+      var version = versionSel.value;
+      var schemaUrl = SCHEMA_URLS[version] || SCHEMA_URLS['draft-07'];
+
+      var fullSchema;
+      if (innerSchema.type === 'object') {
+        fullSchema = Object.assign({ '$schema': schemaUrl, title: 'Generated Schema', description: 'Auto-generated JSON Schema' }, innerSchema);
+      } else {
+        fullSchema = { '$schema': schemaUrl, title: 'Generated Schema', description: 'Auto-generated JSON Schema' };
+        Object.assign(fullSchema, innerSchema);
+      }
+
+      lastSchema = JSON.stringify(fullSchema, null, 2);
+      output.innerHTML = syntaxHighlight(lastSchema);
+
+      // Stats
+      var depth = calcDepth(parsed);
+      var fieldCount = countFields(fullSchema);
+      var reqCount = (fullSchema.required || []).length;
+      var typesUsed = Object.keys(collectTypes(fullSchema));
+
+      statsEl.innerHTML =
+        '<div class="stat-chip">Fields: <strong>' + fieldCount + '</strong></div>' +
+        '<div class="stat-chip">Required: <strong>' + reqCount + '</strong></div>' +
+        '<div class="stat-chip">Max depth: <strong>' + depth + '</strong></div>' +
+        '<div class="stat-chip">Types: <strong>' + typesUsed.join(', ') + '</strong></div>' +
+        '<div class="stat-chip">Draft: <strong>' + version + '</strong></div>';
+
+      showPostActionCTA();
+    }
+
+    /* ---- Events ---- */
+    document.getElementById('btn-generate').addEventListener('click', doGenerate);
+
+    document.getElementById('btn-clear').addEventListener('click', function () {
+      input.value = '';
+      output.innerHTML = '';
+      statsEl.innerHTML = '';
+      hideMsg(inputMsg);
+      lastSchema = '';
+      input.focus();
+    });
+
+    document.getElementById('btn-copy').addEventListener('click', function () {
+      if (lastSchema) copyToClipboard(lastSchema, this);
+    });
+
+    document.getElementById('btn-example').addEventListener('click', function () {
+      input.value = JSON.stringify({
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "name": "Jane Doe",
+        "email": "jane@example.com",
+        "age": 28,
+        "isActive": true,
+        "score": 98.5,
+        "createdAt": "2026-01-15T10:30:00Z",
+        "address": {
+          "street": "123 Main St",
+          "city": "Austin",
+          "country": "US",
+          "zip": "78701"
+        },
+        "tags": ["developer", "admin"],
+        "preferences": {
+          "theme": "dark",
+          "notifications": true,
+          "language": "en"
+        }
+      }, null, 2);
+      doGenerate();
+    });
+
+    bindCtrlEnter(doGenerate);
+  })();
+  </script>
+  <script data-goatcounter="https://devbrew.goatcounter.com/count" async src="https://gc.zgo.at/count.js" integrity="sha384-DGiREytotlUiLflu8vLo0vvfxKWn36pKPT1ZBhh3R+3vhewrS/4p3H9eys9Zr2bPQ" crossorigin="anonymous"></script>
+</body>
+</html>

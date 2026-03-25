@@ -74,10 +74,10 @@
     <div class="tool-filter">
       <div class="tool-search-wrap">
         <svg class="tool-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input type="text" id="toolSearch" class="tool-search" placeholder="Search 27 tools..." autocomplete="off">
+        <input type="text" id="toolSearch" class="tool-search" placeholder="Search 32 tools..." autocomplete="off">
       </div>
       <div class="tool-categories" role="tablist">
-        <button class="cat-pill active" data-cat="all" role="tab" aria-selected="true">All <span class="cat-count">27</span></button>
+        <button class="cat-pill active" data-cat="all" role="tab" aria-selected="true">All <span class="cat-count">32</span></button>
         <button class="cat-pill cat-pill-ai" data-cat="ai" role="tab">&#x1F916; AI Tools</button>
         <button class="cat-pill" data-cat="data" role="tab">Data Formats</button>
         <button class="cat-pill" data-cat="code" role="tab">Code Tools</button>
@@ -87,11 +87,31 @@
     </div>
 
     <div class="tool-grid" id="toolGrid">
-      <div class="tool-card tool-card-ai" data-cat="ai" data-keywords="ai artificial intelligence llm language model">
-        <div class="tool-card-icon" aria-hidden="true">&#x1F916;</div>
-        <h2>AI Tools <span class="ai-badge-soon">Coming Soon</span></h2>
-        <p>AI-powered utilities that run 100% in your browser — no API keys, no server calls, full privacy.</p>
-      </div>
+      <a href="ai-regex.html" class="tool-card tool-card-ai" data-cat="ai" data-keywords="ai regex generator pattern match natural language describe english">
+        <div class="tool-card-icon" aria-hidden="true">&#x1F52E;</div>
+        <h2>AI Regex Generator <span class="ai-badge">AI</span></h2>
+        <p>Describe what you want to match in plain English — get the right regex instantly. No more trial and error.</p>
+      </a>
+      <a href="ai-code-explainer.html" class="tool-card tool-card-ai" data-cat="ai" data-keywords="ai code explainer explain javascript python sql understand">
+        <div class="tool-card-icon" aria-hidden="true">&#x1F9E0;</div>
+        <h2>AI Code Explainer <span class="ai-badge">AI</span></h2>
+        <p>Paste any code snippet and get a clear plain-English explanation. Detects language, functions, patterns.</p>
+      </a>
+      <a href="ai-json-schema.html" class="tool-card tool-card-ai" data-cat="ai" data-keywords="ai json schema generator infer validate draft types">
+        <div class="tool-card-icon" aria-hidden="true">&#x1F4CF;</div>
+        <h2>AI JSON Schema Generator <span class="ai-badge">AI</span></h2>
+        <p>Paste JSON — get a complete JSON Schema with types, formats, required fields, and smart descriptions.</p>
+      </a>
+      <a href="ai-sql-builder.html" class="tool-card tool-card-ai" data-cat="ai" data-keywords="ai sql builder query natural language english select join aggregate">
+        <div class="tool-card-icon" aria-hidden="true">&#x1F5C4;&#xFE0F;</div>
+        <h2>AI SQL Builder <span class="ai-badge">AI</span></h2>
+        <p>Describe your query in plain English and get syntactically correct SQL. MySQL, PostgreSQL, SQLite support.</p>
+      </a>
+      <a href="ai-color-palette.html" class="tool-card tool-card-ai" data-cat="ai" data-keywords="ai color palette generator theme mood design complementary analogous css">
+        <div class="tool-card-icon" aria-hidden="true">&#x1F3A8;</div>
+        <h2>AI Color Palette Generator <span class="ai-badge">AI</span></h2>
+        <p>Describe a theme or mood — get a beautiful, WCAG-accessible color palette with CSS, Tailwind, and SCSS export.</p>
+      </a>
       <a href="json-formatter.html" class="tool-card" data-cat="data" data-keywords="json format validate minify beautify">
         <div class="tool-card-icon" aria-hidden="true">{ }</div>
         <h2>JSON Formatter</h2>

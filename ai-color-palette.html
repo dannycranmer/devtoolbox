@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Color Palette Generator — DevBrew</title>
+  <meta name="description" content="Describe a theme or mood and get a professional color palette instantly. Complementary, analogous, triadic, and more — 100% client-side color theory.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="canonical" href="https://devbrew.org/ai-color-palette.html">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://devbrew.org/ai-color-palette.html">
+  <meta property="og:title" content="AI Color Palette Generator — DevBrew">
+  <meta property="og:description" content="Describe a theme or mood and get a professional color palette instantly. 100% client-side.">
+  <meta property="og:image" content="https://devbrew.org/og-image.png">
+  <meta property="og:site_name" content="DevBrew">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI Color Palette Generator — DevBrew">
+  <meta name="twitter:description" content="Describe a theme or mood and get a professional color palette instantly. 100% client-side.">
+  <meta name="twitter:image" content="https://devbrew.org/og-image.png">
+  <link rel="stylesheet" href="css/style.css?v=16">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AI Color Palette Generator",
+  "description": "Describe a theme or mood and get a professional color palette instantly. Complementary, analogous, triadic, and more.",
+  "url": "https://devbrew.org/ai-color-palette.html",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "creator": { "@type": "Organization", "name": "DevBrew", "url": "https://devbrew.org" }
+}
+  </script>
+  <style>
+    .main {
+      flex: 1;
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .tool-header { margin-bottom: 1.25rem; }
+    .tool-header h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.4rem;
+    }
+    .tool-header p { color: var(--text-secondary); font-size: 0.9375rem; }
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: linear-gradient(135deg, rgba(14,165,233,0.15), rgba(139,92,246,0.15));
+      border: 1px solid rgba(14,165,233,0.3);
+      border-radius: 20px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .tool-layout-single { display: flex; flex-direction: column; gap: 1.25rem; }
+    .tool-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .panel-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .control-group label {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    select {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.35rem 0.5rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    input[type="text"] {
+      width: 100%;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.875rem;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      transition: border-color var(--transition);
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: var(--border-focus); }
+    input[type="text"]::placeholder { color: var(--text-muted); }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.875rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition);
+      font-family: inherit;
+    }
+    .btn:hover { background: #222; border-color: var(--text-muted); }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .msg { font-size: 0.8125rem; padding: 0; display: none; }
+    .msg.show { display: block; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); }
+    .msg-success { background: var(--success-bg); color: var(--success); }
+    .msg-error   { background: var(--error-bg); color: var(--error); }
+    .msg-warning { background: var(--warning-bg); color: var(--warning); }
+    /* Theme pills */
+    .theme-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .theme-pill {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.25rem 0.65rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: inherit;
+    }
+    .theme-pill:hover {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    /* Palette output */
+    .palette-row {
+      display: flex;
+      gap: 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .color-swatch {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+      transition: flex var(--transition), filter var(--transition);
+      position: relative;
+    }
+    .color-swatch:hover { flex: 1.6; filter: brightness(1.1); }
+    .swatch-block {
+      height: 120px;
+      width: 100%;
+    }
+    .swatch-info {
+      padding: 0.5rem 0.4rem;
+      background: var(--bg-secondary);
+      text-align: center;
+    }
+    .swatch-hex {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: block;
+    }
+    .swatch-rgb {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.1rem;
+    }
+    .swatch-hsl {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      display: block;
+    }
+    .copy-flash {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .copy-flash.show { opacity: 1; }
+    /* Copy format tabs */
+    .copy-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .copy-tab-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: inherit;
+    }
+    .copy-tab-btn:hover, .copy-tab-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .copy-output {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      overflow: auto;
+      max-height: 200px;
+      display: none;
+    }
+    .copy-output.show { display: block; }
+    /* Contrast table */
+    .contrast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.5rem;
+    }
+    .contrast-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .contrast-preview {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0 0.5rem;
+    }
+    .contrast-info {
+      padding: 0.375rem 0.5rem;
+      font-size: 0.6875rem;
+      color: var(--text-secondary);
+    }
+    .badge-pass { color: var(--success); font-weight: 600; }
+    .badge-fail { color: var(--error); font-weight: 600; }
+    .badge-aaa  { color: #a78bfa; font-weight: 600; }
+    .shortcut-hint { font-size: 0.8rem; color: var(--text-muted); }
+    .kbd {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+      font-size: 0.75em;
+      font-family: var(--font-mono);
+    }
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .footer-sister { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+    .footer-sister a, .footer-github a { color: var(--text-secondary); text-decoration: none; }
+    .footer-sister a:hover, .footer-github a:hover { color: var(--accent); }
+    .footer-sep { color: var(--text-muted); }
+    @media (max-width: 600px) {
+      .swatch-block { height: 80px; }
+      .palette-row { border-radius: var(--radius-sm); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">Dev<span>Brew</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"></button>
+      <ul class="nav-links" role="menubar">
+        <li><a href="index.html" role="menuitem">Home</a></li>
+        <li><a href="ai-regex.html" role="menuitem">AI Regex</a></li>
+        <li><a href="ai-code-explainer.html" role="menuitem">AI Code</a></li>
+        <li><a href="ai-json-schema.html" role="menuitem">AI Schema</a></li>
+        <li><a href="ai-sql-builder.html" role="menuitem">AI SQL</a></li>
+        <li><a href="ai-color-palette.html" class="active" role="menuitem">AI Colors</a></li>
+        <li><a href="json-formatter.html" role="menuitem">JSON</a></li>
+        <li class="nav-bmc"><a href="https://buymeacoffee.com/dairylea" class="nav-coffee" target="_blank" rel="noopener">&#9749; Buy Me a Coffee</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="tool-header">
+      <div class="ai-badge">&#129302; AI-Powered &bull; 100% Client-Side</div>
+      <h1>AI Color Palette Generator</h1>
+      <p>Describe a theme or mood &mdash; get a professional color palette instantly using color theory. <span class="shortcut-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd> to generate</span></p>
+    </div>
+
+    <div class="tool-layout-single">
+
+      <!-- Input panel -->
+      <div class="tool-panel">
+        <span class="panel-label">Describe Your Theme</span>
+        <input type="text" id="theme-input" placeholder="e.g. ocean sunset, corporate tech, warm cozy, forest..." aria-label="Theme description" autocomplete="off">
+
+        <div class="controls-row">
+          <div class="control-group">
+            <label for="palette-type">Palette type:</label>
+            <select id="palette-type" aria-label="Color harmony type">
+              <option value="complementary">Complementary</option>
+              <option value="analogous" selected>Analogous</option>
+              <option value="triadic">Triadic</option>
+              <option value="split-complementary">Split-Complementary</option>
+              <option value="monochromatic">Monochromatic</option>
+              <option value="tetradic">Tetradic</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label for="shade-count">Colors:</label>
+            <select id="shade-count" aria-label="Number of colors">
+              <option value="3">3</option>
+              <option value="5" selected>5</option>
+              <option value="7">7</option>
+              <option value="9">9</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-generate" type="button">Generate Palette</button>
+          <button class="btn" id="btn-random" type="button">&#127922; Random Theme</button>
+        </div>
+        <div id="input-msg" class="msg" role="alert" aria-live="polite"></div>
+      </div>
+
+      <!-- Quick themes -->
+      <div class="tool-panel">
+        <span class="panel-label">Quick Themes</span>
+        <div class="theme-pills" id="theme-pills"></div>
+      </div>
+
+      <!-- Palette output -->
+      <div class="tool-panel" id="palette-panel" style="display:none">
+        <span class="panel-label">Color Palette</span>
+        <div class="palette-row" id="palette-row" role="list" aria-label="Color swatches"></div>
+
+        <!-- Copy formats -->
+        <div>
+          <div class="copy-tabs" id="copy-tabs">
+            <button class="copy-tab-btn" data-fmt="css">CSS Variables</button>
+            <button class="copy-tab-btn" data-fmt="tailwind">Tailwind Config</button>
+            <button class="copy-tab-btn" data-fmt="scss">SCSS Variables</button>
+            <button class="copy-tab-btn" data-fmt="json">JSON</button>
+          </div>
+          <div class="copy-output" id="copy-output"></div>
+          <div class="btn-row" id="copy-format-row" style="display:none;margin-top:0.5rem">
+            <button class="btn" id="btn-copy-format" type="button">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accessibility panel -->
+      <div class="tool-panel" id="contrast-panel" style="display:none">
+        <span class="panel-label">WCAG Contrast Check</span>
+        <div class="contrast-grid" id="contrast-grid"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-sister">
+      <span class="footer-sister-label">Sister Projects:</span>
+      <a href="https://parchpdf.com/" target="_blank" rel="noopener">Parchment (PDF Tools)</a>
+      <span class="footer-sep">&bull;</span>
+      <a href="https://picbrew.org/" target="_blank" rel="noopener">PicBrew (Image Tools)</a>
+    </div>
+    <div class="footer-github">
+      <a href="https://github.com/dannycranmer/devtoolbox" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; margin-right: 4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub
+      </a>
+    </div>
+    Free &amp; open source developer tools &mdash; no ads, no tracking, just tools that work.
+  </footer>
+
+  <script src="js/common.js?v=16"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var themeInput   = document.getElementById('theme-input');
+    var paletteType  = document.getElementById('palette-type');
+    var shadeCount   = document.getElementById('shade-count');
+    var inputMsg     = document.getElementById('input-msg');
+    var palettePanel = document.getElementById('palette-panel');
+    var paletteRow   = document.getElementById('palette-row');
+    var contrastPanel = document.getElementById('contrast-panel');
+    var contrastGrid = document.getElementById('contrast-grid');
+    var copyOutput   = document.getElementById('copy-output');
+    var copyFmtRow   = document.getElementById('copy-format-row');
+    var currentColors = [];
+    var activeFmt = null;
+
+    /* ---- Theme keyword database ---- */
+    var themeDB = [
+      { keywords: ['forest', 'jungle', 'nature', 'leaf', 'tree', 'garden', 'botanical'], h: 130, s: 45, l: 30 },
+      { keywords: ['ocean', 'sea', 'marine', 'nautical', 'aqua', 'water', 'coastal'], h: 205, s: 65, l: 40 },
+      { keywords: ['desert', 'sand', 'earth', 'clay', 'terracotta', 'warm earth'], h: 28, s: 50, l: 45 },
+      { keywords: ['sky', 'clear', 'daytime', 'daylight', 'air'], h: 200, s: 60, l: 55 },
+      { keywords: ['sunset', 'dusk', 'twilight', 'dawn', 'golden hour'], h: 25, s: 80, l: 55 },
+      { keywords: ['snow', 'arctic', 'ice', 'winter', 'frost', 'blizzard'], h: 200, s: 30, l: 85 },
+      { keywords: ['fire', 'flame', 'volcano', 'lava', 'burning'], h: 15, s: 90, l: 50 },
+      { keywords: ['lavender', 'field', 'spring', 'blossom', 'floral'], h: 270, s: 40, l: 65 },
+      { keywords: ['autumn', 'fall', 'harvest', 'pumpkin', 'october'], h: 30, s: 70, l: 45 },
+      { keywords: ['mountain', 'stone', 'rock', 'granite', 'slate'], h: 220, s: 10, l: 40 },
+      { keywords: ['meadow', 'grass', 'lawn'], h: 100, s: 50, l: 40 },
+      { keywords: ['red', 'crimson', 'ruby', 'scarlet'], h: 0, s: 75, l: 50 },
+      { keywords: ['orange', 'amber', 'tangerine', 'peach'], h: 30, s: 85, l: 55 },
+      { keywords: ['yellow', 'gold', 'lemon', 'canary', 'banana'], h: 50, s: 90, l: 55 },
+      { keywords: ['green', 'emerald', 'sage', 'olive', 'mint'], h: 140, s: 55, l: 40 },
+      { keywords: ['blue', 'cobalt', 'indigo', 'navy', 'azure'], h: 220, s: 70, l: 45 },
+      { keywords: ['purple', 'violet', 'plum', 'lilac', 'mauve'], h: 270, s: 60, l: 45 },
+      { keywords: ['pink', 'magenta', 'fuchsia', 'rose gold', 'blush'], h: 330, s: 65, l: 60 },
+      { keywords: ['teal', 'turquoise', 'cyan', 'seafoam'], h: 175, s: 55, l: 45 },
+      { keywords: ['brown', 'chocolate', 'coffee', 'mocha', 'walnut'], h: 25, s: 40, l: 30 },
+      { keywords: ['gray', 'grey', 'silver', 'ash', 'smoke'], h: 220, s: 10, l: 60 },
+      { keywords: ['black', 'dark', 'midnight', 'obsidian', 'onyx', 'noir'], h: 220, s: 15, l: 15 },
+      { keywords: ['white', 'bright', 'clean', 'pure', 'ivory', 'cream'], h: 50, s: 20, l: 95 },
+      { keywords: ['corporate', 'professional', 'business', 'enterprise', 'formal'], h: 215, s: 50, l: 40 },
+      { keywords: ['playful', 'fun', 'kids', 'colorful', 'cartoon', 'bubbly'], h: 350, s: 75, l: 60 },
+      { keywords: ['luxury', 'elegant', 'premium', 'rich', 'opulent'], h: 45, s: 70, l: 45 },
+      { keywords: ['minimal', 'clean', 'simple', 'modern', 'sleek', 'nordic'], h: 210, s: 15, l: 50 },
+      { keywords: ['tech', 'digital', 'cyber', 'neon', 'matrix', 'hacker', 'code'], h: 160, s: 80, l: 50 },
+      { keywords: ['cozy', 'warm', 'comfortable', 'home', 'inviting', 'hygge'], h: 30, s: 45, l: 55 },
+      { keywords: ['romantic', 'love', 'valentine', 'passion'], h: 340, s: 70, l: 55 },
+      { keywords: ['vintage', 'retro', 'antique', 'old', 'nostalgic', 'sepia'], h: 35, s: 30, l: 55 },
+      { keywords: ['futuristic', 'space', 'sci-fi', 'galaxy', 'cosmic', 'stellar'], h: 250, s: 60, l: 35 },
+      { keywords: ['tropical', 'beach', 'summer', 'vacation', 'island', 'paradise'], h: 185, s: 70, l: 55 },
+      { keywords: ['halloween', 'spooky', 'gothic', 'horror'], h: 25, s: 80, l: 45 },
+      { keywords: ['christmas', 'holiday', 'festive', 'xmas'], h: 5, s: 75, l: 45 },
+      { keywords: ['medical', 'health', 'hospital', 'clinical'], h: 195, s: 50, l: 55 },
+      { keywords: ['food', 'restaurant', 'cuisine', 'appetite', 'cooking'], h: 20, s: 80, l: 50 },
+      { keywords: ['fashion', 'style', 'beauty', 'cosmetic', 'makeup'], h: 330, s: 40, l: 60 },
+      { keywords: ['sport', 'athletic', 'energy', 'gym', 'fitness', 'active'], h: 15, s: 85, l: 50 },
+      { keywords: ['music', 'jazz', 'blues', 'rock', 'concert'], h: 250, s: 50, l: 40 },
+      { keywords: ['wedding', 'bridal', 'marriage', 'ceremony'], h: 340, s: 30, l: 80 },
+      { keywords: ['education', 'school', 'learning', 'academic', 'library'], h: 210, s: 55, l: 45 },
+      { keywords: ['startup', 'innovative', 'disruptive', 'bold', 'fresh'], h: 170, s: 65, l: 45 },
+    ];
+
+    var quickThemes = [
+      'ocean', 'forest', 'sunset', 'tech', 'cozy', 'luxury',
+      'vintage', 'galaxy', 'tropical', 'minimal', 'gothic', 'wedding'
+    ];
+
+    /* ---- Quick theme pills ---- */
+    var pillsEl = document.getElementById('theme-pills');
+    quickThemes.forEach(function (theme) {
+      var btn = document.createElement('button');
+      btn.className = 'theme-pill';
+      btn.textContent = theme;
+      btn.addEventListener('click', function () {
+        themeInput.value = theme;
+        doGenerate();
+      });
+      pillsEl.appendChild(btn);
+    });
+
+    /* ---- HSL color math ---- */
+    function hslToRgb(h, s, l) {
+      h = ((h % 360) + 360) % 360;
+      s /= 100;
+      l /= 100;
+      var c = (1 - Math.abs(2 * l - 1)) * s;
+      var x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      var m = l - c / 2;
+      var r, g, b;
+      if (h < 60)       { r = c; g = x; b = 0; }
+      else if (h < 120) { r = x; g = c; b = 0; }
+      else if (h < 180) { r = 0; g = c; b = x; }
+      else if (h < 240) { r = 0; g = x; b = c; }
+      else if (h < 300) { r = x; g = 0; b = c; }
+      else              { r = c; g = 0; b = x; }
+      return [
+        Math.round((r + m) * 255),
+        Math.round((g + m) * 255),
+        Math.round((b + m) * 255)
+      ];
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(function (v) {
+        return ('0' + Math.max(0, Math.min(255, v)).toString(16)).slice(-2);
+      }).join('');
+    }
+
+    function hslToHex(h, s, l) {
+      var rgb = hslToRgb(h, s, l);
+      return rgbToHex(rgb[0], rgb[1], rgb[2]);
+    }
+
+    function hexToRgb(hex) {
+      var r = parseInt(hex.slice(1, 3), 16);
+      var g = parseInt(hex.slice(3, 5), 16);
+      var b = parseInt(hex.slice(5, 7), 16);
+      return [r, g, b];
+    }
+
+    /* ---- Luminance & contrast ---- */
+    function relativeLuminance(r, g, b) {
+      var srgb = [r, g, b].map(function (c) {
+        c /= 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+    }
+
+    function contrastRatio(hex1, hex2) {
+      var rgb1 = hexToRgb(hex1);
+      var rgb2 = hexToRgb(hex2);
+      var L1 = relativeLuminance(rgb1[0], rgb1[1], rgb1[2]);
+      var L2 = relativeLuminance(rgb2[0], rgb2[1], rgb2[2]);
+      var lighter = Math.max(L1, L2);
+      var darker  = Math.min(L1, L2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    /* ---- Palette generation ---- */
+    function clampL(l) { return Math.max(10, Math.min(92, l)); }
+
+    function makeShades(h, s, baseL, count) {
+      var colors = [];
+      if (count === 1) {
+        colors.push({ h: h, s: s, l: baseL });
+        return colors;
+      }
+      // Spread lightness from dark (20%) to light (85%) across count steps
+      var minL = 18;
+      var maxL = 85;
+      for (var i = 0; i < count; i++) {
+        var t = count === 1 ? 0.5 : i / (count - 1);
+        var lv = minL + t * (maxL - minL);
+        colors.push({ h: h, s: Math.max(20, s - (Math.abs(lv - baseL) * 0.2)), l: clampL(lv) });
+      }
+      return colors;
+    }
+
+    function generatePalette(baseH, baseS, baseL, type, count) {
+      var colors = [];
+      var perHue, hues, i;
+
+      switch (type) {
+        case 'complementary':
+          hues = [baseH, (baseH + 180) % 360];
+          perHue = Math.ceil(count / 2);
+          hues.forEach(function (h, idx) {
+            var shades = makeShades(h, baseS, baseL, perHue);
+            shades.forEach(function (c) { if (colors.length < count) colors.push(c); });
+          });
+          break;
+
+        case 'analogous':
+          var step = 30;
+          var start = baseH - step;
+          hues = [];
+          for (i = 0; i < count; i++) {
+            hues.push(((start + i * step) + 360) % 360);
+          }
+          // Vary lightness gently
+          hues.forEach(function (h, idx) {
+            var t = count === 1 ? 0.5 : idx / (count - 1);
+            var lv = clampL(baseL - 10 + t * 20);
+            colors.push({ h: h, s: baseS, l: lv });
+          });
+          break;
+
+        case 'triadic':
+          hues = [baseH, (baseH + 120) % 360, (baseH + 240) % 360];
+          perHue = Math.ceil(count / 3);
+          hues.forEach(function (h) {
+            var shades = makeShades(h, baseS, baseL, perHue);
+            shades.forEach(function (c) { if (colors.length < count) colors.push(c); });
+          });
+          break;
+
+        case 'split-complementary':
+          hues = [baseH, (baseH + 150) % 360, (baseH + 210) % 360];
+          perHue = Math.ceil(count / 3);
+          hues.forEach(function (h) {
+            var shades = makeShades(h, baseS, baseL, perHue);
+            shades.forEach(function (c) { if (colors.length < count) colors.push(c); });
+          });
+          break;
+
+        case 'monochromatic':
+          colors = makeShades(baseH, baseS, baseL, count);
+          break;
+
+        case 'tetradic':
+          hues = [baseH, (baseH + 90) % 360, (baseH + 180) % 360, (baseH + 270) % 360];
+          perHue = Math.ceil(count / 4);
+          hues.forEach(function (h) {
+            var shades = makeShades(h, baseS, baseL, perHue);
+            shades.forEach(function (c) { if (colors.length < count) colors.push(c); });
+          });
+          break;
+
+        default:
+          colors = makeShades(baseH, baseS, baseL, count);
+      }
+
+      // Pad or trim
+      while (colors.length < count) {
+        var last = colors[colors.length - 1];
+        colors.push({ h: last.h, s: last.s, l: clampL(last.l + 8) });
+      }
+      colors = colors.slice(0, count);
+
+      return colors.map(function (c, idx) {
+        var hex = hslToHex(c.h, c.s, c.l);
+        var rgb = hslToRgb(c.h, c.s, c.l);
+        return {
+          hex: hex,
+          rgb: 'rgb(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ')',
+          hsl: 'hsl(' + Math.round(c.h) + ', ' + Math.round(c.s) + '%, ' + Math.round(c.l) + '%)',
+          h: c.h, s: c.s, l: c.l,
+          index: idx + 1
+        };
+      });
+    }
+
+    /* ---- Theme matching ---- */
+    function matchTheme(description) {
+      if (!description) return null;
+      var words = description.toLowerCase().split(/[\s,;]+/);
+      var bestMatch = null;
+      var bestScore = 0;
+
+      themeDB.forEach(function (entry) {
+        var score = 0;
+        words.forEach(function (w) {
+          entry.keywords.forEach(function (kw) {
+            if (w === kw) { score += 2; }
+            else if (w.indexOf(kw) !== -1 || kw.indexOf(w) !== -1) { score += 1; }
+          });
+        });
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = entry;
+        }
+      });
+
+      // If no match, try to extract any color word
+      if (!bestMatch || bestScore === 0) {
+        // Hash the description to pick a consistent hue
+        var hash = 0;
+        for (var i = 0; i < description.length; i++) {
+          hash = description.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return { h: Math.abs(hash) % 360, s: 60, l: 45 };
+      }
+
+      // Add slight hue variation based on secondary keywords
+      var hueShift = 0;
+      words.forEach(function (w) {
+        if (/warm|hot|fire|sun/i.test(w)) hueShift -= 10;
+        if (/cool|cold|ice|deep/i.test(w)) hueShift += 10;
+        if (/dark|deep|rich|bold/i.test(w)) { bestMatch = Object.assign({}, bestMatch, { l: Math.max(15, bestMatch.l - 12) }); }
+        if (/light|pale|soft|pastel|muted/i.test(w)) { bestMatch = Object.assign({}, bestMatch, { l: Math.min(80, bestMatch.l + 15), s: Math.max(15, bestMatch.s - 15) }); }
+        if (/vibrant|vivid|bright|saturated/i.test(w)) { bestMatch = Object.assign({}, bestMatch, { s: Math.min(95, bestMatch.s + 15) }); }
+      });
+
+      return { h: (bestMatch.h + hueShift + 360) % 360, s: bestMatch.s, l: bestMatch.l };
+    }
+
+    /* ---- Render palette ---- */
+    function renderPalette(colors) {
+      paletteRow.innerHTML = '';
+
+      colors.forEach(function (c) {
+        var swatch = document.createElement('div');
+        swatch.className = 'color-swatch';
+        swatch.setAttribute('role', 'listitem');
+        swatch.setAttribute('title', 'Click to copy ' + c.hex);
+
+        var block = document.createElement('div');
+        block.className = 'swatch-block';
+        block.style.background = c.hex;
+
+        var flash = document.createElement('div');
+        flash.className = 'copy-flash';
+        flash.textContent = 'Copied!';
+        block.appendChild(flash);
+
+        var info = document.createElement('div');
+        info.className = 'swatch-info';
+        info.innerHTML =
+          '<span class="swatch-hex">' + c.hex.toUpperCase() + '</span>' +
+          '<span class="swatch-rgb">' + c.rgb + '</span>' +
+          '<span class="swatch-hsl">' + c.hsl + '</span>';
+
+        swatch.appendChild(block);
+        swatch.appendChild(info);
+
+        swatch.addEventListener('click', function () {
+          copyToClipboard(c.hex.toUpperCase(), null);
+          flash.classList.add('show');
+          setTimeout(function () { flash.classList.remove('show'); }, 1200);
+        });
+
+        paletteRow.appendChild(swatch);
+      });
+    }
+
+    /* ---- Copy format generation ---- */
+    function buildCSSVars(colors) {
+      var lines = [':root {'];
+      colors.forEach(function (c, i) {
+        lines.push('  --color-' + (i + 1) + ': ' + c.hex.toUpperCase() + ';');
+      });
+      lines.push('}');
+      return lines.join('\n');
+    }
+
+    function buildTailwind(colors) {
+      var lines = ['colors: {'];
+      var levels = [100, 200, 300, 400, 500, 600, 700, 800, 900];
+      colors.forEach(function (c, i) {
+        var level = levels[i] || (i + 1) * 100;
+        lines.push("  'brand-" + level + "': '" + c.hex.toUpperCase() + "',");
+      });
+      lines.push('}');
+      return lines.join('\n');
+    }
+
+    function buildSCSS(colors) {
+      return colors.map(function (c, i) {
+        return '$color-' + (i + 1) + ': ' + c.hex.toUpperCase() + ';';
+      }).join('\n');
+    }
+
+    function buildJSON(colors) {
+      var obj = {};
+      colors.forEach(function (c, i) {
+        obj['color' + (i + 1)] = {
+          hex: c.hex.toUpperCase(),
+          rgb: c.rgb,
+          hsl: c.hsl
+        };
+      });
+      return JSON.stringify(obj, null, 2);
+    }
+
+    function showFormat(fmt) {
+      activeFmt = fmt;
+      var text = '';
+      switch (fmt) {
+        case 'css':      text = buildCSSVars(currentColors); break;
+        case 'tailwind': text = buildTailwind(currentColors); break;
+        case 'scss':     text = buildSCSS(currentColors); break;
+        case 'json':     text = buildJSON(currentColors); break;
+      }
+      copyOutput.textContent = text;
+      copyOutput.className = 'copy-output show';
+      copyFmtRow.style.display = 'flex';
+
+      document.querySelectorAll('.copy-tab-btn').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-fmt') === fmt);
+      });
+    }
+
+    /* ---- Contrast grid ---- */
+    function renderContrast(colors) {
+      contrastGrid.innerHTML = '';
+      // Check first vs last (dark bg / light text combos)
+      var pairs = [];
+      for (var i = 0; i < colors.length; i++) {
+        for (var j = i + 1; j < colors.length; j++) {
+          pairs.push([colors[i], colors[j]]);
+        }
+      }
+      // Show at most 12 pairs
+      pairs.slice(0, 12).forEach(function (pair) {
+        var fg = pair[0];
+        var bg = pair[1];
+        var ratio = contrastRatio(fg.hex, bg.hex);
+        var ratioStr = ratio.toFixed(2) + ':1';
+        var passAA = ratio >= 4.5;
+        var passAAA = ratio >= 7;
+        var passAALarge = ratio >= 3;
+
+        var card = document.createElement('div');
+        card.className = 'contrast-card';
+
+        var preview = document.createElement('div');
+        preview.className = 'contrast-preview';
+        preview.style.background = bg.hex;
+        preview.style.color = fg.hex;
+        preview.textContent = 'Sample Text';
+
+        var info = document.createElement('div');
+        info.className = 'contrast-info';
+        var badge;
+        if (passAAA) {
+          badge = '<span class="badge-aaa">AAA &#10003;</span>';
+        } else if (passAA) {
+          badge = '<span class="badge-pass">AA &#10003;</span>';
+        } else if (passAALarge) {
+          badge = '<span class="badge-pass">AA Large &#10003;</span>';
+        } else {
+          badge = '<span class="badge-fail">Fail &#10007;</span>';
+        }
+        info.innerHTML = fg.hex.toUpperCase() + ' on ' + bg.hex.toUpperCase() + '<br>' +
+          ratioStr + ' &mdash; ' + badge;
+
+        card.appendChild(preview);
+        card.appendChild(info);
+        contrastGrid.appendChild(card);
+      });
+    }
+
+    /* ---- Main generation ---- */
+    function doGenerate() {
+      var raw = themeInput.value.trim();
+      if (!raw) {
+        showMsg(inputMsg, 'warning', 'Enter a theme or mood to generate a palette.');
+        return;
+      }
+
+      hideMsg(inputMsg);
+
+      var theme = matchTheme(raw);
+      var count = parseInt(shadeCount.value, 10);
+      var type  = paletteType.value;
+
+      currentColors = generatePalette(theme.h, theme.s, theme.l, type, count);
+
+      renderPalette(currentColors);
+      palettePanel.style.display = 'flex';
+
+      // Reset copy UI
+      copyOutput.className = 'copy-output';
+      copyOutput.textContent = '';
+      copyFmtRow.style.display = 'none';
+      document.querySelectorAll('.copy-tab-btn').forEach(function (b) { b.classList.remove('active'); });
+      activeFmt = null;
+
+      // Contrast
+      renderContrast(currentColors);
+      contrastPanel.style.display = 'flex';
+
+      showPostActionCTA();
+    }
+
+    /* ---- Random theme ---- */
+    var randomThemes = [
+      'midnight galaxy', 'warm terracotta', 'ocean breeze', 'forest floor',
+      'cherry blossom', 'cyber neon', 'golden hour', 'arctic frost',
+      'lavender fields', 'deep jungle', 'rose gold', 'slate mountain',
+      'tropical paradise', 'autumn harvest', 'vintage sepia', 'electric blue'
+    ];
+
+    document.getElementById('btn-random').addEventListener('click', function () {
+      var theme = randomThemes[Math.floor(Math.random() * randomThemes.length)];
+      themeInput.value = theme;
+      doGenerate();
+    });
+
+    /* ---- Copy format tabs ---- */
+    document.getElementById('copy-tabs').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-fmt]');
+      if (!btn) return;
+      var fmt = btn.getAttribute('data-fmt');
+      if (activeFmt === fmt) {
+        // Toggle off
+        copyOutput.className = 'copy-output';
+        copyFmtRow.style.display = 'none';
+        btn.classList.remove('active');
+        activeFmt = null;
+      } else {
+        showFormat(fmt);
+      }
+    });
+
+    document.getElementById('btn-copy-format').addEventListener('click', function () {
+      if (copyOutput.textContent) {
+        copyToClipboard(copyOutput.textContent, this);
+      }
+    });
+
+    /* ---- Events ---- */
+    document.getElementById('btn-generate').addEventListener('click', doGenerate);
+
+    themeInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); doGenerate(); }
+    });
+
+    paletteType.addEventListener('change', function () {
+      if (currentColors.length > 0) doGenerate();
+    });
+
+    shadeCount.addEventListener('change', function () {
+      if (currentColors.length > 0) doGenerate();
+    });
+
+    bindCtrlEnter(doGenerate);
+  })();
+  </script>
+  <script data-goatcounter="https://devbrew.goatcounter.com/count" async src="https://gc.zgo.at/count.js" integrity="sha384-DGiREytotlUiLflu8vLo0vvfxKWn36pKPT1ZBhh3R+3vhewrS/4p3H9eys9Zr2bPQ" crossorigin="anonymous"></script>
+</body>
+</html>
