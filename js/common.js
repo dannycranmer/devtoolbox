@@ -8,6 +8,7 @@
   var currentPage = location.pathname.split('/').pop() || 'index.html';
 
   var categories = [
+    { title: '\uD83E\uDD16 AI Tools', items: [] },
     { title: '\uD83D\uDD27 Formatters', items: [
       { href: 'json-formatter.html', icon: '{ }', label: 'JSON' },
       { href: 'sql-formatter.html', icon: '\uD83D\uDDC3\uFE0F', label: 'SQL' },
@@ -157,7 +158,7 @@
       '<a href="index.html" class="mobile-nav-home' + homeActive + '">\uD83C\uDFE0 All Tools</a>' +
       sectionsHTML +
       '<a href="https://buymeacoffee.com/dairylea" class="mobile-nav-coffee" target="_blank" rel="noopener">\u2615 Buy Me a Coffee</a>' +
-      '<div class="mobile-nav-privacy">\uD83D\uDD12 100% Private \u00B7 All processing in your browser</div>';
+      '<div class="mobile-nav-privacy">\uD83E\uDD16 AI-Powered \u00B7 \uD83D\uDD12 100% Private \u00B7 All processing in your browser</div>';
 
     // Insert after the nav element
     nav.after(overlay);
